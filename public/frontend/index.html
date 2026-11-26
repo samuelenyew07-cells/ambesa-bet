@@ -235,7 +235,40 @@
       </div>
 
       <!-- 2. DARK SECONDARY NAVIGATION BAR -->
-      <nav class="ambessa-nav-bar">
+            <!-- MOBILE ORANGE BRAND & AUTH TOP BAR -->
+      <div class="mobile-top" id="mobile-top">
+        <div class="mobile-top-left">
+          <button type="button" class="mobile-top-brand" id="btn-mobile-home" aria-label="Ambessa Bet home">
+            <img src="assets/ambessa-logo.png" alt="Ambessa Bet" class="ambessa-mobile-lion-logo" />
+          </button>
+          <button type="button" class="mobile-top-btn" id="mobile-top-search-btn-guest" aria-label="Search" title="Search Event">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7"></circle>
+              <line x1="21" y1="21" x2="16" y2="16"></line>
+            </svg>
+          </button>
+        </div>
+
+        <!-- GUEST ACTIONS (Logged Out) -->
+        <div class="mobile-header-actions" id="mobile-guest-actions">
+          <button type="button" class="mobile-btn-login" id="mobile-btn-login">LOGIN</button>
+          <button type="button" class="mobile-btn-signup" id="mobile-btn-signup">REGISTER</button>
+        </div>
+
+        <!-- AUTHED ACTIONS (Logged In) -->
+        <div class="mobile-header-actions" id="mobile-authed-actions" hidden>
+          <button type="button" class="mobile-balance-pill" id="mobile-balance-pill">
+            <span class="mobile-balance-amount" id="mobile-balance-amount">0.00</span>
+            <span class="mobile-balance-curr">ETB</span>
+          </button>
+          <button type="button" class="mobile-btn-deposit" id="mobile-btn-deposit">Deposit</button>
+          <button type="button" class="mobile-top-btn" id="mobile-btn-account" aria-label="Account">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#000000"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"/></svg>
+          </button>
+        </div>
+      </div>
+
+<nav class="ambessa-nav-bar">
         <div class="ambessa-nav-menu">
           <button type="button" class="ambessa-nav-tab is-active" data-nav="home" id="nav-tab-home">
             <svg class="ambessa-nav-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -244,14 +277,22 @@
             </svg>
             <span>HOME</span>
           </button>
-          <button type="button" class="ambessa-nav-tab" data-nav="sport" id="nav-tab-sport">
-            <svg class="ambessa-nav-svg" width="20" height="15" viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="1.8">
-              <rect x="1" y="1" width="22" height="14" rx="2"></rect>
-              <line x1="12" y1="1" x2="12" y2="15"></line>
-              <circle cx="12" cy="8" r="3.2"></circle>
-            </svg>
-            <span>SPORT</span>
-          </button>
+          <div class="ambessa-nav-dropdown-wrap ambessa-sport-dropdown-wrap">
+            <button type="button" class="ambessa-nav-tab" data-nav="sport" id="nav-tab-sport" aria-haspopup="true" aria-expanded="false">
+              <svg class="ambessa-nav-svg" width="20" height="15" viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="1" y="1" width="22" height="14" rx="2"></rect>
+                <line x1="12" y1="1" x2="12" y2="15"></line>
+                <circle cx="12" cy="8" r="3.2"></circle>
+              </svg>
+              <span>SPORT</span>
+            </button>
+            <div class="ambessa-sport-menu" id="nav-sport-menu" role="menu">
+              <button type="button" class="ambessa-sport-item" data-sport-action="upcoming" role="menuitem">UPCOMING EVENTS</button>
+              <button type="button" class="ambessa-sport-item" data-sport-action="top-sports" role="menuitem">TOP SPORTS</button>
+              <button type="button" class="ambessa-sport-item" data-sport-action="express" role="menuitem">EXPRESS</button>
+              <button type="button" class="ambessa-sport-item" data-sport-action="results" role="menuitem">RESULTS</button>
+            </div>
+          </div>
           <button type="button" class="ambessa-nav-tab" data-nav="live" id="nav-tab-live">
             <svg class="ambessa-nav-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="2.5" fill="currentColor"></circle>
@@ -337,43 +378,6 @@
         </div>
       </nav>
     </header>
-
-    <div class="mobile-top" id="mobile-top">
-      <button type="button" class="mobile-top-brand" id="btn-mobile-home" aria-label="Ambessa Bet home">
-        <img src="assets/ambessa-logo.png" alt="Ambessa Bet" />
-      </button>
-
-      <!-- GUEST ACTIONS (Logged Out) -->
-      <div class="mobile-header-actions" id="mobile-guest-actions">
-        <button type="button" class="mobile-app-pill" id="mobile-top-app-pill" title="Download Ambessa Bet App">App</button>
-        <button type="button" class="mobile-top-btn" id="mobile-top-search-btn-guest" aria-label="Search" title="Search Event">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16" y2="16"></line></svg>
-        </button>
-        <button type="button" class="mobile-btn-login" id="mobile-btn-login">Log In</button>
-        <button type="button" class="mobile-btn-signup" id="mobile-btn-signup">Sign Up</button>
-        <button type="button" class="mobile-top-btn" id="btn-mobile-guest-account" aria-label="Account">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"/></svg>
-        </button>
-      </div>
-
-      <!-- AUTHED ACTIONS (Logged In) -->
-      <div class="mobile-header-actions" id="mobile-authed-actions" hidden>
-        <button type="button" class="mobile-app-pill" id="mobile-top-app-pill-auth" title="Download Ambessa Bet App">App</button>
-        <button type="button" class="mobile-top-btn" id="mobile-top-search-btn-auth" aria-label="Search" title="Search Event">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16" y2="16"></line></svg>
-        </button>
-        <div class="mobile-balance-pill" id="mobile-balance-pill">
-          <span class="mobile-balance-val" id="mobile-balance-val">0.00 ETB</span>
-          <button type="button" class="mobile-deposit-plus" id="mobile-balance-deposit-btn" title="Deposit">+</button>
-        </div>
-        <button type="button" class="mobile-top-btn" id="mobile-btn-bonuses" aria-label="Bonuses" title="Bonuses">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-2.18c.07-.44.18-.88.18-1.36C18 2.51 15.49 0 12.36 0c-1.73 0-3.27.79-4.36 2.04C6.91.79 5.37 0 3.64 0 .51 0-2 2.51-2 4.64c0 .48.11.92.18 1.36H-2v2h22V6zm-7.64 0c-.42-1.17-1.48-2-2.72-2-.88 0-1.64.4-2.16 1.02A2.636 2.636 0 0 1 5.36 3c-.9 0-1.64.75-1.64 1.64 0 .3.08.57.18.82l-1.08.54H20zm-8.72 0H2.1c.1-.25.18-.52.18-.82C2.28 4.29 3 3.5 3.91 3.5c.82 0 1.52.51 1.8 1.22l.53 1.28zM2 8v12h8V8H2zm12 0v12h8V8h-8z"/></svg>
-        </button>
-        <button type="button" class="mobile-top-btn" id="btn-mobile-auth-account" aria-label="Account" title="Profile">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"/></svg>
-        </button>
-      </div>
-    </div>
 
     <!-- MOBILE MAIN NAVIGATION TABS -->
     <nav class="mobile-main-nav" id="mobile-main-nav" aria-label="Main navigation">
@@ -646,13 +650,80 @@
 
       </div>
     </aside>
-    <button type="button" class="mobile-slip-fab" id="mobile-slip-fab" hidden aria-label="Open betslip">
+    <button type="button" class="mobile-slip-fab" id="mobile-slip-fab" hidden aria-label="Open betslip" style="display:none !important;">
       <span class="mobile-slip-fab-count" id="mobile-slip-count">0</span>
       <span class="mobile-slip-fab-odds">
         <span class="mobile-slip-fab-label">TOTAL ODDS</span>
         <strong id="mobile-slip-odds">0.00</strong>
       </span>
     </button>
+
+    <!-- AMBESSA MOBILE MULTI BOTTOM BAR (Matching Image 2) -->
+    <div class="ambessa-mobile-multi-bar" id="ambessa-mobile-multi-bar" hidden>
+      <div class="ambessa-multi-bar-content">
+        <div class="ambessa-multi-bar-center">
+          <span class="ambessa-multi-title">Multi</span>
+          <span class="ambessa-multi-count" id="ambessa-multi-count">(0)</span>
+          <span class="ambessa-multi-odds" id="ambessa-multi-odds">0.00</span>
+        </div>
+        <div class="ambessa-multi-bar-right">
+          <svg class="ambessa-multi-chevron" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- AMBESSA MOBILE BETSLIP MODAL (Matching Image 3) -->
+    <div class="ambessa-mobile-betslip-modal" id="ambessa-mobile-betslip-modal" hidden>
+      <div class="ambessa-m-slip-header">
+        <div class="ambessa-m-slip-tabs">
+          <button type="button" class="ambessa-m-slip-tab is-active" id="ambessa-m-tab-multi">Multi</button>
+          <button type="button" class="ambessa-m-slip-tab" id="ambessa-m-tab-single">Single</button>
+        </div>
+        <button type="button" class="ambessa-m-slip-close-btn" id="ambessa-m-slip-close-btn" aria-label="Collapse Betslip">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <div class="ambessa-m-slip-scroll-area">
+        <div class="ambessa-m-slip-list" id="ambessa-m-slip-list"></div>
+      </div>
+
+      <div class="ambessa-m-slip-footer">
+        <div class="ambessa-m-stake-row">
+          <input type="number" class="ambessa-m-stake-input" id="ambessa-m-stake-input" value="20" min="20" step="1" inputmode="numeric" />
+          <button type="button" class="ambessa-m-max-btn" id="ambessa-m-max-btn">MAX</button>
+        </div>
+
+        <div class="ambessa-m-totals-box">
+          <div class="ambessa-m-totals-col">
+            <span class="ambessa-m-tot-lbl">Total Odds</span>
+            <span class="ambessa-m-tot-val" id="ambessa-m-total-odds">0.00</span>
+          </div>
+          <div class="ambessa-m-totals-divider"></div>
+          <div class="ambessa-m-totals-col">
+            <span class="ambessa-m-tot-lbl">Possible winning</span>
+            <span class="ambessa-m-tot-val" id="ambessa-m-possible-win">0.00</span>
+          </div>
+        </div>
+
+        <div class="ambessa-m-actions-row">
+          <button type="button" class="ambessa-m-trash-btn" id="ambessa-m-trash-btn" title="Clear Betslip">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </button>
+          <button type="button" class="ambessa-m-fast-btn" id="ambessa-m-fast-btn">FAST BET</button>
+          <button type="button" class="ambessa-m-place-btn" id="ambessa-m-place-btn">PLACE BET</button>
+        </div>
+      </div>
+    </div>
 
     <!-- MOBILE MENU DRAWER (matches Image 2) -->
     <div class="mobile-menu-backdrop" id="mobile-menu-backdrop" hidden>
@@ -906,57 +977,57 @@
 
     <!-- MOBILE BOTTOM NAVIGATION BAR -->
     <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Mobile Navigation">
-      <button type="button" class="mobile-bnav-item" id="mobile-bnav-menu">
+      <button type="button" class="mobile-bnav-item" id="mobile-bnav-sport">
         <span class="mobile-bnav-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="18" rx="2"></rect>
+            <circle cx="12" cy="12" r="4"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <line x1="12" y1="3" x2="12" y2="7"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
           </svg>
         </span>
-        <span class="mobile-bnav-label">Menu</span>
-      </button>
-
-      <button type="button" class="mobile-bnav-item" id="mobile-bnav-mybets">
-        <span class="mobile-bnav-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-            <path d="m9 14 2 2 4-4"/>
-          </svg>
-        </span>
-        <span class="mobile-bnav-label">Mybets</span>
-      </button>
-
-      <button type="button" class="mobile-bnav-item" id="mobile-bnav-results">
-        <span class="mobile-bnav-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="16" rx="2"></rect>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
-            <path d="m9 15 2 2 4-4"></path>
-          </svg>
-        </span>
-        <span class="mobile-bnav-label">Result</span>
+        <span class="mobile-bnav-label">Sport</span>
       </button>
 
       <button type="button" class="mobile-bnav-item" id="mobile-bnav-live">
         <span class="mobile-bnav-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4.93 4.93a10 10 0 0 0 0 14.14"/>
-            <path d="M7.76 7.76a6 6 0 0 0 0 8.48"/>
-            <circle cx="12" cy="12" r="2"/>
-            <path d="M16.24 7.76a6 6 0 0 1 0 8.48"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <circle cx="12" cy="12" r="7" stroke-dasharray="4 2"></circle>
+            <circle cx="12" cy="12" r="10"></circle>
           </svg>
         </span>
         <span class="mobile-bnav-label">Live</span>
       </button>
 
-      <button type="button" class="mobile-bnav-item" id="mobile-bnav-chat">
+      <!-- Center Raised Menu Button -->
+      <button type="button" class="mobile-bnav-item mobile-bnav-center-menu" id="mobile-bnav-menu">
+        <div class="mobile-bnav-center-circle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="#000000">
+            <path d="M3 18h18v-2.5H3v2.5zm0-5.5h18v-2.5H3v2.5zm0-8v2.5h18V4.5H3z"/>
+          </svg>
+        </div>
+        <span class="mobile-bnav-label">Menu</span>
+      </button>
+
+      <button type="button" class="mobile-bnav-item" id="mobile-bnav-games">
         <span class="mobile-bnav-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="2" y="4" width="20" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>
+            <text x="12" y="16" font-size="9" font-weight="900" fill="currentColor" text-anchor="middle" font-family="sans-serif">777</text>
           </svg>
         </span>
-        <span class="mobile-bnav-label">Chat</span>
+        <span class="mobile-bnav-label">GAMES</span>
+      </button>
+
+      <button type="button" class="mobile-bnav-item" id="mobile-bnav-chat">
+        <span class="mobile-bnav-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+          </svg>
+        </span>
+        <span class="mobile-bnav-label">CHAT</span>
       </button>
     </nav>
 
@@ -1089,7 +1160,7 @@
       <aside class="sidebar ambessa-sidebar" id="sidebar">
         <button type="button" class="drawer-close" id="btn-close-sidebar" aria-label="Close menu">&times;</button>
 
-        <!-- TOP LEAGUES BLOCK -->
+        <!-- Top Matches BLOCK -->
         <div class="ambessa-sidebar-card">
           <div class="ambessa-sidebar-header">
             <span class="ambessa-gear-ico">⚙</span>
@@ -1159,10 +1230,21 @@
           </div>
         </div>
 
-        <!-- FILTER BY TIME ORANGE PILL -->
-        <button type="button" class="ambessa-time-filter-pill" id="btn-filter-time">
-          Filter by Time
-        </button>
+        <!-- FILTER BY TIME ORANGE PILL & DROPDOWN -->
+        <div class="ambessa-time-filter-wrap" id="ambessa-time-filter-wrap">
+          <button type="button" class="ambessa-time-filter-pill" id="btn-filter-time" aria-haspopup="true" aria-expanded="false">
+            Filter by Time
+          </button>
+          <div class="ambessa-time-filter-dropdown" id="ambessa-time-filter-dropdown" hidden>
+            <div class="ambessa-time-filter-opt is-selected" data-time-filter="all">Filter by Time</div>
+            <div class="ambessa-time-filter-opt" data-time-filter="1h">1 hour</div>
+            <div class="ambessa-time-filter-opt" data-time-filter="3h">3 hours</div>
+            <div class="ambessa-time-filter-opt" data-time-filter="6h">6 hours</div>
+            <div class="ambessa-time-filter-opt" data-time-filter="12h">12 hours</div>
+            <div class="ambessa-time-filter-opt" data-time-filter="1d">1 day</div>
+            <div class="ambessa-time-filter-opt" data-time-filter="3d">3 days</div>
+          </div>
+        </div>
 
         <!-- SPORTS LIST WITH COUNTS -->
         <div class="ambessa-sidebar-sports-card">
@@ -1232,13 +1314,13 @@
                 </div>
               </div>
 
-              <!-- VIEW TOGGLE (UPCOMING MATCHES vs TOP LEAGUES) -->
+              <!-- VIEW TOGGLE (Upcoming vs TOP LEAGUES) -->
               <div class="ambessa-view-toggle-bar">
                 <button type="button" class="ambessa-toggle-tab" id="ambessa-btn-upcoming" data-ambessa-view="upcoming">
-                  UPCOMING MATCHES
+                  Upcoming
                 </button>
                 <button type="button" class="ambessa-toggle-tab is-active" id="ambessa-btn-top-leagues" data-ambessa-view="top-leagues">
-                  TOP LEAGUES
+                  Top Matches
                 </button>
               </div>
 
@@ -1255,6 +1337,40 @@
 
               <!-- RIGHT COLUMN: Match Visualizer pitch & Detailed Markets -->
               <div class="ambessa-league-detail-col" id="ambessa-league-detail-col"></div>
+            </div>
+
+            <!-- 3. MOBILE SPORT VIEW (Matching media_1795677075135_a9d0b212.jpg) -->
+            <div id="ambessa-mobile-sport-view" class="ambessa-mobile-sport-view" hidden>
+              <!-- Dropdown Filters Row -->
+              <div class="ambessa-sport-filter-row">
+                <div class="ambessa-filter-pill-wrap" id="mobile-sport-pill-wrap">
+                  <button type="button" class="ambessa-sport-filter-pill" id="mobile-sport-filter-sport">
+                    <span id="mobile-sport-filter-sport-val">Football</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </button>
+                  <div class="ambessa-filter-dropdown" id="mobile-sport-dropdown" hidden>
+                    <button type="button" class="ambessa-filter-dropdown-opt is-selected" data-mobile-sport="football">⚽ Football</button>
+                    <button type="button" class="ambessa-filter-dropdown-opt" data-mobile-sport="basketball">🏀 Basketball</button>
+                    <button type="button" class="ambessa-filter-dropdown-opt" data-mobile-sport="tennis">🎾 Tennis</button>
+                  </div>
+                </div>
+
+                <div class="ambessa-filter-pill-wrap" id="mobile-time-pill-wrap">
+                  <button type="button" class="ambessa-sport-filter-pill" id="mobile-sport-filter-time">
+                    <span id="mobile-sport-filter-time-val">Filter by Time</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </button>
+                  <div class="ambessa-filter-dropdown" id="mobile-time-filter-dropdown" hidden>
+                    <button type="button" class="ambessa-filter-dropdown-opt is-selected" data-time-filter="all">All Time</button>
+                    <button type="button" class="ambessa-filter-dropdown-opt" data-time-filter="3h">3 hours</button>
+                    <button type="button" class="ambessa-filter-dropdown-opt" data-time-filter="today">Today</button>
+                    <button type="button" class="ambessa-filter-dropdown-opt" data-time-filter="3d">3 days</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Countries Accordion List -->
+              <div class="ambessa-sport-countries-list" id="mobile-sport-countries-list"></div>
             </div>
 
             <div id="home-league-matches-section" hidden></div>
@@ -3039,6 +3155,18 @@
             </svg>
           </button>
         </div>
+        <div class="ambessa-slip-toggle-bar">
+          <label class="ambessa-slip-toggle">
+            <input type="checkbox" id="toggle-copy-ticket" checked />
+            <span class="ambessa-slip-switch"></span>
+            <span class="ambessa-slip-toggle-lbl">Copy ticket</span>
+          </label>
+          <label class="ambessa-slip-toggle">
+            <input type="checkbox" id="toggle-sort-time" />
+            <span class="ambessa-slip-switch"></span>
+            <span class="ambessa-slip-toggle-lbl">Sort by Time</span>
+          </label>
+        </div>
         <span class="betslip-badge" id="slip-tab-count" hidden>0</span>
         
         <div class="betslip-empty-notice ambessa-slip-empty" id="slip-empty-notice">
@@ -3068,76 +3196,53 @@
         <div class="betslip-panel-slip" id="panel-slip" hidden>
           <div class="betslip-list" id="slip-list"></div>
 
-          <div class="betslip-mode-bar">
+          <div class="betslip-mode-bar" style="display:none;">
             <button type="button" class="btn-betslip-mode" id="btn-betslip-mode">SINGLE</button>
           </div>
 
           <div class="betslip-foot" id="slip-foot">
-            <div class="betslip-odds-row" id="betslip-odds-row">
-              <span class="betslip-odds-label">Odds</span>
-              <strong class="betslip-odds-val" id="total-odds">0.00</strong>
+            <div class="ambessa-slip-odds-row" id="betslip-odds-row">
+              <span class="ambessa-slip-odds-label">Total ODDS</span>
+              <strong class="ambessa-slip-odds-val" id="total-odds">0.00</strong>
             </div>
 
-            <div class="stake-row">
-              <span class="stake-label">Stake</span>
-              <div class="stake-stepper-pill">
-                <button type="button" class="stake-step-circle" id="stake-minus">−</button>
-                <input type="number" id="stake-input" min="20" step="1" value="20" placeholder="Stake.." />
-                <button type="button" class="stake-step-circle" id="stake-plus">+</button>
+            <div class="ambessa-stake-stepper-row">
+              <button type="button" class="ambessa-stake-circle-btn" id="stake-minus">−</button>
+              <input type="number" id="stake-input" min="20" step="1" value="20" placeholder="Stake.." />
+              <button type="button" class="ambessa-stake-circle-btn" id="stake-plus">+</button>
+            </div>
+
+            <div class="ambessa-slip-bonus-bar" id="betslip-bonus-banner">
+              <div class="ambessa-slip-bonus-top">
+                <span class="ambessa-slip-bonus-left">
+                  <span class="ambessa-slip-info-ico">ℹ</span>
+                  <span id="bonus-banner-text">Current bonus is 0%</span>
+                  <strong class="bonus-banner-pct" id="bonus-banner-pct" style="display:none;">0%</strong>
+                </span>
+                <span class="ambessa-slip-bonus-close" id="btn-close-bonus">✕</span>
+              </div>
+              <div class="ambessa-slip-bonus-chevron">⌵</div>
+            </div>
+
+            <div class="ambessa-slip-payout-row">
+              <span class="ambessa-slip-payout-label">Net Win/Payout</span>
+              <div class="ambessa-slip-payout-val">
+                <span id="potential-win">0.00</span> ETB
               </div>
             </div>
 
-            <div class="quick-stakes-row">
-              <div class="quick-stakes" id="quick-stakes"></div>
-              <button type="button" class="quick-stake-edit" id="btn-quick-stake-edit" title="Custom stake">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-              </button>
+            <div class="ambessa-ticket-preview-link" id="btn-ticket-preview">
+              TICKET PREVIEW
             </div>
 
-            <div class="betslip-bonus-banner" id="betslip-bonus-banner">
-              <span class="bonus-banner-text" id="bonus-banner-text">Add one more event to get</span>
-              <strong class="bonus-banner-pct" id="bonus-banner-pct">8% bonus</strong>
+            <div class="ambessa-slip-actions">
+              <button type="button" class="ambessa-btn-place-bet" id="btn-place">PLACE BET</button>
+              <button type="button" class="ambessa-btn-place-online" id="btn-place-online">PLACE BET ONLINE</button>
             </div>
-
-            <div class="potential-winning-box">
-              <div class="pw-title">Potential Winning</div>
-              <div class="pw-amount-line">
-                <span class="pw-val" id="potential-win">0.00</span>
-                <span class="pw-cur">ETB</span>
-              </div>
-            </div>
-
-            <div class="betslip-meta-row">
-              <div class="meta-odds-type">
-                <span class="meta-check">✓</span>
-                <span>Odds Type</span>
-              </div>
-              <button type="button" class="meta-settings" data-coming-soon>
-                <span>Settings</span>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54A.484.484 0 0 0 14 2h-4c-.25 0-.46.18-.49.42l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.63 8.49c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.485.485 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.49.41h4c.25 0 .46-.18.49-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-              </button>
-            </div>
-
-            <div class="betslip-auth-notice" id="slip-auth-notice">
+            
+            <div class="betslip-auth-notice" id="slip-auth-notice" hidden>
               <span class="auth-notice-ico">ⓘ</span>
               <span>You need to login to be able to place a bet.</span>
-            </div>
-
-            <div class="betslip-actions-block">
-              <button type="button" class="btn-share-dark" id="btn-share-slip">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-7 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
-                <span>SHARE</span>
-              </button>
-              <div class="betslip-dual-actions">
-                <button type="button" class="btn-cancel-red" id="btn-clear-slip">
-                  <span class="btn-act-ico">✖</span>
-                  <span>CANCEL</span>
-                </button>
-                <button type="button" class="btn-place-green" id="btn-place">
-                  <span>PLACE BET</span>
-                  <span class="btn-act-ico">📋</span>
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -4438,21 +4543,7 @@
     </div>
   </div>
 
-  <!-- AMBESSA "WE ARE HERE!" FLOATING CHAT WIDGET -->
-  <div class="ambessa-chat-widget" id="ambessa-chat-widget">
-    <div class="ambessa-chat-prompt-card">
-      <div class="ambessa-chat-greeting">
-        <span class="chat-wave">👋</span> Hi! How can we help?
-      </div>
-      <div class="ambessa-chat-actions">
-        <button type="button" class="ambessa-chat-action-btn">I have a question</button>
-        <button type="button" class="ambessa-chat-action-btn">Tell me more</button>
-      </div>
-    </div>
-    <div class="ambessa-chat-trigger" title="We Are Here!">
-      <img src="assets/ambessa-chat-badge.png" alt="We Are Here!" class="ambessa-floating-chat-img" />
-    </div>
-  </div>
+  
 
   <script src="./config.js?v=20261123"></script>
   <script src="./api-client.js?v=20260918_v4"></script>

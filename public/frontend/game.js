@@ -66,7 +66,10 @@ function clearNightMode() {
 
   applyTheme(color);
 
-  window.addEventListener("DOMContentLoaded", () => {
+  
+
+  
+window.addEventListener("DOMContentLoaded", () => {
     clearNightMode();
     applyTheme(color);
   });
@@ -571,7 +574,13 @@ const state = {
   countryLeagues: {},
   leagueDropdown: null,
   leagueDropdownSearch: "",
-  sidebar: { topLeagues: [], countries: [] },
+  sidebar: (() => {
+    try {
+      const cached = localStorage.getItem("hope_bet_cached_sidebar");
+      if (cached) return JSON.parse(cached);
+    } catch (_) {}
+    return { topLeagues: [], countries: [] };
+  })(),
   sessionUser: null,
   authTab: "login",
   adIndex: 0,
@@ -651,6 +660,9 @@ const state = {
     casinoProfit: 0,
     casinoPct: "0%",
   },
+  ambessaViewMode: "top-leagues",
+  ambessaSelectedLeague: null,
+  ambessaSearchQuery: "",
 };
 window.state = state;
 
@@ -794,7 +806,9 @@ function isMobileLayout() {
 }
 
 function closeMobileDrawers() {
-  document.body.classList.remove("menu-open", "betslip-open", "account-open", "mmenu-open", "mobile-search-open");
+  document.body.classList.remove("menu-open", "betslip-open", "account-open", "mmenu-open", "mobile-search-open", "ambessa-m-slip-open");
+  const mModal = $("ambessa-mobile-betslip-modal");
+  if (mModal) mModal.hidden = true;
   const backdrop = $("mobile-drawer-backdrop");
   if (backdrop) backdrop.hidden = true;
   const mBackdrop = $("mobile-menu-backdrop");
@@ -865,7 +879,25 @@ function openMobileMenu() {
   openDedicatedMobileMenu();
 }
 
+function openAmbessaMobileBetslip() {
+  const modal = $("ambessa-mobile-betslip-modal");
+  if (!modal) return;
+  modal.hidden = false;
+  document.body.classList.add("ambessa-m-slip-open");
+  syncMobileSlipCount();
+}
+
+function closeAmbessaMobileBetslip() {
+  const modal = $("ambessa-mobile-betslip-modal");
+  if (modal) modal.hidden = true;
+  document.body.classList.remove("ambessa-m-slip-open");
+}
+
 function openMobileBetslip() {
+  if (isMobileLayout()) {
+    openAmbessaMobileBetslip();
+    return;
+  }
   document.body.classList.add("betslip-open");
   document.body.classList.remove("menu-open", "account-open");
   const backdrop = $("mobile-drawer-backdrop");
@@ -923,9 +955,69 @@ function syncMobileSlipCount() {
   const countEl = $("mobile-slip-count");
   const oddsEl = $("mobile-slip-odds");
   const fab = $("mobile-slip-fab");
+  const tOdds = totalOdds() ? totalOdds().toFixed(2) : "0.00";
   if (countEl) countEl.textContent = String(count);
-  if (oddsEl) oddsEl.textContent = totalOdds() ? totalOdds().toFixed(2) : "0.00";
-  if (fab) fab.hidden = count === 0;
+  if (oddsEl) oddsEl.textContent = tOdds;
+  if (fab) fab.hidden = true; // Disabled in favor of Ambessa multi bar
+
+  // Ambessa Mobile Multi Bottom Bar (Image 2)
+  const multiBar = $("ambessa-mobile-multi-bar");
+  const multiCount = $("ambessa-multi-count");
+  const multiOdds = $("ambessa-multi-odds");
+  const bottomNav = document.querySelector(".mobile-bottom-nav");
+
+  if (multiCount) multiCount.textContent = "(" + count + ")";
+  if (multiOdds) multiOdds.textContent = tOdds;
+
+  if (count > 0 && isMobileLayout()) {
+    if (multiBar) multiBar.hidden = false;
+    document.body.classList.add("has-multi-bar");
+    if (bottomNav) bottomNav.style.setProperty("display", "none", "important");
+  } else {
+    if (multiBar) multiBar.hidden = true;
+    document.body.classList.remove("has-multi-bar");
+    if (bottomNav) bottomNav.style.removeProperty("display");
+  }
+
+  // Ambessa Mobile Betslip Modal (Image 3)
+  const mList = $("ambessa-m-slip-list");
+  const mTotOdds = $("ambessa-m-total-odds");
+  const mPossWin = $("ambessa-m-possible-win");
+  const mStakeInput = $("ambessa-m-stake-input");
+
+  if (mTotOdds) mTotOdds.textContent = tOdds;
+  if (mPossWin) mPossWin.textContent = fmt(potentialWin());
+  if (mStakeInput && document.activeElement !== mStakeInput) {
+    mStakeInput.value = state.stake;
+  }
+
+  if (mList) {
+    if (count === 0) {
+      mList.innerHTML = '<div style="text-align:center;padding:48px 16px;color:#8E8A9F;font-size:14px;">Your betslip is empty</div>';
+      closeAmbessaMobileBetslip();
+    } else {
+      mList.innerHTML = state.slip.map((b) => {
+        let matchLine = b.homeName && b.awayName ? (b.homeName + " V " + b.awayName) : (b.fixtureName || "");
+        matchLine = matchLine.replace(/ - /g, " V ").toUpperCase();
+        let marketLabel = b.marketName || "Match Result";
+        let selLabel = (b.selectionName || "").toUpperCase();
+        return (
+          '<div class="ambessa-m-bet-card" data-key="' + b.key + '">' +
+            '<div class="ambessa-m-bet-top">' +
+              '<span class="ambessa-m-bet-teams">' + matchLine + '</span>' +
+              '<button type="button" class="ambessa-m-bet-del" data-remove="' + b.key + '" aria-label="Remove">' +
+                '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' +
+              '</button>' +
+            '</div>' +
+            '<div class="ambessa-m-bet-bottom">' +
+              '<span class="ambessa-m-bet-market">' + marketLabel + ': ' + selLabel + '</span>' +
+              '<span class="ambessa-m-bet-odd">' + Number(b.odd).toFixed(2) + '</span>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join("");
+    }
+  }
 }
 
 function renderMobileSportsStrip() {
@@ -1111,13 +1203,13 @@ function getTimeFilterDef(id) {
 }
 
 function buildMockFixtures() {
-  const now = new Date();
-  const dToday1 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 22, 45).toISOString();
-  const dToday2 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 0).toISOString();
-  const dTom1 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 22, 0).toISOString();
-  const dTom2 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 19, 30).toISOString();
-  const dTom3 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 20, 30).toISOString();
-  const dTom4 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 21, 0).toISOString();
+  const nowMs = Date.now();
+  const dToday1 = new Date(nowMs + 45 * 60 * 1000).toISOString();
+  const dToday2 = new Date(nowMs + 2 * 3600 * 1000).toISOString();
+  const dTom1 = new Date(nowMs + 5 * 3600 * 1000).toISOString();
+  const dTom2 = new Date(nowMs + 10 * 3600 * 1000).toISOString();
+  const dTom3 = new Date(nowMs + 20 * 3600 * 1000).toISOString();
+  const dTom4 = new Date(nowMs + 48 * 3600 * 1000).toISOString();
 
   return [
     {
@@ -1279,6 +1371,14 @@ async function toggleSidebarCountry(countryName) {
 
 function findFixture(fixtureId) {
   const id = Number(fixtureId);
+  if (typeof UEFA_EUROPA_FIXTURES !== "undefined" && Array.isArray(UEFA_EUROPA_FIXTURES)) {
+    const europa = UEFA_EUROPA_FIXTURES.find((f) => Number(f.fixtureId || f.id) === id);
+    if (europa) return europa;
+  }
+  if (typeof UEFA_CHAMPIONS_FIXTURES !== "undefined" && Array.isArray(UEFA_CHAMPIONS_FIXTURES)) {
+    const champ = UEFA_CHAMPIONS_FIXTURES.find((f) => Number(f.fixtureId || f.id) === id);
+    if (champ) return champ;
+  }
   if (typeof UEFA_NATIONS_FIXTURES !== "undefined" && Array.isArray(UEFA_NATIONS_FIXTURES)) {
     const uefa = UEFA_NATIONS_FIXTURES.find((f) => Number(f.fixtureId || f.id) === id);
     if (uefa) return uefa;
@@ -2053,6 +2153,7 @@ async function fetchSidebar() {
     const countries = (data.countries || []).map((c) => ({
       name: c.name || c.country,
       flag: c.flag,
+      code: c.code,
       count: c.leagueCount || c.count || 0,
       fixtureCount: c.fixtureCount || c.fixtures || 0,
     }));
@@ -2065,6 +2166,9 @@ async function fetchSidebar() {
       renderSidebar();
       renderTopLeaguesGrid();
       updateSportsMenuUI();
+      if (typeof renderSportsSidebar === "function") {
+        renderSportsSidebar();
+      }
       try {
         localStorage.setItem("hope_bet_cached_sidebar", JSON.stringify(state.sidebar));
       } catch (_) {}
@@ -11240,11 +11344,11 @@ async function renderResultsPage() {
     }
     const backBtn = $("fs-mobile-back-btn");
     if (backBtn) {
-      backBtn.addEventListener("click", () => {
-        state.resultsViewMode = "competitions";
-        state.resultsSelectedLeagueKey = null;
-        renderResultsPage();
-      });
+      backBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      backToMobileCountriesList();
+    });
     }
     return;
   }
@@ -13650,7 +13754,18 @@ function slipKey(fixtureId, marketKey, selection) {
 }
 
 function isSelected(fixtureId, marketKey, selection) {
-  return state.slip.some((b) => b.key === slipKey(fixtureId, marketKey, selection));
+  return state.slip.some((b) => {
+    if (Number(b.fixtureId) !== Number(fixtureId)) return false;
+    if (b.key === slipKey(fixtureId, marketKey, selection)) return true;
+    if ((marketKey === "1x2" || marketKey === "m1") && (b.market === "1x2" || b.market === "m1")) {
+      const s1 = String(selection).toLowerCase();
+      const s2 = String(b.selection).toLowerCase();
+      if ((s1 === "home" || s1 === "1") && (s2 === "home" || s2 === "1")) return true;
+      if ((s1 === "draw" || s1 === "x") && (s2 === "draw" || s2 === "x")) return true;
+      if ((s1 === "away" || s1 === "2") && (s2 === "away" || s2 === "2")) return true;
+    }
+    return false;
+  });
 }
 
 function getMarketOdds(fixture, market, selection) {
@@ -14394,30 +14509,374 @@ function renderBalance() {
   }
 }
 
+var AMBESSA_FOOTBALL_COUNTRIES = [
+  {
+    name: "Europe",
+    flag: "https://media.api-sports.io/flags/eu.svg",
+    fallbackFlag: "🇪🇺",
+    count: 66,
+    leagues: [
+      { id: 2, name: "UEFA Champions League", count: 9 },
+      { id: 3, name: "UEFA Europa League", count: 18 },
+      { id: 848, name: "UEFA Conference League", count: 18 },
+      { id: 1, name: "UEFA Nations League", count: 12 },
+      { id: 14, name: "UEFA Youth League", count: 18 }
+    ]
+  },
+  {
+    name: "England",
+    flag: "https://media.api-sports.io/flags/gb-eng.svg",
+    fallbackFlag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    count: 184,
+    leagues: [
+      { id: 39, name: "Premier League", count: 20 },
+      { id: 40, name: "Championship", count: 24 },
+      { id: 43, name: "National League", count: 15 },
+      { id: 45, name: "FA Cup", count: 32 },
+      { id: 48, name: "EFL Cup", count: 16 }
+    ]
+  },
+  {
+    name: "Spain",
+    flag: "https://media.api-sports.io/flags/es.svg",
+    fallbackFlag: "🇪🇸",
+    count: 84,
+    leagues: [
+      { id: 140, name: "La Liga", count: 20 },
+      { id: 141, name: "Segunda División", count: 11 },
+      { id: 143, name: "Copa del Rey", count: 37 }
+    ]
+  },
+  {
+    name: "Italy",
+    flag: "https://media.api-sports.io/flags/it.svg",
+    fallbackFlag: "🇮🇹",
+    count: 112,
+    leagues: [
+      { id: 135, name: "Serie A", count: 20 },
+      { id: 136, name: "Serie B", count: 14 },
+      { id: 137, name: "Coppa Italia", count: 24 }
+    ]
+  },
+  {
+    name: "Germany",
+    flag: "https://media.api-sports.io/flags/de.svg",
+    fallbackFlag: "🇩🇪",
+    count: 91,
+    leagues: [
+      { id: 78, name: "Bundesliga", count: 18 },
+      { id: 79, name: "2. Bundesliga", count: 9 },
+      { id: 81, name: "DFB Pokal", count: 32 }
+    ]
+  },
+  {
+    name: "France",
+    flag: "https://media.api-sports.io/flags/fr.svg",
+    fallbackFlag: "🇫🇷",
+    count: 85,
+    leagues: [
+      { id: 61, name: "Ligue 1", count: 18 },
+      { id: 62, name: "Ligue 2", count: 18 },
+      { id: 66, name: "Coupe de France", count: 32 }
+    ]
+  },
+  {
+    name: "Portugal",
+    flag: "https://media.api-sports.io/flags/pt.svg",
+    fallbackFlag: "🇵🇹",
+    count: 55,
+    leagues: [
+      { id: 94, name: "Primeira Liga", count: 18 },
+      { id: 96, name: "Taça de Portugal", count: 16 }
+    ]
+  },
+  {
+    name: "Netherlands",
+    flag: "https://media.api-sports.io/flags/nl.svg",
+    fallbackFlag: "🇳🇱",
+    count: 54,
+    leagues: [
+      { id: 88, name: "Eredivisie", count: 18 },
+      { id: 90, name: "KNVB Beker", count: 16 }
+    ]
+  },
+  {
+    name: "Turkey",
+    flag: "https://media.api-sports.io/flags/tr.svg",
+    fallbackFlag: "🇹🇷",
+    count: 38,
+    leagues: [
+      { id: 203, name: "Süper Lig", count: 20 },
+      { id: 205, name: "Turkish Cup", count: 18 }
+    ]
+  },
+  {
+    name: "Brazil",
+    flag: "https://media.api-sports.io/flags/br.svg",
+    fallbackFlag: "🇧🇷",
+    count: 62,
+    leagues: [
+      { id: 71, name: "Serie A", count: 20 },
+      { id: 73, name: "Copa do Brasil", count: 32 }
+    ]
+  },
+  {
+    name: "Argentina",
+    flag: "https://media.api-sports.io/flags/ar.svg",
+    fallbackFlag: "🇦🇷",
+    count: 54,
+    leagues: [
+      { id: 128, name: "Liga Profesional", count: 28 },
+      { id: 130, name: "Copa Argentina", count: 26 }
+    ]
+  },
+  {
+    name: "World",
+    flag: "https://media.api-sports.io/flags/world.svg",
+    fallbackFlag: "🌐",
+    count: 42,
+    leagues: [
+      { id: 1, name: "World Cup", count: 32 },
+      { id: 10, name: "Club Friendlies", count: 10 }
+    ]
+  }
+];
+
+function getAmbessaFootballCountries() {
+  const topList = Array.isArray(AMBESSA_FOOTBALL_COUNTRIES) ? AMBESSA_FOOTBALL_COUNTRIES : [];
+  const topNames = new Set(topList.map((t) => t.name.toLowerCase()));
+
+  const apiCountries = (state.sidebar && Array.isArray(state.sidebar.countries))
+    ? state.sidebar.countries
+    : [];
+
+  const extra = [];
+  const added = new Set(topNames);
+
+  // If Americas in FOOTBALL_STATIC_LEAGUES or state, ensure Americas is included
+  if (typeof FOOTBALL_STATIC_LEAGUES !== "undefined" && FOOTBALL_STATIC_LEAGUES["Americas"] && !added.has("americas")) {
+    extra.push({
+      name: "Americas",
+      flag: null,
+      fallbackFlag: "🌎",
+      count: 36,
+      leagues: FOOTBALL_STATIC_LEAGUES["Americas"].map((l) => ({ id: l.id, name: l.name, count: l.count || 1 }))
+    });
+    added.add("americas");
+  }
+
+  apiCountries.forEach((ac) => {
+    const name = ac.name || ac.country;
+    if (!name) return;
+    const lower = name.toLowerCase();
+    if (added.has(lower)) return;
+    added.add(lower);
+
+    const flagUrl = ac.flag || (ac.code ? `https://media.api-sports.io/flags/${String(ac.code).toLowerCase()}.svg` : null);
+    const cachedLeagues = (state.countryLeagues && state.countryLeagues[name]) ||
+      (typeof FOOTBALL_STATIC_LEAGUES !== "undefined" && FOOTBALL_STATIC_LEAGUES[name]) || [];
+
+    extra.push({
+      name: name,
+      flag: flagUrl,
+      fallbackFlag: (typeof COUNTRY_FLAGS !== "undefined" && COUNTRY_FLAGS[name]) || "🏳",
+      count: ac.fixtureCount || ac.count || ac.leagueCount || 1,
+      leagues: cachedLeagues.map((l) => ({ id: l.id, name: l.name, count: l.count || l.fixtureCount || "" }))
+    });
+  });
+
+  extra.sort((a, b) => a.name.localeCompare(b.name));
+  return [...topList, ...extra];
+}
+
+function getLeagueFlagInfo(league) {
+  if (!league) return { flag: null, fallback: "⚽" };
+  const name = typeof league === "string" ? league : (league.name || "");
+  const country = typeof league === "object" ? (league.country || "") : "";
+  const matchStr = (country + " " + name).toLowerCase();
+
+  if (matchStr.includes("europe") || matchStr.includes("uefa") || matchStr.includes("champions league") || matchStr.includes("europa league") || matchStr.includes("nations league") || matchStr.includes("conference league")) {
+    return { flag: "https://media.api-sports.io/flags/eu.svg", fallback: "🇪🇺" };
+  }
+  if (matchStr.includes("england") || matchStr.includes("premier league") || matchStr.includes("championship")) {
+    return { flag: "https://media.api-sports.io/flags/gb-eng.svg", fallback: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" };
+  }
+  if (matchStr.includes("spain") || matchStr.includes("la liga") || matchStr.includes("copa del rey") || matchStr.includes("segunda")) {
+    return { flag: "https://media.api-sports.io/flags/es.svg", fallback: "🇪🇸" };
+  }
+  if (matchStr.includes("italy") || matchStr.includes("serie a") || matchStr.includes("serie b") || matchStr.includes("coppa italia")) {
+    return { flag: "https://media.api-sports.io/flags/it.svg", fallback: "🇮🇹" };
+  }
+  if (matchStr.includes("germany") || matchStr.includes("bundesliga") || matchStr.includes("dfb")) {
+    return { flag: "https://media.api-sports.io/flags/de.svg", fallback: "🇩🇪" };
+  }
+  if (matchStr.includes("france") || matchStr.includes("ligue 1") || matchStr.includes("ligue 2")) {
+    return { flag: "https://media.api-sports.io/flags/fr.svg", fallback: "🇫🇷" };
+  }
+  if (matchStr.includes("portugal") || matchStr.includes("primeira liga")) {
+    return { flag: "https://media.api-sports.io/flags/pt.svg", fallback: "🇵🇹" };
+  }
+  if (matchStr.includes("netherlands") || matchStr.includes("eredivisie")) {
+    return { flag: "https://media.api-sports.io/flags/nl.svg", fallback: "🇳🇱" };
+  }
+  if (matchStr.includes("turkey") || matchStr.includes("süper lig") || matchStr.includes("super lig")) {
+    return { flag: "https://media.api-sports.io/flags/tr.svg", fallback: "🇹🇷" };
+  }
+  if (matchStr.includes("brazil") || matchStr.includes("brasil")) {
+    return { flag: "https://media.api-sports.io/flags/br.svg", fallback: "🇧🇷" };
+  }
+  if (matchStr.includes("argentina")) {
+    return { flag: "https://media.api-sports.io/flags/ar.svg", fallback: "🇦🇷" };
+  }
+  if (matchStr.includes("saudi")) {
+    return { flag: "https://media.api-sports.io/flags/sa.svg", fallback: "🇸🇦" };
+  }
+  if (matchStr.includes("belgium")) {
+    return { flag: "https://media.api-sports.io/flags/be.svg", fallback: "🇧🇪" };
+  }
+  if (matchStr.includes("americas") || matchStr.includes("copa libertadores") || matchStr.includes("copa sudamericana")) {
+    return { flag: null, fallback: "🌎" };
+  }
+  if (matchStr.includes("world")) {
+    return { flag: "https://media.api-sports.io/flags/world.svg", fallback: "🌐" };
+  }
+
+  if (state.sidebar && Array.isArray(state.sidebar.countries)) {
+    const found = state.sidebar.countries.find((c) => {
+      const cName = String(c.name || "").toLowerCase();
+      return cName && matchStr.includes(cName);
+    });
+    if (found) {
+      return {
+        flag: found.flag || (found.code ? `https://media.api-sports.io/flags/${found.code.toLowerCase()}.svg` : null),
+        fallback: (typeof COUNTRY_FLAGS !== "undefined" && COUNTRY_FLAGS[found.name]) || "🏳"
+      };
+    }
+  }
+
+  return { flag: null, fallback: "⚽" };
+}
+
 function renderSportsSidebar() {
   const el = $("sidebar-sports");
   if (!el) return;
   const isAmbessa = $("sidebar") && $("sidebar").classList.contains("ambessa-sidebar");
   if (isAmbessa) {
+    const topLeaguesCard = document.querySelector(".ambessa-sidebar-card");
+    const filterTimeBtn = $("btn-filter-time");
+    if (state.ambessaMode === "live") {
+      if (topLeaguesCard) topLeaguesCard.style.display = "none";
+      if (filterTimeBtn) filterTimeBtn.style.display = "none";
+
+      const liveList = typeof getLiveFixturesList === "function" ? getLiveFixturesList() : [];
+      const liveSports = [
+        { id: "football", name: "Football", count: liveList.length || 25, icon: "⚽", active: true },
+        { id: "basketball", name: "Basketball", count: 7, icon: "🏀" },
+        { id: "table-tennis", name: "Table Tennis", count: 4, icon: "🏓" },
+        { id: "volleyball", name: "Volleyball", count: 5, icon: "🏐" },
+        { id: "ice-hockey", name: "Ice Hockey", count: 4, icon: "🏒" },
+        { id: "handball", name: "Handball", count: 2, icon: "🤾" },
+        { id: "cyberfootball", name: "CyberFootball", count: 1, icon: "⚽" }
+      ];
+
+      el.innerHTML = liveSports.map((s) => `
+        <button type="button" class="ambessa-sport-row${s.active ? ' is-active' : ''}" data-live-sport="${s.id}" style="${s.active ? 'background: #FF5722 !important; color: #FFFFFF !important;' : ''}">
+          <span class="sport-ico">${s.icon}</span>
+          <span class="sport-name" style="${s.active ? 'color: #FFFFFF !important; font-weight: 700;' : ''}">${s.name}</span>
+          <span class="sport-count" style="${s.active ? 'color: #FFFFFF !important; font-weight: 800;' : ''}">${s.count}</span>
+        </button>
+      `).join("");
+      return;
+    } else {
+      if (topLeaguesCard) topLeaguesCard.style.display = "";
+      if (filterTimeBtn) filterTimeBtn.style.display = "";
+    }
+    if (state.ambessaFootballExpanded === undefined) {
+      state.ambessaFootballExpanded = true;
+    }
+    if (!state.ambessaSelectedCountry) {
+      state.ambessaSelectedCountry = "Spain";
+    }
+
     const ambessaSports = [
-      { id: "football", name: "FOOTBALL", count: 1025, icon: "⚽" },
-      { id: "basketball", name: "BASKETBALL", count: 99, icon: "🏀" },
-      { id: "table-tennis", name: "TABLE TENNIS", count: 240, icon: "🏓" },
-      { id: "volleyball", name: "VOLLEYBALL", count: 56, icon: "🏐" },
-      { id: "ice-hockey", name: "ICE HOCKEY", count: 161, icon: "🏒" },
-      { id: "cricket", name: "CRICKET", count: 2, icon: "🏏" }
+      { id: "football", name: "FOOTBALL", count: 1311, icon: "⚽" },
+      { id: "basketball", name: "BASKETBALL", count: 124, icon: "🏀" },
+      { id: "table-tennis", name: "TABLE TENNIS", count: 288, icon: "🏓" },
+      { id: "volleyball", name: "VOLLEYBALL", count: 48, icon: "🏐" },
+      { id: "ice-hockey", name: "ICE HOCKEY", count: 179, icon: "🏒" },
+      { id: "cricket", name: "CRICKET", count: 19, icon: "🏏" }
     ];
-    el.innerHTML = ambessaSports
-      .map(
-        (s) => `
-      <button type="button" class="ambessa-sport-row${(state.sportFilter || "football") === s.id ? " is-active" : ""}" data-sidebar-sport="${s.id}">
-        <span class="sport-ico">${s.icon}</span>
-        <span class="sport-name">${s.name}</span>
-        <span class="sport-count">${s.count}</span>
-        <span class="chev-down">⌵</span>
-      </button>`
-      )
-      .join("");
+
+    let html = "";
+    ambessaSports.forEach((s) => {
+      if (s.id === "football") {
+        const isFootOpen = state.ambessaFootballExpanded !== false;
+        const allCountries = (typeof getAmbessaFootballCountries === "function")
+          ? getAmbessaFootballCountries()
+          : (typeof AMBESSA_FOOTBALL_COUNTRIES !== "undefined" ? AMBESSA_FOOTBALL_COUNTRIES : []);
+
+        html += `
+          <div class="ambessa-sport-group">
+            <button type="button" class="ambessa-sport-head${isFootOpen ? " is-open" : ""}" data-ambessa-sport="football">
+              <span class="sport-ico">${s.icon}</span>
+              <span class="sport-name">${s.name}</span>
+              <span class="sport-count">${s.count}</span>
+              <span class="chev-down">${isFootOpen ? "⌃" : "⌵"}</span>
+            </button>
+            ${isFootOpen ? `
+              <div class="ambessa-football-countries">
+                ${allCountries.map((c) => {
+                  const isCtryOpen = state.ambessaExpandedCountry === c.name;
+                  const isCtrySelected = state.ambessaSelectedCountry === c.name;
+                  const leagues = (state.countryLeagues && state.countryLeagues[c.name]) ||
+                    (typeof FOOTBALL_STATIC_LEAGUES !== "undefined" && FOOTBALL_STATIC_LEAGUES[c.name]) ||
+                    c.leagues || [];
+
+                  return `
+                    <div class="ambessa-country-item${isCtryOpen ? " is-open" : ""}${isCtrySelected ? " is-selected" : ""}" data-country="${c.name}">
+                      <div class="ambessa-country-head${isCtrySelected ? " is-selected" : ""}" data-ambessa-country="${c.name}">
+                        ${c.flag && (c.flag.startsWith("http") || c.flag.startsWith("/")) ? `
+                          <img src="${c.flag}" alt="${c.name}" class="country-flag-img" loading="lazy" onerror="this.outerHTML='<span class=\\'country-flag-emoji\\'>${c.fallbackFlag || '🏳'}</span>'" />
+                        ` : `
+                          <span class="country-flag-emoji">${c.fallbackFlag || c.flag || '🏳'}</span>
+                        `}
+                        <span class="country-name">${c.name}</span>
+                        <span class="country-count">${c.count}</span>
+                        <span class="country-chev">${isCtryOpen ? "⌃" : "⌵"}</span>
+                      </div>
+                      ${isCtryOpen ? `
+                        <div class="ambessa-country-leagues">
+                          ${leagues.length ? leagues.map((l) => `
+                            <div class="ambessa-league-subrow${Number(state.ambessaSelectedLeague) === Number(l.id) ? " is-selected" : ""}" data-sub-league="${l.id}">
+                              <span class="subleague-name">${l.name}</span>
+                              <span class="subleague-count">${l.count || l.fixtureCount || ""}</span>
+                              <span class="subleague-arrow">›</span>
+                            </div>
+                          `).join("") : `
+                            <div class="ambessa-league-subrow" style="color: #8E95A5; font-size: 11.5px; padding: 7px 16px;">Loading leagues...</div>
+                          `}
+                        </div>
+                      ` : ""}
+                    </div>
+                  `;
+                }).join("")}
+              </div>
+            ` : ""}
+          </div>
+        `;
+      } else {
+        html += `
+          <button type="button" class="ambessa-sport-row${(state.sportFilter || "football") === s.id ? " is-active" : ""}" data-sidebar-sport="${s.id}">
+            <span class="sport-ico">${s.icon}</span>
+            <span class="sport-name">${s.name}</span>
+            <span class="sport-count">${s.count}</span>
+            <span class="chev-down">⌵</span>
+          </button>
+        `;
+      }
+    });
+
+    el.innerHTML = html;
     renderMobileSportsStrip();
     renderMobileTimeStrip();
     return;
@@ -15390,12 +15849,18 @@ function renderSidebar() {
     ];
     leaguesEl.innerHTML = ambessaTopLeagues
       .map(
-        (l) => `
-      <button type="button" class="ambessa-league-row${state.leagueFilter === l.id && !state.countryFilter ? " is-on" : ""}" data-sidebar-league="${l.id}">
-        <span class="sport-ico">⚽</span>
+        (l) => {
+          const flagInfo = getLeagueFlagInfo(l);
+          const flagHtml = flagInfo.flag
+            ? `<img src="${flagInfo.flag}" alt="${l.name}" class="league-flag-img" loading="lazy" onerror="this.outerHTML='<span class=\\'league-flag-emoji\\'>${flagInfo.fallback || '⚽'}</span>'" />`
+            : `<span class="league-flag-emoji">${flagInfo.fallback || '⚽'}</span>`;
+          return `
+      <button type="button" class="ambessa-league-row${(Number(state.ambessaSelectedLeague) === Number(l.id) || state.leagueFilter === l.id) && !state.countryFilter ? " is-on" : ""}" data-sidebar-league="${l.id}">
+        ${flagHtml}
         <span class="league-name">${l.name}</span>
         <span class="chev-ico">›</span>
-      </button>`
+      </button>`;
+        }
       )
       .join("");
     return;
@@ -16024,6 +16489,167 @@ function renderTopMatchesCarousel() {
   }
 }
 
+const AMBESSA_TOP_LEAGUE_IDS = new Set([
+  1, 2, 3, 39, 40, 61, 71, 78, 88, 94, 128, 135, 140, 144, 203, 235, 307, 848
+]);
+
+function isAmbessaTopLeague(f) {
+  if (!f || !f.league) return false;
+  const lid = Number(f.league.id);
+  if (lid && AMBESSA_TOP_LEAGUE_IDS.has(lid)) return true;
+  if (typeof leagueIdInTopSet === "function" && leagueIdInTopSet(lid)) return true;
+  if (state.sidebar?.topLeagues?.some((l) => Number(l.id) === lid)) return true;
+
+  const c = String(f.league.country || "").toLowerCase().trim();
+  const n = String(f.league.name || "").toLowerCase().trim();
+
+  // Exclude lower tiers / non-top leagues
+  if (
+    n.includes("persha") ||
+    n.includes("league 2") ||
+    n.includes("division 1") ||
+    n.includes("division 2") ||
+    n.includes("de ascenso") ||
+    n.includes("afc") ||
+    n.includes("gulf") ||
+    n.includes("federation cup") ||
+    n.includes("league cup")
+  ) {
+    return false;
+  }
+
+  // European / UEFA major competitions
+  if (n.includes("uefa") && (n.includes("champions league") || n.includes("europa league") || n.includes("conference league") || n.includes("nations league"))) return true;
+  if ((c === "europe" || c === "world") && (n === "champions league" || n === "europa league" || n === "conference league" || n === "uefa nations league")) return true;
+
+  // Major national leagues
+  if (c === "england" && (n === "premier league" || n === "championship")) return true;
+  if (c === "spain" && (n === "la liga" || n === "primera division")) return true;
+  if (c === "italy" && n === "serie a") return true;
+  if (c === "germany" && n === "bundesliga") return true;
+  if (c === "france" && n === "ligue 1") return true;
+  if (c === "netherlands" && n === "eredivisie") return true;
+  if (c === "portugal" && n === "primeira liga") return true;
+  if (c === "turkey" && (n.includes("super lig") || n.includes("sÃ¼per lig") || n.includes("süper lig"))) return true;
+  if (c === "saudi arabia" && n.includes("pro league")) return true;
+  if (c === "brazil" && n === "serie a") return true;
+  if (c === "belgium" && n.includes("pro league")) return true;
+  if (c === "argentina" && n.includes("profesional")) return true;
+
+  return false;
+}
+
+function isMatchUpcoming(f) {
+  if (!f) return false;
+  // Started or live matches must go to LIVE, not UPCOMING
+  if (typeof isMatchStarted === "function" && isMatchStarted(f)) {
+    return false;
+  }
+  if (f.isLive || (typeof isLiveFixture === "function" && isLiveFixture(f))) {
+    return false;
+  }
+  const status = String(f.status?.short || f.status || "").toUpperCase().trim();
+  if (["FT", "AET", "PEN", "PST", "CANC", "ABD", "AWD", "WO", "FINISHED", "ENDED"].includes(status)) {
+    return false;
+  }
+  if (["1H", "2H", "HT", "ET", "P", "LIVE", "IN_PLAY", "BT"].includes(status)) {
+    return false;
+  }
+  const dateVal = f.date || f.fixture?.date;
+  const kick = dateVal ? new Date(dateVal).getTime() : 0;
+  if (kick && !isNaN(kick) && kick <= (Date.now() - 10 * 60 * 1000)) {
+    return false; // match kickoff has arrived/passed - move to LIVE
+  }
+  return true;
+}
+
+function passesAmbessaTimeFilter(fixture, timeFilter) {
+  if (!timeFilter || timeFilter === "all") return true;
+  if (!fixture) return false;
+
+  const dateVal = fixture.date || fixture.fixture?.date;
+  if (!dateVal) return false;
+
+  const kick = new Date(dateVal).getTime();
+  if (!kick || isNaN(kick)) return false;
+
+  const now = Date.now();
+  let maxMs = 0;
+  if (timeFilter === "1h") maxMs = 1 * 3600 * 1000;
+  else if (timeFilter === "3h") maxMs = 3 * 3600 * 1000;
+  else if (timeFilter === "6h") maxMs = 6 * 3600 * 1000;
+  else if (timeFilter === "12h") maxMs = 12 * 3600 * 1000;
+  else if (timeFilter === "1d") maxMs = 24 * 3600 * 1000;
+  else if (timeFilter === "3d") maxMs = 72 * 3600 * 1000;
+  else if (timeFilter === "today") maxMs = 24 * 3600 * 1000;
+
+  if (maxMs > 0) {
+    const diff = kick - now;
+    return diff >= -10 * 60 * 1000 && diff <= maxMs;
+  }
+  return true;
+}
+
+function getAmbessaTimeFilterLabel(id) {
+  const map = {
+    "1h": "1 hour",
+    "3h": "3 hours",
+    "6h": "6 hours",
+    "12h": "12 hours",
+    "1d": "1 day",
+    "3d": "3 days",
+    "all": "all time"
+  };
+  return map[id] || id;
+}
+
+function setAmbessaTimeFilter(filterId) {
+  state.ambessaTimeFilter = filterId;
+  state.timeFilter = filterId;
+
+  const dropdown = $("ambessa-time-filter-dropdown");
+  if (dropdown) {
+    dropdown.querySelectorAll(".ambessa-time-filter-opt").forEach((opt) => {
+      const match = opt.dataset.timeFilter === filterId;
+      opt.classList.toggle("is-selected", match);
+    });
+  }
+
+  const btn = $("btn-filter-time");
+  if (btn) {
+    if (filterId === "all") {
+      btn.textContent = "Filter by Time";
+    } else {
+      btn.textContent = "Filter by Time (" + getAmbessaTimeFilterLabel(filterId) + ")";
+    }
+  }
+
+  const wrap = $("ambessa-time-filter-wrap");
+  if (wrap) wrap.classList.remove("is-open");
+  if (dropdown) dropdown.hidden = true;
+
+  const mobileTimeVal = $("mobile-sport-filter-time-val");
+  if (mobileTimeVal) {
+    if (filterId === "all") {
+      mobileTimeVal.textContent = "Filter by Time";
+    } else {
+      mobileTimeVal.textContent = "Filter by Time (" + getAmbessaTimeFilterLabel(filterId) + ")";
+    }
+  }
+  const mobileTimeDropdown = $("mobile-time-filter-dropdown");
+  if (mobileTimeDropdown) {
+    mobileTimeDropdown.hidden = true;
+    mobileTimeDropdown.querySelectorAll(".ambessa-filter-dropdown-opt").forEach((opt) => {
+      opt.classList.toggle("is-selected", opt.dataset.timeFilter === filterId);
+    });
+  }
+
+  renderAmbessaMatchesTable();
+  if (typeof renderAmbessaMobileCountriesList === "function") {
+    renderAmbessaMobileCountriesList();
+  }
+}
+
 function renderAmbessaMatchesTable() {
   const container = $("ambessa-matches-container");
   if (!container) return;
@@ -16045,33 +16671,69 @@ function renderAmbessaMatchesTable() {
     );
   }
 
-  if (state.ambessaViewMode === "upcoming") {
+  const viewMode = state.ambessaViewMode || "top-leagues";
+
+  if (viewMode === "live") {
+    // LIVE MATCHES: Ongoing in-play matches
+    const liveList = (state.liveFixtures && state.liveFixtures.length)
+      ? state.liveFixtures
+      : rawFixtures.filter((f) => isLiveFixture(f) || (f.status && ["1H", "2H", "HT", "LIVE", "IN_PLAY"].includes(f.status.short)) || f.isLive);
+    fixtures = liveList.length ? liveList : rawFixtures.slice(0, 15);
+  } else if (viewMode === "upcoming") {
+    // UPCOMING MATCHES: ALL available matches (any league), sorted soonest first
+    fixtures = fixtures.filter(isMatchUpcoming);
     fixtures.sort((a, b) => new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime());
   } else {
+    // TOP LEAGUES:
+    fixtures = fixtures.filter(isMatchUpcoming);
     if (state.ambessaSelectedLeague) {
       const lid = Number(state.ambessaSelectedLeague);
       const filtered = fixtures.filter((f) => Number(f.league?.id) === lid);
       if (filtered.length) fixtures = filtered;
+    } else {
+      // Top Leagues overview: ONLY show matches from Top Leagues!
+      const topFiltered = fixtures.filter(isAmbessaTopLeague);
+      if (topFiltered.length) fixtures = topFiltered;
+    }
+    // And among top leagues, sort by soonest starting first (chronological order)
+        // And among top leagues, sort by soonest starting first (chronological order)
+    fixtures.sort((a, b) => new Date(a.date || a.fixture?.date || 0).getTime() - new Date(b.date || b.fixture?.date || 0).getTime());
+  }
+
+  // APPLY AMBESSA TIME FILTER
+  const curTimeFilter = state.ambessaTimeFilter || state.timeFilter;
+  if (curTimeFilter && curTimeFilter !== "all" && viewMode !== "live") {
+    const timeFiltered = fixtures.filter((f) => passesAmbessaTimeFilter(f, curTimeFilter));
+    if (timeFiltered.length) {
+      fixtures = timeFiltered;
+    } else {
+      const allUpcomingInTime = rawFixtures
+        .filter(isMatchUpcoming)
+        .filter((f) => passesAmbessaTimeFilter(f, curTimeFilter));
+      allUpcomingInTime.sort((a, b) => new Date(a.date || a.fixture?.date || 0).getTime() - new Date(b.date || b.fixture?.date || 0).getTime());
+      fixtures = allUpcomingInTime;
     }
   }
 
-  let html = `
-    <div class="ambessa-table-header">
-      <div class="ambessa-th-match"></div>
-      <div class="ambessa-th-group ambessa-th-result">
-        <span class="ambessa-th-group-title">Match Result</span>
-        <div class="ambessa-th-cols"><span>1</span><span>X</span><span>2</span></div>
-      </div>
-      <div class="ambessa-th-group ambessa-th-double">
-        <span class="ambessa-th-group-title">Double chance</span>
-        <div class="ambessa-th-cols"><span>1X</span><span>12</span><span>X2</span></div>
-      </div>
-      <div class="ambessa-th-group ambessa-th-btts">
-        <span class="ambessa-th-group-title">Both Score</span>
-        <div class="ambessa-th-cols"><span>Yes</span><span>No</span></div>
-      </div>
-    </div>
-  `;
+  if (!fixtures.length) {
+    const lbl = getAmbessaTimeFilterLabel(curTimeFilter);
+    container.innerHTML = '<div class="ambessa-empty-matches" style="padding:40px 20px;text-align:center;color:#8E95A5;font-size:14px;font-weight:600;">' +
+      '<div style="font-size:26px;margin-bottom:8px;">⏳</div>' +
+      '<div>No upcoming matches found within ' + lbl + '.</div>' +
+      '<div style="margin-top:14px;">' +
+        '<button type="button" id="btn-reset-time-filter" style="background:#FF5722;color:#fff;border:0;border-radius:6px;padding:8px 18px;cursor:pointer;font-weight:800;font-size:13px;">Show All Matches</button>' +
+      '</div>' +
+    '</div>';
+    const btnReset = $("btn-reset-time-filter");
+    if (btnReset) {
+      btnReset.addEventListener("click", () => {
+        setAmbessaTimeFilter("all");
+      });
+    }
+    return;
+  }
+
+  let html = "";
 
   for (const f of fixtures) {
     const fId = f.fixtureId || f.id;
@@ -16098,73 +16760,87 @@ function renderAmbessaMatchesTable() {
     const selBNo = isSelected(fId, "btts", "no") || isSelected(fId, "btts", "ng");
 
     const leagueName = (f.league && f.league.name) || "Football League";
-    const flag = (f.league && f.league.logo && f.league.logo.length <= 4) ? f.league.logo : "🏆";
+    const flagInfo = getLeagueFlagInfo(f.league || leagueName);
+    const flagHtml = flagInfo.flag
+      ? `<img src="${flagInfo.flag}" alt="${leagueName}" class="ambessa-card-league-flag-img" loading="lazy" onerror="this.outerHTML='<span class=\\'ambessa-card-country-flag\\'>${flagInfo.fallback || '⚽'}</span>'" />`
+      : `<span class="ambessa-card-country-flag">${flagInfo.fallback || '⚽'}</span>`;
     const sideBets = f.sideBetsCount || (1400 + (Number(fId) % 500));
 
-    const d = new Date(f.date || Date.now());
+    const d = new Date(f.date || f.fixture?.date || Date.now());
     const day = String(d.getDate()).padStart(2, "0");
     const mon = String(d.getMonth() + 1).padStart(2, "0");
     const hr = String(d.getHours()).padStart(2, "0");
+    const yr = d.getFullYear();
     const min = String(d.getMinutes()).padStart(2, "0");
-    const dateFormatted = `${day}/${mon} ${hr}:${min}`;
+    const isLive = Boolean(f.isLive || (f.status && ["1H", "2H", "HT", "LIVE", "IN_PLAY"].includes(f.status.short)));
+    const elapsed = f.status?.elapsed ? `${f.status.elapsed}'` : (f.time || "LIVE");
+    const dateFormatted = isLive
+      ? `<span style="color:#22C55E;font-weight:800;display:inline-flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;background:#22C55E;border-radius:50%;display:inline-block;box-shadow:0 0 6px #22C55E;"></span> ${elapsed}</span>`
+      : `<span class="ambessa-desktop-kickoff">${day}/${mon} ${hr}:${min}</span><span class="ambessa-mobile-kickoff">${day}/${mon}/${yr}•${hr}:${min}</span>`;
 
     html += `
       <div class="ambessa-match-card" data-fixture-id="${fId}">
         <div class="ambessa-card-top">
           <div class="ambessa-card-league">
-            <span class="ambessa-card-ball">⚽</span>
-            <span class="ambessa-card-country-flag">${flag}</span>
-            <span class="ambessa-card-league-name">${leagueName}</span>
+            ${flagHtml}
+            <span class="ambessa-card-league-name" style="color: #FF7A00 !important;">${leagueName}</span>
           </div>
           <div class="ambessa-card-kickoff">
             <span>${dateFormatted}</span>
           </div>
         </div>
 
-        <div class="ambessa-card-main-row">
-          <div class="ambessa-card-teams-wrap">
-            <span class="ambessa-card-teams" data-open-fixture="${fId}">${f.home.name} V ${f.away.name}</span>
-            <button type="button" class="ambessa-side-bets-pill" data-open-fixture="${fId}">
-              +${sideBets} Side Bets
+        <div class="ambessa-card-middle-row">
+          <span class="ambessa-card-teams" data-open-fixture="${fId}">${f.home.name} V ${f.away.name}</span>
+          <button type="button" class="ambessa-side-bets-pill" data-open-fixture="${fId}">
+            <span class="ambessa-desktop-sidebets">+${sideBets} Side Bets</span>
+            <span class="ambessa-mobile-sidebets">+${sideBets}</span>
+          </button>
+        </div>
+
+        <div class="ambessa-card-odds-row">
+          <!-- Match Result 1 X 2 -->
+          <div class="ambessa-odds-cluster ambessa-cluster-result">
+            <button type="button" class="odd-btn ambessa-odd-btn${selH ? ' is-selected' : ''}" data-fixture="${fId}" data-market="1x2" data-selection="home" title="${f.home.name} (1)">
+              <span class="ambessa-odd-label">1</span>
+              <span class="ambessa-odd-val">${hOdd}</span>
+            </button>
+            <button type="button" class="odd-btn ambessa-odd-btn${selD ? ' is-selected' : ''}" data-fixture="${fId}" data-market="1x2" data-selection="draw" title="Draw (X)">
+              <span class="ambessa-odd-label">X</span>
+              <span class="ambessa-odd-val">${dOdd}</span>
+            </button>
+            <button type="button" class="odd-btn ambessa-odd-btn${selA ? ' is-selected' : ''}" data-fixture="${fId}" data-market="1x2" data-selection="away" title="${f.away.name} (2)">
+              <span class="ambessa-odd-label">2</span>
+              <span class="ambessa-odd-val">${aOdd}</span>
             </button>
           </div>
 
-          <div class="ambessa-card-odds-grid">
-            <!-- Match Result 1 X 2 -->
-            <div class="ambessa-odds-cluster ambessa-cluster-result">
-              <button type="button" class="odd-btn ambessa-odd-btn${selH ? ' is-selected' : ''}" data-fixture="${fId}" data-market="1x2" data-selection="home" title="${f.home.name} (1)">
-                <span class="ambessa-odd-num">${hOdd}</span>
-              </button>
-              <button type="button" class="odd-btn ambessa-odd-btn${selD ? ' is-selected' : ''}" data-fixture="${fId}" data-market="1x2" data-selection="draw" title="Draw (X)">
-                <span class="ambessa-odd-num">${dOdd}</span>
-              </button>
-              <button type="button" class="odd-btn ambessa-odd-btn${selA ? ' is-selected' : ''}" data-fixture="${fId}" data-market="1x2" data-selection="away" title="${f.away.name} (2)">
-                <span class="ambessa-odd-num">${aOdd}</span>
-              </button>
-            </div>
+          <!-- Double Chance 1X 12 X2 -->
+          <div class="ambessa-odds-cluster ambessa-cluster-double">
+            <button type="button" class="odd-btn ambessa-odd-btn${sel1X ? ' is-selected' : ''}" data-fixture="${fId}" data-market="dc" data-selection="1x" title="1X">
+              <span class="ambessa-odd-label">1X</span>
+              <span class="ambessa-odd-val">${dc1x}</span>
+            </button>
+            <button type="button" class="odd-btn ambessa-odd-btn${sel12 ? ' is-selected' : ''}" data-fixture="${fId}" data-market="dc" data-selection="12" title="12">
+              <span class="ambessa-odd-label">12</span>
+              <span class="ambessa-odd-val">${dc12}</span>
+            </button>
+            <button type="button" class="odd-btn ambessa-odd-btn${selX2 ? ' is-selected' : ''}" data-fixture="${fId}" data-market="dc" data-selection="x2" title="X2">
+              <span class="ambessa-odd-label">X2</span>
+              <span class="ambessa-odd-val">${dcx2}</span>
+            </button>
+          </div>
 
-            <!-- Double Chance 1X 12 X2 -->
-            <div class="ambessa-odds-cluster ambessa-cluster-double">
-              <button type="button" class="odd-btn ambessa-odd-btn${sel1X ? ' is-selected' : ''}" data-fixture="${fId}" data-market="dc" data-selection="1x" title="1X">
-                <span class="ambessa-odd-num">${dc1x}</span>
-              </button>
-              <button type="button" class="odd-btn ambessa-odd-btn${sel12 ? ' is-selected' : ''}" data-fixture="${fId}" data-market="dc" data-selection="12" title="12">
-                <span class="ambessa-odd-num">${dc12}</span>
-              </button>
-              <button type="button" class="odd-btn ambessa-odd-btn${selX2 ? ' is-selected' : ''}" data-fixture="${fId}" data-market="dc" data-selection="x2" title="X2">
-                <span class="ambessa-odd-num">${dcx2}</span>
-              </button>
-            </div>
-
-            <!-- Both Score Yes No -->
-            <div class="ambessa-odds-cluster ambessa-cluster-btts">
-              <button type="button" class="odd-btn ambessa-odd-btn${selBYes ? ' is-selected' : ''}" data-fixture="${fId}" data-market="btts" data-selection="yes" title="Both Score Yes">
-                <span class="ambessa-odd-num">${bttsYes}</span>
-              </button>
-              <button type="button" class="odd-btn ambessa-odd-btn${selBNo ? ' is-selected' : ''}" data-fixture="${fId}" data-market="btts" data-selection="no" title="Both Score No">
-                <span class="ambessa-odd-num">${bttsNo}</span>
-              </button>
-            </div>
+          <!-- Both Score Yes No -->
+          <div class="ambessa-odds-cluster ambessa-cluster-btts">
+            <button type="button" class="odd-btn ambessa-odd-btn${selBYes ? ' is-selected' : ''}" data-fixture="${fId}" data-market="btts" data-selection="yes" title="Both Score Yes">
+              <span class="ambessa-odd-label">Yes</span>
+              <span class="ambessa-odd-val">${bttsYes}</span>
+            </button>
+            <button type="button" class="odd-btn ambessa-odd-btn${selBNo ? ' is-selected' : ''}" data-fixture="${fId}" data-market="btts" data-selection="no" title="Both Score No">
+              <span class="ambessa-odd-label">No</span>
+              <span class="ambessa-odd-val">${bttsNo}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -16174,7 +16850,383 @@ function renderAmbessaMatchesTable() {
   container.innerHTML = html;
 }
 
-const UEFA_NATIONS_FIXTURES = [
+// AMBESSA_FOOTBALL_COUNTRIES is defined above with getAmbessaFootballCountries()
+
+var UEFA_EUROPA_FIXTURES = [
+  {
+    fixtureId: 900301,
+    id: 900301,
+    date: "2026-11-26T20:45:00Z",
+    displayDate: "26/11 20:45 2026",
+    league: { id: 3, name: "Europe - UEFA Europa League", logo: "🏆", country: "Europe" },
+    home: { id: 3001, name: "FC Viktoria Plzen" },
+    away: { id: 3002, name: "SL Benfica FC" },
+    sideBetsCount: 1405,
+    odds: {
+      home: "5.71",
+      draw: "4.82",
+      away: "1.42",
+      doubleChance: { homeDraw: "2.57", homeAway: "1.14", drawAway: "1.11" },
+      toQualify: { home: "3.80", away: "1.22" },
+      twoUp: { home: "5.69", draw: "4.82", away: "1.42" },
+      btts: { yes: "1.55", no: "2.28" },
+      goalsOddEven: { odd: "1.90", even: "1.85" },
+      homeGoalsOddEven: { odd: "1.95", even: "1.80" },
+      awayGoalsOddEven: { odd: "1.92", even: "1.82" },
+      htFt: { h_h: "9.50", h_d: "18.0", h_a: "2.10" }
+    }
+  },
+  {
+    fixtureId: 900302,
+    id: 900302,
+    date: "2026-11-26T20:45:00Z",
+    displayDate: "26/11 20:45 2026",
+    league: { id: 3, name: "Europe - UEFA Europa League", logo: "🏆", country: "Europe" },
+    home: { id: 3003, name: "Royale Union Saint-Gilloise" },
+    away: { id: 3004, name: "Lech Poznan" },
+    sideBetsCount: 1315,
+    odds: {
+      home: "1.30",
+      draw: "5.36",
+      away: "7.78",
+      doubleChance: { homeDraw: "1.08", homeAway: "1.14", drawAway: "3.10" },
+      toQualify: { home: "1.15", away: "4.80" },
+      twoUp: { home: "1.30", draw: "5.36", away: "7.78" },
+      btts: { yes: "1.85", no: "1.92" },
+      goalsOddEven: { odd: "1.90", even: "1.85" },
+      homeGoalsOddEven: { odd: "1.95", even: "1.80" },
+      awayGoalsOddEven: { odd: "1.92", even: "1.82" },
+      htFt: { h_h: "1.85", h_d: "20.0", h_a: "14.0" }
+    }
+  },
+  {
+    fixtureId: 900303,
+    id: 900303,
+    date: "2026-11-26T20:45:00Z",
+    displayDate: "26/11 20:45 2026",
+    league: { id: 3, name: "Europe - UEFA Europa League", logo: "🏆", country: "Europe" },
+    home: { id: 3005, name: "Olympiakos Piraeus" },
+    away: { id: 3006, name: "AC Milan" },
+    sideBetsCount: 1427,
+    odds: {
+      home: "2.79",
+      draw: "3.35",
+      away: "2.33",
+      doubleChance: { homeDraw: "1.52", homeAway: "1.28", drawAway: "1.38" },
+      toQualify: { home: "1.95", away: "1.75" },
+      twoUp: { home: "2.75", draw: "3.35", away: "2.30" },
+      btts: { yes: "1.70", no: "2.05" },
+      goalsOddEven: { odd: "1.90", even: "1.85" },
+      homeGoalsOddEven: { odd: "1.95", even: "1.80" },
+      awayGoalsOddEven: { odd: "1.92", even: "1.82" },
+      htFt: { h_h: "4.60", h_d: "14.0", h_a: "3.75" }
+    }
+  },
+  {
+    fixtureId: 900304,
+    id: 900304,
+    date: "2026-11-26T20:45:00Z",
+    displayDate: "26/11 20:45 2026",
+    league: { id: 3, name: "Europe - UEFA Europa League", logo: "🏆", country: "Europe" },
+    home: { id: 3007, name: "FC Red Bull Salzburg" },
+    away: { id: 3008, name: "FC Ararat-Armenia" },
+    sideBetsCount: 1092,
+    odds: {
+      home: "1.14",
+      draw: "7.59",
+      away: "13.4",
+      doubleChance: { homeDraw: "1.02", homeAway: "1.08", drawAway: "4.80" },
+      toQualify: { home: "1.06", away: "7.50" },
+      twoUp: { home: "1.13", draw: "7.59", away: "13.4" },
+      btts: { yes: "2.10", no: "1.65" },
+      goalsOddEven: { odd: "1.90", even: "1.85" },
+      homeGoalsOddEven: { odd: "1.95", even: "1.80" },
+      awayGoalsOddEven: { odd: "1.92", even: "1.82" },
+      htFt: { h_h: "1.50", h_d: "25.0", h_a: "22.0" }
+    }
+  },
+  {
+    fixtureId: 900305,
+    id: 900305,
+    date: "2026-11-26T20:45:00Z",
+    displayDate: "26/11 20:45 2026",
+    league: { id: 3, name: "Europe - UEFA Europa League", logo: "🏆", country: "Europe" },
+    home: { id: 3009, name: "Olympique Marseille" },
+    away: { id: 3010, name: "Levski Sofia" },
+    sideBetsCount: 1092,
+    odds: {
+      home: "1.32",
+      draw: "5.00",
+      away: "7.82",
+      doubleChance: { homeDraw: "1.07", homeAway: "1.14", drawAway: "3.05" },
+      toQualify: { home: "1.16", away: "4.60" },
+      twoUp: { home: "1.31", draw: "5.00", away: "7.82" },
+      btts: { yes: "1.90", no: "1.80" },
+      goalsOddEven: { odd: "1.90", even: "1.85" },
+      homeGoalsOddEven: { odd: "1.95", even: "1.80" },
+      awayGoalsOddEven: { odd: "1.92", even: "1.82" },
+      htFt: { h_h: "1.88", h_d: "20.0", h_a: "14.0" }
+    }
+  },
+  {
+    fixtureId: 900306,
+    id: 900306,
+    date: "2026-11-26T20:45:00Z",
+    displayDate: "26/11 20:45 2026",
+    league: { id: 3, name: "Europe - UEFA Europa League", logo: "🏆", country: "Europe" },
+    home: { id: 3011, name: "Celta De Vigo" },
+    away: { id: 3012, name: "AFC Bournemouth" },
+    sideBetsCount: 1083,
+    odds: {
+      home: "3.50",
+      draw: "3.42",
+      away: "1.97",
+      doubleChance: { homeDraw: "1.72", homeAway: "1.28", drawAway: "1.26" },
+      toQualify: { home: "2.40", away: "1.50" },
+      twoUp: { home: "3.45", draw: "3.42", away: "1.95" },
+      btts: { yes: "1.75", no: "1.95" },
+      goalsOddEven: { odd: "1.90", even: "1.85" },
+      homeGoalsOddEven: { odd: "1.95", even: "1.80" },
+      awayGoalsOddEven: { odd: "1.92", even: "1.82" },
+      htFt: { h_h: "5.80", h_d: "15.0", h_a: "3.05" }
+    }
+  },
+  {
+    fixtureId: 900307,
+    id: 900307,
+    date: "2026-11-26T20:45:00Z",
+    displayDate: "26/11 20:45 2026",
+    league: { id: 3, name: "Europe - UEFA Europa League", logo: "🏆", country: "Europe" },
+    home: { id: 3013, name: "Besiktas" },
+    away: { id: 3014, name: "Hapoel Be-Er Sheva" },
+    sideBetsCount: 1439,
+    odds: {
+      home: "1.18",
+      draw: "6.95",
+      away: "10.9",
+      doubleChance: { homeDraw: "1.03", homeAway: "1.08", drawAway: "4.20" },
+      toQualify: { home: "1.08", away: "6.50" },
+      twoUp: { home: "1.17", draw: "6.95", away: "10.9" },
+      btts: { yes: "2.05", no: "1.70" },
+      goalsOddEven: { odd: "1.90", even: "1.85" },
+      homeGoalsOddEven: { odd: "1.95", even: "1.80" },
+      awayGoalsOddEven: { odd: "1.92", even: "1.82" },
+      htFt: { h_h: "1.60", h_d: "22.0", h_a: "18.0" }
+    }
+  },
+  {
+    fixtureId: 900308,
+    id: 900308,
+    date: "2026-11-26T20:45:00Z",
+    displayDate: "26/11 20:45 2026",
+    league: { id: 3, name: "Europe - UEFA Europa League", logo: "🏆", country: "Europe" },
+    home: { id: 3015, name: "GNK Dinamo Zagreb" },
+    away: { id: 3016, name: "Bayer 04 Leverkusen" },
+    sideBetsCount: 1363,
+    odds: {
+      home: "3.80",
+      draw: "3.65",
+      away: "1.95",
+      doubleChance: { homeDraw: "1.80", homeAway: "1.24", drawAway: "1.24" },
+      toQualify: { home: "2.60", away: "1.44" },
+      twoUp: { home: "3.75", draw: "3.65", away: "1.92" },
+      btts: { yes: "1.65", no: "2.10" },
+      goalsOddEven: { odd: "1.90", even: "1.85" },
+      homeGoalsOddEven: { odd: "1.95", even: "1.80" },
+      awayGoalsOddEven: { odd: "1.92", even: "1.82" },
+      htFt: { h_h: "6.40", h_d: "15.0", h_a: "2.95" }
+    }
+  }
+];
+
+var UEFA_CHAMPIONS_FIXTURES = [
+  {
+    fixtureId: 900201,
+    id: 900201,
+    date: "2026-11-25T20:45:00Z",
+    displayDate: "25/11 20:45 2026",
+    league: { id: 2, name: "Europe - UEFA Champions League", logo: "🏆", country: "Europe" },
+    home: { id: 2001, name: "SK Slavia Praha" },
+    away: { id: 2002, name: "Villarreal" },
+    sideBetsCount: 1648,
+    odds: {
+      home: "3.09",
+      draw: "3.60",
+      away: "2.07",
+      doubleChance: { homeDraw: "1.66", homeAway: "1.24", drawAway: "1.32" },
+      toQualify: { home: "2.30", away: "1.55" },
+      twoUp: { home: "3.07", draw: "3.60", away: "2.06" },
+      btts: { yes: "1.50", no: "2.40" },
+      goalsOddEven: { odd: "1.90", even: "1.85" },
+      homeGoalsOddEven: { odd: "1.95", even: "1.80" },
+      awayGoalsOddEven: { odd: "1.92", even: "1.82" },
+      htFt: { h_h: "5.10", h_d: "14.5", h_a: "3.25" }
+    }
+  },
+  {
+    fixtureId: 900202,
+    id: 900202,
+    date: "2026-11-25T20:45:00Z",
+    displayDate: "25/11 20:45 2026",
+    league: { id: 2, name: "Europe - UEFA Champions League", logo: "🏆", country: "Europe" },
+    home: { id: 2003, name: "Sabah Baku FK" },
+    away: { id: 2004, name: "FC Barcelona" },
+    sideBetsCount: 1515,
+    odds: {
+      home: "22.0",
+      draw: "11.9",
+      away: "1.05",
+      doubleChance: { homeDraw: "7.43", homeAway: "1.04", drawAway: "1.01" },
+      toQualify: { home: "12.0", away: "1.01" },
+      twoUp: { home: "21.5", draw: "11.9", away: "1.05" },
+      btts: { yes: "1.72", no: "1.99" },
+      goalsOddEven: { odd: "1.90", even: "1.85" },
+      homeGoalsOddEven: { odd: "2.10", even: "1.65" },
+      awayGoalsOddEven: { odd: "1.88", even: "1.86" },
+      htFt: { h_h: "32.0", h_d: "35.0", h_a: "1.32" }
+    }
+  },
+  {
+    fixtureId: 900203,
+    id: 900203,
+    date: "2026-11-25T23:00:00Z",
+    displayDate: "25/11 23:00 2026",
+    league: { id: 2, name: "Europe - UEFA Champions League", logo: "🏆", country: "Europe" },
+    home: { id: 2005, name: "Club Brugge KV" },
+    away: { id: 2006, name: "Liverpool" },
+    sideBetsCount: 1597,
+    odds: {
+      home: "4.30",
+      draw: "4.51",
+      away: "1.59",
+      doubleChance: { homeDraw: "2.15", homeAway: "1.17", drawAway: "1.18" },
+      toQualify: { home: "3.10", away: "1.32" },
+      twoUp: { home: "4.25", draw: "4.51", away: "1.58" },
+      btts: { yes: "1.60", no: "2.20" },
+      goalsOddEven: { odd: "1.90", even: "1.85" },
+      homeGoalsOddEven: { odd: "1.95", even: "1.80" },
+      awayGoalsOddEven: { odd: "1.92", even: "1.82" },
+      htFt: { h_h: "7.20", h_d: "16.0", h_a: "2.35" }
+    }
+  },
+  {
+    fixtureId: 900204,
+    id: 900204,
+    date: "2026-11-25T23:00:00Z",
+    displayDate: "25/11 23:00 2026",
+    league: { id: 2, name: "Europe - UEFA Champions League", logo: "🏆", country: "Europe" },
+    home: { id: 2007, name: "Lille" },
+    away: { id: 2008, name: "FC Bayern Munich" },
+    sideBetsCount: 1526,
+    odds: {
+      home: "5.30",
+      draw: "3.90",
+      away: "1.56",
+      doubleChance: { homeDraw: "2.30", homeAway: "1.22", drawAway: "1.13" },
+      toQualify: { home: "3.75", away: "1.24" },
+      twoUp: { home: "5.25", draw: "3.90", away: "1.55" },
+      btts: { yes: "1.68", no: "2.08" },
+      goalsOddEven: { odd: "1.90", even: "1.85" },
+      homeGoalsOddEven: { odd: "1.95", even: "1.80" },
+      awayGoalsOddEven: { odd: "1.92", even: "1.82" },
+      htFt: { h_h: "9.00", h_d: "17.0", h_a: "2.25" }
+    }
+  },
+  {
+    fixtureId: 900205,
+    id: 900205,
+    date: "2026-11-25T23:00:00Z",
+    displayDate: "25/11 23:00 2026",
+    league: { id: 2, name: "Europe - UEFA Champions League", logo: "🏆", country: "Europe" },
+    home: { id: 2009, name: "FC Shakhtar Donetsk" },
+    away: { id: 2010, name: "Fenerbahce" },
+    sideBetsCount: 1608,
+    odds: {
+      home: "2.73",
+      draw: "3.35",
+      away: "2.38",
+      doubleChance: { homeDraw: "1.50", homeAway: "1.28", drawAway: "1.40" },
+      toQualify: { home: "1.92", away: "1.78" },
+      twoUp: { home: "2.70", draw: "3.35", away: "2.35" },
+      btts: { yes: "1.72", no: "2.02" },
+      goalsOddEven: { odd: "1.90", even: "1.85" },
+      homeGoalsOddEven: { odd: "1.95", even: "1.80" },
+      awayGoalsOddEven: { odd: "1.92", even: "1.82" },
+      htFt: { h_h: "4.50", h_d: "14.0", h_a: "3.85" }
+    }
+  },
+  {
+    fixtureId: 900206,
+    id: 900206,
+    date: "2026-11-25T23:00:00Z",
+    displayDate: "25/11 23:00 2026",
+    league: { id: 2, name: "Europe - UEFA Champions League", logo: "🏆", country: "Europe" },
+    home: { id: 2011, name: "Sporting Clube De Portugal CP" },
+    away: { id: 2012, name: "Manchester United" },
+    sideBetsCount: 1653,
+    odds: {
+      home: "2.53",
+      draw: "3.57",
+      away: "2.44",
+      doubleChance: { homeDraw: "1.48", homeAway: "1.25", drawAway: "1.45" },
+      toQualify: { home: "1.82", away: "1.88" },
+      twoUp: { home: "2.50", draw: "3.57", away: "2.40" },
+      btts: { yes: "1.62", no: "2.18" },
+      goalsOddEven: { odd: "1.90", even: "1.85" },
+      homeGoalsOddEven: { odd: "1.95", even: "1.80" },
+      awayGoalsOddEven: { odd: "1.92", even: "1.82" },
+      htFt: { h_h: "4.10", h_d: "14.5", h_a: "3.95" }
+    }
+  },
+  {
+    fixtureId: 900207,
+    id: 900207,
+    date: "2026-11-25T23:00:00Z",
+    displayDate: "25/11 23:00 2026",
+    league: { id: 2, name: "Europe - UEFA Champions League", logo: "🏆", country: "Europe" },
+    home: { id: 2013, name: "Paris Saint Germain" },
+    away: { id: 2014, name: "AS Roma" },
+    sideBetsCount: 1590,
+    odds: {
+      home: "1.43",
+      draw: "4.76",
+      away: "5.61",
+      doubleChance: { homeDraw: "1.12", homeAway: "1.16", drawAway: "2.55" },
+      toQualify: { home: "1.22", away: "3.85" },
+      twoUp: { home: "1.42", draw: "4.76", away: "5.55" },
+      btts: { yes: "1.75", no: "1.98" },
+      goalsOddEven: { odd: "1.90", even: "1.85" },
+      homeGoalsOddEven: { odd: "1.95", even: "1.80" },
+      awayGoalsOddEven: { odd: "1.92", even: "1.82" },
+      htFt: { h_h: "2.10", h_d: "18.0", h_a: "9.50" }
+    }
+  },
+  {
+    fixtureId: 900208,
+    id: 900208,
+    date: "2026-11-25T23:00:00Z",
+    displayDate: "25/11 23:00 2026",
+    league: { id: 2, name: "Europe - UEFA Champions League", logo: "🏆", country: "Europe" },
+    home: { id: 2015, name: "Inter Milan" },
+    away: { id: 2016, name: "VfB Stuttgart" },
+    sideBetsCount: 1635,
+    odds: {
+      home: "1.55",
+      draw: "4.10",
+      away: "5.30",
+      doubleChance: { homeDraw: "1.14", homeAway: "1.20", drawAway: "2.35" },
+      toQualify: { home: "1.28", away: "3.35" },
+      twoUp: { home: "1.54", draw: "4.10", away: "5.25" },
+      btts: { yes: "1.78", no: "1.95" },
+      goalsOddEven: { odd: "1.90", even: "1.85" },
+      homeGoalsOddEven: { odd: "1.95", even: "1.80" },
+      awayGoalsOddEven: { odd: "1.92", even: "1.82" },
+      htFt: { h_h: "2.35", h_d: "17.0", h_a: "9.00" }
+    }
+  }
+];
+
+var UEFA_NATIONS_FIXTURES = [
   {
     fixtureId: 900101,
     id: 900101,
@@ -16395,25 +17447,614 @@ function getFallbackLeagueFixtures(lid) {
   });
 }
 
+
+// ============================================================
+// DEDICATED REAL-TIME LIVE VIEW (Dynamic from API, matching UI)
+// ============================================================
+const AMBESSA_FALLBACK_LIVE_FIXTURES = [
+  {
+    fixtureId: 90101,
+    id: 90101,
+    league: { id: 188, name: "Championship", country: "Australia" },
+    home: { name: "South Melbourne", score: 0 },
+    away: { name: "Oakleigh Cannons", score: 2 },
+    goals: { home: 0, away: 2 },
+    status: { short: "1H", elapsed: 36 },
+    isLive: true,
+    sideBetsCount: 285,
+    odds: { home: "10.1", draw: "5.47", away: "1.21" }
+  },
+  {
+    fixtureId: 90102,
+    id: 90102,
+    league: { id: 189, name: "Regional League", country: "Belarus" },
+    home: { name: "Spartans Fc", score: 1 },
+    away: { name: "Lightning Fc", score: 3 },
+    goals: { home: 1, away: 3 },
+    status: { short: "2H", elapsed: 61 },
+    isLive: true,
+    sideBetsCount: 56,
+    odds: { home: "-", draw: "-", away: "-" }
+  },
+  {
+    fixtureId: 90103,
+    id: 90103,
+    league: { id: 190, name: "Super League", country: "Indonesia" },
+    home: { name: "Persib Bandung", score: 2 },
+    away: { name: "Persija Jakarta", score: 1 },
+    goals: { home: 2, away: 1 },
+    status: { short: "2H", elapsed: 78 },
+    isLive: true,
+    sideBetsCount: 410,
+    odds: { home: "1.35", draw: "4.80", away: "7.20" }
+  }
+];
+
+function getLiveFixturesList() {
+  if (state.liveFixtures && Array.isArray(state.liveFixtures) && state.liveFixtures.length > 0) {
+    return state.liveFixtures;
+  }
+  const fromFixtures = (state.fixtures || []).filter(isLiveFixture);
+  if (fromFixtures.length > 0) {
+    return fromFixtures;
+  }
+  return AMBESSA_FALLBACK_LIVE_FIXTURES;
+}
+
+function generateLiveCorrectScores(homeGoals, awayGoals, baseFixture) {
+  const h = Number(homeGoals) || 0;
+  const a = Number(awayGoals) || 0;
+  const list = [
+    { sel: `${h+1}-${a}`, val: (2.40 + (h+a)*0.4).toFixed(2), trend: "down" },
+    { sel: `${h}-${a}`, val: (3.80 + (h+a)*0.5).toFixed(2), trend: "down" },
+    { sel: `${h}-${a+1}`, val: (3.20 + (h+a)*0.4).toFixed(2), trend: "up" },
+    { sel: `${h+2}-${a}`, val: (6.50 + (h+a)*1.1).toFixed(2), trend: "up" },
+    { sel: `${h+1}-${a+1}`, val: (4.60 + (h+a)*0.8).toFixed(2), trend: "up" },
+    { sel: `${h}-${a+2}`, val: (8.20 + (h+a)*1.2).toFixed(2), trend: "up" },
+    { sel: `${h+2}-${a+1}`, val: (11.0 + (h+a)*1.5).toFixed(2), trend: "up" },
+    { sel: `${h+1}-${a+2}`, val: (13.5 + (h+a)*1.8).toFixed(2), trend: "up" },
+    { sel: "Other", val: "18.0", trend: "" }
+  ];
+  return list;
+}
+
+function renderAmbessaLiveView() {
+  try {
+    document.body.classList.add("is-ambessa-live");
+    const homeDef = $("ambessa-home-default");
+    const legView = $("ambessa-league-view");
+    if (!legView) return;
+
+    state.ambessaMode = "live";
+    if (homeDef) homeDef.hidden = true;
+    legView.hidden = false;
+
+    // Trigger background refresh if empty
+    if (!state.liveFixtures || !state.liveFixtures.length) {
+      if (typeof fetchInPlayLiveFixtures === "function") {
+        fetchInPlayLiveFixtures().then((res) => {
+          if (res && res.length) {
+            state.liveFixtures = res;
+            if (state.ambessaMode === "live") renderAmbessaLiveView();
+          }
+        }).catch(() => {});
+      }
+    }
+
+    const liveList = getLiveFixturesList();
+
+    // 1. Sidebar live sports list
+    if (typeof renderSportsSidebar === "function") {
+      renderSportsSidebar();
+    }
+
+    // 2. Default selected match
+    const currentSelectedId = state.ambessaSelectedLiveMatch ? Number(state.ambessaSelectedLiveMatch) : null;
+    let selectedMatch = currentSelectedId ? liveList.find(m => Number(m.fixtureId || m.id) === currentSelectedId) : null;
+    if (!selectedMatch && liveList.length > 0) {
+      selectedMatch = liveList[0];
+      state.ambessaSelectedLiveMatch = selectedMatch.fixtureId || selectedMatch.id;
+    }
+
+    // 3. Render Left Column (Matches Feed Grouped by Country & League)
+    const colLeft = $("ambessa-league-matches-col");
+    if (colLeft) {
+      let matchesHtml = "";
+
+      // Market Pills Row
+      const activeMarket = state.ambessaLiveMarketPill || "1x2";
+      matchesHtml += `
+        <div class="ambessa-live-pills-row">
+          <button type="button" class="ambessa-live-pill${activeMarket === '1x2' ? ' is-active' : ''}" data-live-pill-market="1x2">Match result</button>
+          <button type="button" class="ambessa-live-pill${activeMarket === 'handicap' ? ' is-active' : ''}" data-live-pill-market="handicap">Handicap</button>
+          <button type="button" class="ambessa-live-pill${activeMarket === 'totals' ? ' is-active' : ''}" data-live-pill-market="totals">Total Goals</button>
+          <button type="button" class="ambessa-live-pill${activeMarket === 'btts' ? ' is-active' : ''}" data-live-pill-market="btts">Both Teams To &gt;</button>
+        </div>
+        <div class="ambessa-live-sports-bar">
+          <button type="button" class="ambessa-live-sport-item${(!state.ambessaLiveSport || state.ambessaLiveSport === 'football') ? ' is-active' : ''}" data-live-sport="football">
+            <div class="ambessa-live-sport-icon-wrap">
+              <span class="ambessa-live-sport-icon">⚽</span>
+              <span class="ambessa-live-sport-count">18</span>
+            </div>
+            <span class="ambessa-live-sport-label">FOOTBALL</span>
+          </button>
+          <button type="button" class="ambessa-live-sport-item${state.ambessaLiveSport === 'basketball' ? ' is-active' : ''}" data-live-sport="basketball">
+            <div class="ambessa-live-sport-icon-wrap">
+              <span class="ambessa-live-sport-icon">🏀</span>
+              <span class="ambessa-live-sport-count">3</span>
+            </div>
+            <span class="ambessa-live-sport-label">BASKETBALL</span>
+          </button>
+          <button type="button" class="ambessa-live-sport-item${state.ambessaLiveSport === 'ice-hockey' ? ' is-active' : ''}" data-live-sport="ice-hockey">
+            <div class="ambessa-live-sport-icon-wrap">
+              <span class="ambessa-live-sport-icon">🏒</span>
+              <span class="ambessa-live-sport-count">1</span>
+            </div>
+            <span class="ambessa-live-sport-label">ICE HOCKEY</span>
+          </button>
+          <button type="button" class="ambessa-live-sport-item${state.ambessaLiveSport === 'cricket' ? ' is-active' : ''}" data-live-sport="cricket">
+            <div class="ambessa-live-sport-icon-wrap">
+              <span class="ambessa-live-sport-icon">🏏</span>
+              <span class="ambessa-live-sport-count">1</span>
+            </div>
+            <span class="ambessa-live-sport-label">CRICKET</span>
+          </button>
+          <button type="button" class="ambessa-live-sport-item${state.ambessaLiveSport === 'tennis' ? ' is-active' : ''}" data-live-sport="tennis">
+            <div class="ambessa-live-sport-icon-wrap">
+              <span class="ambessa-live-sport-icon">🎾</span>
+              <span class="ambessa-live-sport-count">1</span>
+            </div>
+            <span class="ambessa-live-sport-label">TENNIS</span>
+          </button>
+        </div>
+      `;
+
+      if (!liveList || !liveList.length) {
+        matchesHtml += `
+          <div style="padding:40px; text-align:center; color:#FF5722; font-weight:700;">
+            <div style="font-size:24px; margin-bottom:8px;">&#9917; Loading Live Matches...</div>
+            <div style="color:#8E95A5; font-size:13px;">Connecting to Live Sports Feed...</div>
+          </div>
+        `;
+      } else {
+        // Group matches by Country -> League
+        const countryGroups = {};
+        liveList.forEach((m) => {
+          const country = m.league?.country || "World";
+          const leagueName = m.league?.name || "Football League";
+          if (!countryGroups[country]) countryGroups[country] = { count: 0, leagues: {} };
+          countryGroups[country].count++;
+          if (!countryGroups[country].leagues[leagueName]) countryGroups[country].leagues[leagueName] = [];
+          countryGroups[country].leagues[leagueName].push(m);
+        });
+
+        if (!state.ambessaLiveOpenCountries || state.ambessaLiveOpenCountries.size === 0) {
+          state.ambessaLiveOpenCountries = new Set(Object.keys(countryGroups));
+          state.ambessaLiveOpenLeagues = new Set();
+          Object.keys(countryGroups).forEach(c => {
+            Object.keys(countryGroups[c].leagues).forEach(l => state.ambessaLiveOpenLeagues.add(l));
+          });
+        }
+
+        Object.keys(countryGroups).forEach((country) => {
+          const group = countryGroups[country];
+          const isCountryOpen = state.ambessaLiveOpenCountries.has(country);
+          const flagInfo = typeof getLeagueFlagInfo === "function" ? getLeagueFlagInfo(country) : { flag: "", fallback: "&#127760;" };
+          const countryFlagHtml = flagInfo.flag
+            ? `<img src="${flagInfo.flag}" alt="${country}" class="ambessa-card-league-flag-img" loading="lazy" onerror="this.outerHTML='<span class=\\'ambessa-flag-badge\\'>${flagInfo.fallback || '&#127760;'}</span>'" />`
+            : `<span class="ambessa-flag-badge">${flagInfo.fallback || '&#127760;'}</span>`;
+
+          matchesHtml += `
+            <div class="ambessa-live-country-group" data-live-country="${country}">
+              <div class="ambessa-live-country-head">
+                <div class="ambessa-live-country-left">
+                  ${countryFlagHtml}
+                  <span>${country}</span>
+                  <span style="color:#8E95A5; font-size:12px; margin-left:4px;">${group.count}</span>
+                </div>
+                <span class="ambessa-live-country-chev">${isCountryOpen ? '&#x2335;' : '&#x2303;'}</span>
+              </div>
+              <div class="ambessa-live-country-body"${isCountryOpen ? '' : ' style="display:none;"'}>
+          `;
+
+          Object.keys(group.leagues).forEach((leagueName) => {
+            const leagueMatches = group.leagues[leagueName];
+            const isLeagueOpen = state.ambessaLiveOpenLeagues.has(leagueName);
+
+            matchesHtml += `
+              <div class="ambessa-live-league-group" data-live-league="${leagueName}">
+                <div class="ambessa-live-league-head">
+                  <span>${leagueName}</span>
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="color:#FF7A00; font-size:12px;">${leagueMatches.length}</span>
+                    <span class="ambessa-live-league-chev">${isLeagueOpen ? '&#x2335;' : '&#x2303;'}</span>
+                  </div>
+                </div>
+                <div class="ambessa-live-league-body"${isLeagueOpen ? '' : ' style="display:none;"'}>
+            `;
+
+            leagueMatches.forEach((m) => {
+              const fId = Number(m.fixtureId || m.id);
+              if (typeof ensureFixtureOdds === "function") ensureFixtureOdds(m);
+
+              const homeName = m.home?.name || m.teams?.home?.name || "Home";
+              const awayName = m.away?.name || m.teams?.away?.name || "Away";
+              const homeScore = m.goals?.home ?? (m.score?.fulltime?.home ?? 0);
+              const awayScore = m.goals?.away ?? (m.score?.fulltime?.away ?? 0);
+
+              const elNum = m.status?.elapsed ?? (typeof m.elapsed === "number" ? m.elapsed : null);
+              let period = "Live";
+              if (m.status?.short === "2H" || m.status === "2H") period = "2nd Half";
+              else if (m.status?.short === "1H" || m.status === "1H") period = "1st Half";
+              else if (m.status?.short === "HT" || m.status === "HT") period = "Half Time";
+
+              let statusText = "Live";
+              if (period === "Half Time") {
+                statusText = "Half Time";
+              } else if (elNum != null) {
+                statusText = `${period} / ${elNum}m`;
+              } else {
+                statusText = period;
+              }
+              const sideBets = m.sideBetsCount || (1400 + (fId % 500));
+
+              const hOdd = (m.odds && m.odds.home) || (m.odds1x2 && m.odds1x2.home && m.odds1x2.home.val) || "2.10";
+              const dOdd = (m.odds && m.odds.draw) || (m.odds1x2 && m.odds1x2.draw && m.odds1x2.draw.val) || "3.40";
+              const aOdd = (m.odds && m.odds.away) || (m.odds1x2 && m.odds1x2.away && m.odds1x2.away.val) || "3.20";
+
+              const trendH = typeof getOddTrend === "function" && getOddTrend(`m${fId}_1`, hOdd) === "up" ? '<span class="trend-up">&#9650;</span>' : (typeof getOddTrend === "function" && getOddTrend(`m${fId}_1`, hOdd) === "down" ? '<span class="trend-down">&#9660;</span>' : '');
+              const trendD = typeof getOddTrend === "function" && getOddTrend(`m${fId}_X`, dOdd) === "up" ? '<span class="trend-up">&#9650;</span>' : (typeof getOddTrend === "function" && getOddTrend(`m${fId}_X`, dOdd) === "down" ? '<span class="trend-down">&#9660;</span>' : '');
+              const trendA = typeof getOddTrend === "function" && getOddTrend(`m${fId}_2`, aOdd) === "up" ? '<span class="trend-up">&#9650;</span>' : (typeof getOddTrend === "function" && getOddTrend(`m${fId}_2`, aOdd) === "down" ? '<span class="trend-down">&#9660;</span>' : '');
+
+              const isCardActive = selectedMatch && Number(selectedMatch.fixtureId || selectedMatch.id) === fId;
+              const selH = isSelected(fId, "1x2", "home");
+              const selD = isSelected(fId, "1x2", "draw");
+              const selA = isSelected(fId, "1x2", "away");
+
+              matchesHtml += `
+                <div class="ambessa-live-match-card${isCardActive ? ' is-active' : ''}" data-live-fixture="${fId}">
+                  <div class="ambessa-live-card-breadcrumb">Football | ${country} | ${leagueName}</div>
+                  <div class="ambessa-live-card-main">
+                    <div class="ambessa-live-card-teams">
+                      <div class="ambessa-live-team-row">
+                        <span>${homeName}</span>
+                        <strong>${homeScore}</strong>
+                      </div>
+                      <div class="ambessa-live-team-row">
+                        <span>${awayName}</span>
+                        <strong>${awayScore}</strong>
+                      </div>
+                      <div class="ambessa-live-card-meta">
+                        <span class="ambessa-live-sidebets">+${sideBets}</span>
+                        <span class="ambessa-live-time">${statusText}</span>
+                      </div>
+                    </div>
+                    ${(() => {
+                      if (activeMarket === "btts") {
+                        const btts = (m.odds && m.odds.btts) || {};
+                        const bttsYesVal = btts.yes || (homeScore > 0 && awayScore > 0 ? "1.15" : "1.85");
+                        const bttsNoVal = btts.no || (homeScore > 0 && awayScore > 0 ? "5.50" : "1.90");
+                        const selBYes = isSelected(fId, "btts", "yes") || isSelected(fId, "btts", "gg");
+                        const selBNo = isSelected(fId, "btts", "no") || isSelected(fId, "btts", "ng");
+                        const trendBYes = typeof getOddTrend === "function" && getOddTrend(`m${fId}_btts_y`, bttsYesVal) === "up" ? '<span class="trend-up">&#9650;</span>' : (typeof getOddTrend === "function" && getOddTrend(`m${fId}_btts_y`, bttsYesVal) === "down" ? '<span class="trend-down">&#9660;</span>' : '');
+                        const trendBNo = typeof getOddTrend === "function" && getOddTrend(`m${fId}_btts_n`, bttsNoVal) === "up" ? '<span class="trend-up">&#9650;</span>' : (typeof getOddTrend === "function" && getOddTrend(`m${fId}_btts_n`, bttsNoVal) === "down" ? '<span class="trend-down">&#9660;</span>' : '');
+                        return `
+                          <div class="ambessa-live-odds-box" style="display:flex;">
+                            <div class="ambessa-live-odd-cell odd-btn${selBYes ? ' is-selected' : ''}" style="width:72px;" data-live-match="${fId}" data-market="btts" data-selection="yes" data-odd="${bttsYesVal}">
+                              <span class="odd-lbl">Yes</span>
+                              <span class="odd-num">${bttsYesVal} ${trendBYes}</span>
+                            </div>
+                            <div class="ambessa-live-odd-cell odd-btn${selBNo ? ' is-selected' : ''}" style="width:72px;" data-live-match="${fId}" data-market="btts" data-selection="no" data-odd="${bttsNoVal}">
+                              <span class="odd-lbl">No</span>
+                              <span class="odd-num">${bttsNoVal} ${trendBNo}</span>
+                            </div>
+                          </div>
+                        `;
+                      } else if (activeMarket === "totals") {
+                        const totals = (m.odds && m.odds.totals) || {};
+                        const curTot = homeScore + awayScore;
+                        const line = curTot >= 2 ? (curTot + 0.5) : 2.5;
+                        const overVal = totals.over25 || totals.over || (curTot >= 2 ? "1.65" : "1.80");
+                        const underVal = totals.under25 || totals.under || (curTot >= 2 ? "2.20" : "1.95");
+                        const selOver = isSelected(fId, "totals", "over");
+                        const selUnder = isSelected(fId, "totals", "under");
+                        const trendOver = typeof getOddTrend === "function" && getOddTrend(`m${fId}_tot_o`, overVal) === "up" ? '<span class="trend-up">&#9650;</span>' : (typeof getOddTrend === "function" && getOddTrend(`m${fId}_tot_o`, overVal) === "down" ? '<span class="trend-down">&#9660;</span>' : '');
+                        const trendUnder = typeof getOddTrend === "function" && getOddTrend(`m${fId}_tot_u`, underVal) === "up" ? '<span class="trend-up">&#9650;</span>' : (typeof getOddTrend === "function" && getOddTrend(`m${fId}_tot_u`, underVal) === "down" ? '<span class="trend-down">&#9660;</span>' : '');
+                        return `
+                          <div class="ambessa-live-odds-box" style="display:flex;">
+                            <div class="ambessa-live-odd-cell odd-btn${selOver ? ' is-selected' : ''}" style="width:72px;" data-live-match="${fId}" data-market="totals" data-selection="over" data-odd="${overVal}">
+                              <span class="odd-lbl">Over ${line}</span>
+                              <span class="odd-num">${overVal} ${trendOver}</span>
+                            </div>
+                            <div class="ambessa-live-odd-cell odd-btn${selUnder ? ' is-selected' : ''}" style="width:72px;" data-live-match="${fId}" data-market="totals" data-selection="under" data-odd="${underVal}">
+                              <span class="odd-lbl">Under ${line}</span>
+                              <span class="odd-num">${underVal} ${trendUnder}</span>
+                            </div>
+                          </div>
+                        `;
+                      } else if (activeMarket === "handicap") {
+                        const hcap = (m.odds && m.odds.handicap) || {};
+                        const h1Val = hcap.home || "1.90";
+                        const h2Val = hcap.away || "1.90";
+                        const selH1 = isSelected(fId, "handicap", "home") || isSelected(fId, "handicap", "1");
+                        const selH2 = isSelected(fId, "handicap", "away") || isSelected(fId, "handicap", "2");
+                        return `
+                          <div class="ambessa-live-odds-box" style="display:flex;">
+                            <div class="ambessa-live-odd-cell odd-btn${selH1 ? ' is-selected' : ''}" style="width:72px;" data-live-match="${fId}" data-market="handicap" data-selection="home" data-odd="${h1Val}">
+                              <span class="odd-lbl">1 (-1)</span>
+                              <span class="odd-num">${h1Val}</span>
+                            </div>
+                            <div class="ambessa-live-odd-cell odd-btn${selH2 ? ' is-selected' : ''}" style="width:72px;" data-live-match="${fId}" data-market="handicap" data-selection="away" data-odd="${h2Val}">
+                              <span class="odd-lbl">2 (+1)</span>
+                              <span class="odd-num">${h2Val}</span>
+                            </div>
+                          </div>
+                        `;
+                      } else {
+                        return `
+                          <div class="ambessa-live-odds-box">
+                            <div class="ambessa-live-odd-cell odd-btn${selH ? ' is-selected' : ''}" data-live-match="${fId}" data-market="1x2" data-selection="home" data-odd="${hOdd}">
+                              <span class="odd-lbl">1</span>
+                              <span class="odd-num">${hOdd} ${trendH}</span>
+                            </div>
+                            <div class="ambessa-live-odd-cell odd-btn${selD ? ' is-selected' : ''}" data-live-match="${fId}" data-market="1x2" data-selection="draw" data-odd="${dOdd}">
+                              <span class="odd-lbl">X</span>
+                              <span class="odd-num">${dOdd} ${trendD}</span>
+                            </div>
+                            <div class="ambessa-live-odd-cell odd-btn${selA ? ' is-selected' : ''}" data-live-match="${fId}" data-market="1x2" data-selection="away" data-odd="${aOdd}">
+                              <span class="odd-lbl">2</span>
+                              <span class="odd-num">${aOdd} ${trendA}</span>
+                            </div>
+                          </div>
+                        `;
+                      }
+                    })()}
+                  </div>
+                </div>
+              `;
+            });
+
+            matchesHtml += `
+                </div>
+              </div>
+            `;
+          });
+
+          matchesHtml += `
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      colLeft.innerHTML = matchesHtml;
+    }
+
+    // 4. Render Right Column (Pitch Tracker & Detailed Markets for Selected Live Match)
+    const colRight = $("ambessa-league-detail-col");
+    if (colRight) {
+      if (!selectedMatch) {
+        colRight.innerHTML = `<div style="padding:32px; text-align:center; color:#8E95A5;">No live match selected</div>`;
+      } else {
+        const selFId = Number(selectedMatch.fixtureId || selectedMatch.id);
+        if (typeof ensureFixtureOdds === "function") ensureFixtureOdds(selectedMatch);
+
+        const selHomeName = selectedMatch.home?.name || selectedMatch.teams?.home?.name || "Home";
+        const selAwayName = selectedMatch.away?.name || selectedMatch.teams?.away?.name || "Away";
+        const selHomeScore = selectedMatch.goals?.home ?? (selectedMatch.score?.fulltime?.home ?? 0);
+        const selAwayScore = selectedMatch.goals?.away ?? (selectedMatch.score?.fulltime?.away ?? 0);
+
+        const selCountry = selectedMatch.league?.country || "World";
+        const selLeagueName = selectedMatch.league?.name || "Football League";
+        const flagInfo = typeof getLeagueFlagInfo === "function" ? getLeagueFlagInfo(selectedMatch.league || selCountry) : { flag: "", fallback: "&#127760;" };
+        const selFlagHtml = flagInfo.flag
+          ? `<img src="${flagInfo.flag}" alt="${selCountry}" class="ambessa-card-league-flag-img" loading="lazy" onerror="this.outerHTML='<span class=\\'ambessa-flag-badge\\'>${flagInfo.fallback || '&#127760;'}</span>'" />`
+          : `<span class="ambessa-flag-badge">${flagInfo.fallback || '&#127760;'}</span>`;
+
+        const selElNum = selectedMatch.status?.elapsed ?? (typeof selectedMatch.elapsed === "number" ? selectedMatch.elapsed : null);
+        let selPeriod = "Live";
+        if (selectedMatch.status?.short === "2H" || selectedMatch.status === "2H") selPeriod = "2nd Half";
+        else if (selectedMatch.status?.short === "1H" || selectedMatch.status === "1H") selPeriod = "1st Half";
+        else if (selectedMatch.status?.short === "HT" || selectedMatch.status === "HT") selPeriod = "Half Time";
+
+        let selPitchMinute = "Live";
+        if (selPeriod === "Half Time") {
+          selPitchMinute = "Half Time";
+        } else if (selElNum != null) {
+          selPitchMinute = `${selElNum}min. ${selPeriod}`;
+        } else {
+          selPitchMinute = selPeriod;
+        }
+
+        const htHome = selectedMatch.score?.halftime?.home ?? (selectedMatch.status?.short === "2H" ? Math.min(selHomeScore, 1) : 0);
+        const htAway = selectedMatch.score?.halftime?.away ?? (selectedMatch.status?.short === "2H" ? Math.min(selAwayScore, 1) : 0);
+        const selHalves = `(${htHome}:${htAway})(${selHomeScore}:${selAwayScore})`;
+
+        const selHOdd = (selectedMatch.odds && selectedMatch.odds.home) || "2.10";
+        const selDOdd = (selectedMatch.odds && selectedMatch.odds.draw) || "3.40";
+        const selAOdd = (selectedMatch.odds && selectedMatch.odds.away) || "3.20";
+
+        const selH = isSelected(selFId, "1x2", "home");
+        const selD = isSelected(selFId, "1x2", "draw");
+        const selA = isSelected(selFId, "1x2", "away");
+
+        const sel1X = isSelected(selFId, "dc", "1x") || isSelected(selFId, "dc", "homedraw");
+        const sel12 = isSelected(selFId, "dc", "12") || isSelected(selFId, "dc", "homeaway");
+        const selX2 = isSelected(selFId, "dc", "x2") || isSelected(selFId, "dc", "drawaway");
+
+        const selBYes = isSelected(selFId, "btts", "yes") || isSelected(selFId, "btts", "gg");
+        const selBNo = isSelected(selFId, "btts", "no") || isSelected(selFId, "btts", "ng");
+
+        const dc = (selectedMatch.odds && selectedMatch.odds.doubleChance) || {};
+        const dc1xVal = dc["1x"] || dc.homeDraw || "1.30";
+        const dc12Val = dc["12"] || dc.homeAway || "1.25";
+        const dcX2Val = dc["x2"] || dc.drawAway || "1.65";
+
+        const btts = (selectedMatch.odds && selectedMatch.odds.btts) || {};
+        const bttsYesVal = btts.yes || "1.80";
+        const bttsNoVal = btts.no || "1.95";
+
+        const csList = generateLiveCorrectScores(selHomeScore, selAwayScore, selectedMatch);
+        let csHtml = "";
+        csList.forEach((cs) => {
+          const selCS = isSelected(selFId, "cs", cs.sel);
+          const trendCS = cs.trend === "up" ? '<span class="trend-up">&#9650;</span>' : (cs.trend === "down" ? '<span class="trend-down">&#9660;</span>' : '');
+          csHtml += `
+            <div class="ambessa-cs-cell odd-btn${selCS ? ' is-selected' : ''}" data-live-match="${selFId}" data-market="cs" data-selection="${cs.sel}" data-odd="${cs.val}">
+              <span class="cs-label">${cs.sel}</span>
+              <span class="cs-odd">${trendCS} ${cs.val}</span>
+            </div>
+          `;
+        });
+
+        let detailHtml = `
+          <!-- PITCH TRACKER -->
+          <div class="ambessa-pitch-card">
+            <div class="ambessa-pitch-head">
+              <div class="ambessa-pitch-league">
+                ${selFlagHtml}
+                <span>- ${selCountry} - ${selLeagueName}</span>
+              </div>
+              <span style="color:#00C853; font-size:16px;">&#128202;</span>
+            </div>
+            <div class="ambessa-pitch-field">
+              <div class="ambessa-pitch-live-overlay">
+                <div class="ambessa-pitch-live-teams">
+                  ${selHomeName}&nbsp;&nbsp;${selHomeScore}:${selAwayScore}&nbsp;&nbsp;${selAwayName}
+                </div>
+                <div class="ambessa-pitch-live-minute">${selPitchMinute}</div>
+                <div class="ambessa-pitch-live-halves">${selHalves}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CATEGORY TABS STRIP -->
+          <div class="ambessa-market-cat-strip">
+            <button type="button" class="ambessa-cat-pill is-active">Main</button>
+            <button type="button" class="ambessa-cat-pill">Goals</button>
+            <button type="button" class="ambessa-cat-pill">Handicap</button>
+            <button type="button" class="ambessa-cat-pill">Double Bets</button>
+            <button type="button" class="ambessa-cat-pill">Specials &gt;</button>
+          </div>
+
+          <!-- LIVE MARKETS ACCORDION: MATCH RESULT -->
+          <div class="ambessa-market-accordion">
+            <div class="ambessa-accordion-head">
+              <span>Match Result</span>
+              <span class="ambessa-acc-toggle">&#x2303;</span>
+            </div>
+            <div class="ambessa-accordion-body">
+              <div class="ambessa-live-odds-box" style="display:grid; grid-template-columns: repeat(3, 1fr); border: none; background: transparent; gap: 6px;">
+                <div class="ambessa-live-odd-cell odd-btn${selH ? ' is-selected' : ''}" style="width:100%; border:1px solid rgba(255,255,255,0.08); border-radius:4px;" data-live-match="${selFId}" data-market="1x2" data-selection="home" data-odd="${selHOdd}">
+                  <span class="odd-lbl">1</span>
+                  <span class="odd-num">${selHOdd}</span>
+                </div>
+                <div class="ambessa-live-odd-cell odd-btn${selD ? ' is-selected' : ''}" style="width:100%; border:1px solid rgba(255,255,255,0.08); border-radius:4px;" data-live-match="${selFId}" data-market="1x2" data-selection="draw" data-odd="${selDOdd}">
+                  <span class="odd-lbl">X</span>
+                  <span class="odd-num">${selDOdd}</span>
+                </div>
+                <div class="ambessa-live-odd-cell odd-btn${selA ? ' is-selected' : ''}" style="width:100%; border:1px solid rgba(255,255,255,0.08); border-radius:4px;" data-live-match="${selFId}" data-market="1x2" data-selection="away" data-odd="${selAOdd}">
+                  <span class="odd-lbl">2</span>
+                  <span class="odd-num">${selAOdd}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DOUBLE CHANCE -->
+          <div class="ambessa-market-accordion">
+            <div class="ambessa-accordion-head">
+              <span>Double Chance</span>
+              <span class="ambessa-acc-toggle">&#x2303;</span>
+            </div>
+            <div class="ambessa-accordion-body">
+              <div class="ambessa-live-odds-box" style="display:grid; grid-template-columns: repeat(3, 1fr); border: none; background: transparent; gap: 6px;">
+                <div class="ambessa-live-odd-cell odd-btn${sel1X ? ' is-selected' : ''}" style="width:100%; border:1px solid rgba(255,255,255,0.08); border-radius:4px;" data-live-match="${selFId}" data-market="dc" data-selection="1x" data-odd="${dc1xVal}">
+                  <span class="odd-lbl">1X</span>
+                  <span class="odd-num">${dc1xVal}</span>
+                </div>
+                <div class="ambessa-live-odd-cell odd-btn${sel12 ? ' is-selected' : ''}" style="width:100%; border:1px solid rgba(255,255,255,0.08); border-radius:4px;" data-live-match="${selFId}" data-market="dc" data-selection="12" data-odd="${dc12Val}">
+                  <span class="odd-lbl">12</span>
+                  <span class="odd-num">${dc12Val}</span>
+                </div>
+                <div class="ambessa-live-odd-cell odd-btn${selX2 ? ' is-selected' : ''}" style="width:100%; border:1px solid rgba(255,255,255,0.08); border-radius:4px;" data-live-match="${selFId}" data-market="dc" data-selection="x2" data-odd="${dcX2Val}">
+                  <span class="odd-lbl">X2</span>
+                  <span class="odd-num">${dcX2Val}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTH TEAMS TO SCORE -->
+          <div class="ambessa-market-accordion">
+            <div class="ambessa-accordion-head">
+              <span>Both Teams to Score</span>
+              <span class="ambessa-acc-toggle">&#x2303;</span>
+            </div>
+            <div class="ambessa-accordion-body">
+              <div class="ambessa-live-odds-box" style="display:grid; grid-template-columns: repeat(2, 1fr); border: none; background: transparent; gap: 6px;">
+                <div class="ambessa-live-odd-cell odd-btn${selBYes ? ' is-selected' : ''}" style="width:100%; border:1px solid rgba(255,255,255,0.08); border-radius:4px;" data-live-match="${selFId}" data-market="btts" data-selection="yes" data-odd="${bttsYesVal}">
+                  <span class="odd-lbl">Yes</span>
+                  <span class="odd-num">${bttsYesVal}</span>
+                </div>
+                <div class="ambessa-live-odd-cell odd-btn${selBNo ? ' is-selected' : ''}" style="width:100%; border:1px solid rgba(255,255,255,0.08); border-radius:4px;" data-live-match="${selFId}" data-market="btts" data-selection="no" data-odd="${bttsNoVal}">
+                  <span class="odd-lbl">No</span>
+                  <span class="odd-num">${bttsNoVal}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CORRECT SCORE -->
+          <div class="ambessa-market-accordion">
+            <div class="ambessa-accordion-head">
+              <span>Correct Score</span>
+              <span class="ambessa-acc-toggle">&#x2303;</span>
+            </div>
+            <div class="ambessa-accordion-body">
+              <div class="ambessa-correct-score-grid">
+                ${csHtml}
+              </div>
+            </div>
+          </div>
+        `;
+
+        colRight.innerHTML = detailHtml;
+      }
+    }
+  } catch (err) {
+    console.error("renderAmbessaLiveView error:", err);
+  }
+}
+window.renderAmbessaLiveView = renderAmbessaLiveView;
+
 function renderAmbessaLeagueView() {
   const homeDef = $("ambessa-home-default");
   const legView = $("ambessa-league-view");
+  const sportView = $("ambessa-mobile-sport-view");
   if (!legView) return;
 
   if (!state.ambessaSelectedLeague) {
     if (homeDef) homeDef.hidden = false;
-    legView.hidden = true;
+    if (legView) legView.hidden = true;
+    if (sportView) sportView.hidden = true;
     renderAmbessaMatchesTable();
     return;
   }
 
   if (homeDef) homeDef.hidden = true;
+  if (sportView) sportView.hidden = true;
   legView.hidden = false;
+  window.scrollTo({ top: 0, behavior: "instant" });
 
   const lid = Number(state.ambessaSelectedLeague);
   let matches = [];
 
-  if (lid === 1) {
+  if (lid === 3 && typeof UEFA_EUROPA_FIXTURES !== "undefined") {
+    matches = UEFA_EUROPA_FIXTURES;
+  } else if (lid === 2 && typeof UEFA_CHAMPIONS_FIXTURES !== "undefined") {
+    matches = UEFA_CHAMPIONS_FIXTURES;
+  } else if (lid === 1 && typeof UEFA_NATIONS_FIXTURES !== "undefined") {
     matches = UEFA_NATIONS_FIXTURES;
   } else {
     // 1. Matches from 951 real API fixtures by league ID
@@ -16467,6 +18108,11 @@ function renderAmbessaLeagueView() {
   }
   state.ambessaSelectedMatch = matchInList || matches[0] || null;
 
+  
+  const curTime = state.ambessaTimeFilter || state.timeFilter;
+  if (curTime && curTime !== "all") {
+    matches = matches.filter((f) => passesAmbessaTimeFilter(f, curTime));
+  }
   renderAmbessaLeagueMatchesCol(matches);
   if (state.ambessaSelectedMatch) {
     renderAmbessaLeagueDetailCol(state.ambessaSelectedMatch);
@@ -16474,9 +18120,18 @@ function renderAmbessaLeagueView() {
     const colRight = $("ambessa-league-detail-col");
     if (colRight) colRight.innerHTML = `<div style="padding:24px;text-align:center;color:#8E95A5;">No match selected</div>`;
   }
+  const lv = $("ambessa-league-view");
+  if (lv) {
+    if (state.ambessaMobileDetailActive && window.innerWidth <= 1024) {
+      lv.classList.add("is-mobile-detail-active");
+    } else if (window.innerWidth <= 1024 && !state.ambessaMobileDetailActive) {
+      lv.classList.remove("is-mobile-detail-active");
+    }
+  }
 }
 
 function openAmbessaMatch(fixtureId) {
+  if (window.innerWidth <= 1024) state.ambessaMobileDetailActive = true;
   const fixture = findFixture(fixtureId);
   if (!fixture) return;
 
@@ -16503,35 +18158,84 @@ function openAmbessaMatch(fixtureId) {
     colRight.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
+window.openAmbessaMatch = openAmbessaMatch;
 
 function renderAmbessaLeagueMatchesCol(matches) {
   const colLeft = $("ambessa-league-matches-col");
   if (!colLeft) return;
 
+  const lid = Number(state.ambessaSelectedLeague);
+  let countryName = "ENGLAND";
+  let leagueName = "PREMIER LEAGUE";
+  const allCountries = (typeof getAmbessaFootballCountries === "function")
+    ? getAmbessaFootballCountries()
+    : (typeof AMBESSA_FOOTBALL_COUNTRIES !== "undefined" ? AMBESSA_FOOTBALL_COUNTRIES : []);
+  for (const c of allCountries) {
+    const leagues = (state.countryLeagues && state.countryLeagues[c.name]) ||
+      (typeof FOOTBALL_STATIC_LEAGUES !== "undefined" && FOOTBALL_STATIC_LEAGUES[c.name]) ||
+      c.leagues || [];
+    const hit = leagues.find((l) => Number(l.id) === lid);
+    if (hit) {
+      countryName = (c.name || "ENGLAND").toUpperCase();
+      leagueName = (hit.name || "PREMIER LEAGUE").toUpperCase();
+      break;
+    }
+  }
+  if (matches && matches[0] && matches[0].league && matches[0].league.name) {
+    leagueName = matches[0].league.name.toUpperCase();
+    if (matches[0].league.country) countryName = matches[0].league.country.toUpperCase();
+  }
+  let cleanLeagueName = leagueName;
+  if (cleanLeagueName.toUpperCase().startsWith(countryName.toUpperCase() + " - ")) {
+    cleanLeagueName = cleanLeagueName.substring(countryName.length + 3).trim();
+  }
+  const titleText = `FOOTBALL - ${countryName} - ${cleanLeagueName}`;
+
+  const headerHtml = `
+    <div class="ambessa-mobile-league-header">
+      <button type="button" class="ambessa-mobile-back-btn" id="ambessa-mobile-back-btn" aria-label="Back">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6600" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+      <span class="ambessa-mobile-league-title">${titleText}</span>
+    </div>
+  `;
+
   if (!matches || !matches.length) {
-    colLeft.innerHTML = `<div style="padding:24px;text-align:center;color:#8E95A5;background:#181A24;border-radius:8px;">No matches found for this league</div>`;
+    colLeft.innerHTML = headerHtml + `<div style="padding:24px;text-align:center;color:#8E95A5;background:#181A24;border-radius:8px;">No matches found for this league</div>`;
+    const backBtn = $("ambessa-mobile-back-btn");
+    if (backBtn) {
+      backBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      backToMobileCountriesList();
+    });
+    }
     return;
   }
 
   const selectedId = state.ambessaSelectedMatch ? (state.ambessaSelectedMatch.fixtureId || state.ambessaSelectedMatch.id) : null;
 
-  const html = matches.map((m) => {
+  const html = matches.map((m, index) => {
     const fId = m.fixtureId || m.id;
     ensureFixtureOdds(m);
     const isSel = Number(selectedId) === Number(fId);
-    const leagueName = (m.league && m.league.name) || "Football League";
-    const sideBets = m.sideBetsCount || (1400 + (Number(fId) % 500));
+    const mLeagueName = (m.league && m.league.name) || "Football League";
+    const sideBets = m.sideBetsCount || (1000 + (Number(fId) % 500));
 
-    let dateStr = m.displayDate;
-    if (!dateStr) {
-      const d = new Date(m.date || Date.now());
-      const day = String(d.getDate()).padStart(2, "0");
-      const mon = String(d.getMonth() + 1).padStart(2, "0");
-      const hr = String(d.getHours()).padStart(2, "0");
-      const min = String(d.getMinutes()).padStart(2, "0");
-      const yr = d.getFullYear();
-      dateStr = `${day}/${mon} ${hr}:${min} ${yr}`;
-    }
+    const isFirstCard = (index === 0);
+    const leagueColor = isFirstCard ? "#FF5722" : "#7D8499";
+
+    const d = new Date(m.date || Date.now());
+    const day = String(d.getDate()).padStart(2, "0");
+    const mon = String(d.getMonth() + 1).padStart(2, "0");
+    const hr = String(d.getHours()).padStart(2, "0");
+    const min = String(d.getMinutes()).padStart(2, "0");
+    const yr = d.getFullYear();
+
+    const dateStr = m.displayDate || `${day}/${mon} ${hr}:${min} ${yr}`;
+    const dateDotTime = `${day}/${mon}•${hr}:${min}`;
 
     const hOdd = getMarketOdds(m, "1x2", "home") || (m.odds && m.odds.home) || "2.10";
     const dOdd = getMarketOdds(m, "1x2", "draw") || (m.odds && m.odds.draw) || "3.40";
@@ -16541,40 +18245,78 @@ function renderAmbessaLeagueMatchesCol(matches) {
     const selD = isSelected(fId, "1x2", "draw");
     const selA = isSelected(fId, "1x2", "away");
 
+    const lmFlagInfo = getLeagueFlagInfo(m.league || mLeagueName);
+    const lmFlagHtml = lmFlagInfo.flag
+      ? `<img src="${lmFlagInfo.flag}" alt="${mLeagueName}" class="ambessa-card-league-flag-img" loading="lazy" onerror="this.outerHTML='<span class=\\'ambessa-lm-ball\\'>${lmFlagInfo.fallback || '⚽'}</span>'" />`
+      : `<span class="ambessa-lm-ball">${lmFlagInfo.fallback || '⚽'}</span>`;
+
+    const homeName = m.home?.name || "Home";
+    const awayName = m.away?.name || "Away";
+
     return `
       <div class="ambessa-lm-card${isSel ? ' is-selected' : ''}" data-lm-fixture="${fId}">
-        <div class="ambessa-lm-head">
-          <div class="ambessa-lm-league">
-            <span class="ambessa-lm-ball">⚽</span>
-            <span>${leagueName}</span>
+        <!-- Desktop view content -->
+        <div class="ambessa-desktop-lm-content">
+          <div class="ambessa-lm-head">
+            <div class="ambessa-lm-league" style="color: ${leagueColor} !important;">
+              ${lmFlagHtml}
+              <span class="ambessa-lm-league-name" style="color: ${leagueColor} !important;">${mLeagueName}</span>
+            </div>
+            <div class="ambessa-lm-meta-right">
+              <span class="ambessa-lm-date">${dateStr}</span>
+            </div>
           </div>
-          <div class="ambessa-lm-date">${dateStr}</div>
+          <div class="ambessa-lm-body">
+            <div class="ambessa-lm-teams-row">
+              <div class="ambessa-lm-teams" title="${homeName} V ${awayName}">${homeName} V ${awayName}</div>
+              <span class="ambessa-lm-sidebets">+${sideBets}</span>
+            </div>
+          </div>
         </div>
-        <div class="ambessa-lm-body">
-          <div class="ambessa-lm-teams-row">
-            <div class="ambessa-lm-teams">${m.home?.name || 'Home'} V ${m.away?.name || 'Away'}</div>
-            <div class="ambessa-lm-sidebets">+${sideBets}</div>
+
+        <!-- Mobile view content (Matching Image 1: Stacked Teams + Date/Badge) -->
+        <div class="ambessa-mobile-lm-content">
+          <div class="ambessa-mobile-match-top-row">
+            <div class="ambessa-mobile-teams-stacked">
+              <div class="ambessa-mobile-team-name">${homeName.toUpperCase()}</div>
+              <div class="ambessa-mobile-team-name">${awayName.toUpperCase()}</div>
+            </div>
+            <div class="ambessa-mobile-match-meta">
+              <div class="ambessa-mobile-match-date">${dateDotTime}</div>
+              <div class="ambessa-mobile-match-badge">+${sideBets}</div>
+            </div>
           </div>
-          <div class="ambessa-lm-odds-row">
-            <button type="button" class="ambessa-lm-odd-box odd-btn${selH ? ' is-selected' : ''}" data-fixture="${fId}" data-market="1x2" data-selection="home" title="${m.home?.name || 'Home'} (1)">
-              <span class="ambessa-lm-odd-label">1</span>
-              <span class="ambessa-lm-odd-val">${hOdd}</span>
-            </button>
-            <button type="button" class="ambessa-lm-odd-box odd-btn${selD ? ' is-selected' : ''}" data-fixture="${fId}" data-market="1x2" data-selection="draw" title="Draw (X)">
-              <span class="ambessa-lm-odd-label">X</span>
-              <span class="ambessa-lm-odd-val">${dOdd}</span>
-            </button>
-            <button type="button" class="ambessa-lm-odd-box odd-btn${selA ? ' is-selected' : ''}" data-fixture="${fId}" data-market="1x2" data-selection="away" title="${m.away?.name || 'Away'} (2)">
-              <span class="ambessa-lm-odd-label">2</span>
-              <span class="ambessa-lm-odd-val">${aOdd}</span>
-            </button>
-          </div>
+        </div>
+
+        <!-- Odds Row: 1 X 2 (in black bar with orange odds) -->
+        <div class="ambessa-lm-odds-row">
+          <button type="button" class="ambessa-lm-odd-box${selH ? ' is-selected' : ''}" data-fixture="${fId}" data-market="1x2" data-selection="home" title="${homeName} (1)">
+            <span class="ambessa-lm-odd-label">1</span>
+            <span class="ambessa-lm-odd-val">${hOdd}</span>
+          </button>
+          <button type="button" class="ambessa-lm-odd-box${selD ? ' is-selected' : ''}" data-fixture="${fId}" data-market="1x2" data-selection="draw" title="Draw (X)">
+            <span class="ambessa-lm-odd-label">X</span>
+            <span class="ambessa-lm-odd-val">${dOdd}</span>
+          </button>
+          <button type="button" class="ambessa-lm-odd-box${selA ? ' is-selected' : ''}" data-fixture="${fId}" data-market="1x2" data-selection="away" title="${awayName} (2)">
+            <span class="ambessa-lm-odd-label">2</span>
+            <span class="ambessa-lm-odd-val">${aOdd}</span>
+          </button>
         </div>
       </div>
     `;
   }).join("");
 
-  colLeft.innerHTML = html;
+  colLeft.innerHTML = headerHtml + html;
+
+  const backBtn = $("ambessa-mobile-back-btn");
+  if (backBtn) {
+    backBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      backToMobileCountriesList();
+    });
+  }
 }
 
 function renderHtFtButtons(fId, m) {
@@ -16919,311 +18661,202 @@ function renderAmbessaLeagueDetailCol(m) {
 
   const fId = m.fixtureId || m.id;
   ensureFixtureOdds(m);
+
+  let markets = state.fixtureMarkets[fId];
+  if (!markets || !markets.length) {
+    markets = buildImmediateFixtureMarkets(m);
+    state.fixtureMarkets[fId] = markets;
+  }
+
   const leagueName = (m.league && m.league.name) || "Football League";
   const homeName = m.home?.name || "Home";
   const awayName = m.away?.name || "Away";
 
-  const hOdd = getMarketOdds(m, "1x2", "home") || (m.odds && m.odds.home) || "2.10";
-  const dOdd = getMarketOdds(m, "1x2", "draw") || (m.odds && m.odds.draw) || "3.40";
-  const aOdd = getMarketOdds(m, "1x2", "away") || (m.odds && m.odds.away) || "3.20";
+  let dateStr = m.displayDate;
+  if (!dateStr) {
+    const d = new Date(m.date || Date.now());
+    const day = String(d.getDate()).padStart(2, "0");
+    const mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][d.getMonth()] || "Nov";
+    const hr = String(d.getHours()).padStart(2, "0");
+    const min = String(d.getMinutes()).padStart(2, "0");
+    dateStr = `${day} ${mon} ${hr}:${min}`;
+  }
 
-  const dc1x = (m.odds && m.odds.doubleChance && (m.odds.doubleChance.homeDraw || m.odds.doubleChance["1x"])) || "1.32";
-  const dc12 = (m.odds && m.odds.doubleChance && (m.odds.doubleChance.homeAway || m.odds.doubleChance["12"])) || "1.28";
-  const dcx2 = (m.odds && m.odds.doubleChance && (m.odds.doubleChance.drawAway || m.odds.doubleChance["x2"])) || "1.65";
+  const activeTab = state.ambessaDetailTab || "all";
+  const searchQ = (state.ambessaDetailSearch || "").toLowerCase();
 
-  const tqH = (m.odds && m.odds.toQualify && m.odds.toQualify.home) || (parseFloat(hOdd) * 0.85).toFixed(2);
-  const tqA = (m.odds && m.odds.toQualify && m.odds.toQualify.away) || (parseFloat(aOdd) * 0.85).toFixed(2);
+  let filtered = (markets || []).filter((mk) => {
+    if (isExcludedMarket(mk)) return false;
+    if (activeTab !== "all" && !marketMatchesTab(mk, activeTab)) return false;
+    if (searchQ && !mk.name.toLowerCase().includes(searchQ)) return false;
+    return true;
+  });
 
-  const twoUpH = (m.odds && m.odds.twoUp && m.odds.twoUp.home) || (parseFloat(hOdd) * 0.99).toFixed(2);
-  const twoUpD = (m.odds && m.odds.twoUp && m.odds.twoUp.draw) || dOdd;
-  const twoUpA = (m.odds && m.odds.twoUp && m.odds.twoUp.away) || (parseFloat(aOdd) * 0.99).toFixed(2);
+  if (!state.ambessaExpandedMarkets) {
+    state.ambessaExpandedMarkets = new Set();
+  }
+  // Default open the first market (Match Winner)
+  if (state.ambessaExpandedMarkets.size === 0 && filtered.length > 0) {
+    state.ambessaExpandedMarkets.add(filtered[0].id);
+  }
 
-  const bttsY = (m.odds && m.odds.btts && (m.odds.btts.yes || m.odds.btts.gg)) || "1.80";
-  const bttsN = (m.odds && m.odds.btts && (m.odds.btts.no || m.odds.btts.ng)) || "1.95";
+  // TABS LIST (Matching Image 2)
+  const tabsList = [
+    { id: "all", label: "All" },
+    { id: "main", label: "Main" },
+    { id: "saves", label: "Saves" },
+    { id: "goals", label: "Goals" },
+    { id: "handicap", label: "Handicap" },
+    { id: "half1", label: "1st Half" },
+    { id: "half2", label: "2nd Half" },
+    { id: "htft", label: "Half Time/ Full Time" },
+    { id: "score", label: "Correct Score" },
+    { id: "combo", label: "Combo" }
+  ];
 
-  const gOdd = (m.odds && m.odds.goalsOddEven && m.odds.goalsOddEven.odd) || "1.90";
-  const gEven = (m.odds && m.odds.goalsOddEven && m.odds.goalsOddEven.even) || "1.85";
+  const tabsHtml = tabsList.map((t) => `
+    <button type="button" class="ambessa-dtab${activeTab === t.id ? ' is-active' : ''}" data-ambessa-tab="${t.id}">${t.label}</button>
+  `).join("");
 
-  const hOddG = (m.odds && m.odds.homeGoalsOddEven && m.odds.homeGoalsOddEven.odd) || "1.95";
-  const hEvenG = (m.odds && m.odds.homeGoalsOddEven && m.odds.homeGoalsOddEven.even) || "1.80";
+  const marketsHtml = filtered.map((mk) => {
+    const isOpen = state.ambessaExpandedMarkets.has(mk.id);
+    const chev = isOpen ? "▲" : "▼";
+    const is3Col = mk.values.length === 3;
+    const is2Col = mk.values.length === 2;
+    const isSingleRow = (is2Col || is3Col || mk.values.length <= 4) && mk.id !== 10;
 
-  const aOddG = (m.odds && m.odds.awayGoalsOddEven && m.odds.awayGoalsOddEven.odd) || "1.92";
-  const aEvenG = (m.odds && m.odds.awayGoalsOddEven && m.odds.awayGoalsOddEven.even) || "1.82";
+    const oddsHtml = mk.values.map((v) => {
+      const isOddMissing = !v.odd || v.odd === "—" || v.odd === "-" || isNaN(parseFloat(v.odd));
+      const isLocked = Boolean(v.locked || mk.isLocked || isOddMissing);
+      const sel = !isLocked && isSelected(fId, `m${mk.id}`, v.value);
+      const label = formatMarketLabel(v.value, m, mk);
+      return `
+        <button type="button" class="ambessa-m-odd-btn odd-btn${sel ? ' is-selected' : ''}" data-fixture="${fId}" data-market="m${mk.id}" data-selection="${v.value}" title="${label}">
+          <span class="ambessa-m-odd-name">${label}</span>
+          <span class="ambessa-m-odd-val">${v.odd || '—'}</span>
+        </button>
+      `;
+    }).join("");
 
-  // Selections
-  const selH = isSelected(fId, "1x2", "home");
-  const selD = isSelected(fId, "1x2", "draw");
-  const selA = isSelected(fId, "1x2", "away");
-  const sel1X = isSelected(fId, "dc", "1x");
-  const sel12 = isSelected(fId, "dc", "12");
-  const selX2 = isSelected(fId, "dc", "x2");
-  const selBY = isSelected(fId, "btts", "yes") || isSelected(fId, "btts", "gg");
-  const selBN = isSelected(fId, "btts", "no") || isSelected(fId, "btts", "ng");
-  const selTq1 = isSelected(fId, "to_qualify", "1");
-  const selTq2 = isSelected(fId, "to_qualify", "2");
-  const sel2Up1 = isSelected(fId, "two_up", "1");
-  const sel2UpX = isSelected(fId, "two_up", "x");
-  const sel2Up2 = isSelected(fId, "two_up", "2");
-  const selGOdd = isSelected(fId, "goals_oe", "odd");
-  const selGEven = isSelected(fId, "goals_oe", "even");
-  const selHG_Odd = isSelected(fId, "h_goals_oe", "odd");
-  const selHG_Even = isSelected(fId, "h_goals_oe", "even");
-  const selAG_Odd = isSelected(fId, "a_goals_oe", "odd");
-  const selAG_Even = isSelected(fId, "a_goals_oe", "even");
-
-  container.innerHTML = `
-    <!-- PITCH VISUALIZER CARD -->
-    <div class="ambessa-pitch-card">
-      <div class="ambessa-pitch-head">
-        <div class="ambessa-pitch-league">
-          <span style="color:#2196F3;margin-right:4px;">🌐</span>
-          <span>${leagueName}</span>
-        </div>
-        <div class="ambessa-pitch-match-name">${homeName} V ${awayName}</div>
-      </div>
-      <div class="ambessa-pitch-field">
-        <div class="ambessa-pitch-box-left"></div>
-        <div class="ambessa-pitch-shield ambessa-shield-home">
-          <span class="ambessa-shield-ball">⚽</span>
-        </div>
-        <div class="ambessa-pitch-shield ambessa-shield-away">
-          <span class="ambessa-shield-ball">⚽</span>
-        </div>
-        <div class="ambessa-pitch-box-right"></div>
-      </div>
-    </div>
-
-    <!-- MARKETS ACCORDION CARD -->
-    <div class="ambessa-detail-markets">
-      <!-- 1. MAIN -->
-      <div class="ambessa-market-main-header" data-toggle-cat="main">
-        <span>MAIN</span>
-        <span class="ambessa-chevron">▲</span>
-      </div>
-      <div class="ambessa-cat-content is-open" data-cat-body="main">
-        <!-- To Qualify -->
-        <div class="ambessa-market-sec">
-          <div class="ambessa-market-sec-head" data-toggle-sec="to_qualify">
-            <span>To Qualify</span>
-            <span class="ambessa-sec-chev">⌵</span>
-          </div>
-          <div class="ambessa-market-sec-body">
-            <div class="ambessa-market-grid ambessa-market-grid-2col">
-              <button type="button" class="ambessa-m-odd-btn odd-btn${selTq1 ? ' is-selected' : ''}" data-fixture="${fId}" data-market="to_qualify" data-selection="1" title="${homeName} To Qualify">
-                <span class="ambessa-m-odd-name">1</span>
-                <span class="ambessa-m-odd-val">${tqH}</span>
-              </button>
-              <button type="button" class="ambessa-m-odd-btn odd-btn${selTq2 ? ' is-selected' : ''}" data-fixture="${fId}" data-market="to_qualify" data-selection="2" title="${awayName} To Qualify">
-                <span class="ambessa-m-odd-name">2</span>
-                <span class="ambessa-m-odd-val">${tqA}</span>
-              </button>
-            </div>
+    return `
+      <div class="ambessa-market-sec${isOpen ? '' : ' is-collapsed'}" data-ambessa-sec-id="${mk.id}">
+        <div class="ambessa-market-sec-head" data-ambessa-sec-toggle="${mk.id}">
+          <div class="ambessa-market-sec-title-wrap">
+            <span class="ambessa-sec-chev">${chev}</span>
+            <span class="ambessa-sec-star">☆</span>
+            <span>${mk.name}</span>
           </div>
         </div>
-
-        <!-- Match Result -->
-        <div class="ambessa-market-sec">
-          <div class="ambessa-market-sec-head" data-toggle-sec="1x2">
-            <span>Match Result</span>
-            <span class="ambessa-sec-chev">⌵</span>
-          </div>
-          <div class="ambessa-market-sec-body">
-            <div class="ambessa-market-grid ambessa-market-grid-3col">
-              <button type="button" class="ambessa-m-odd-btn odd-btn${selH ? ' is-selected' : ''}" data-fixture="${fId}" data-market="1x2" data-selection="home" title="${homeName}">
-                <span class="ambessa-m-odd-name">1</span>
-                <span class="ambessa-m-odd-val">${hOdd}</span>
-              </button>
-              <button type="button" class="ambessa-m-odd-btn odd-btn${selD ? ' is-selected' : ''}" data-fixture="${fId}" data-market="1x2" data-selection="draw" title="Draw">
-                <span class="ambessa-m-odd-name">X</span>
-                <span class="ambessa-m-odd-val">${dOdd}</span>
-              </button>
-              <button type="button" class="ambessa-m-odd-btn odd-btn${selA ? ' is-selected' : ''}" data-fixture="${fId}" data-market="1x2" data-selection="away" title="${awayName}">
-                <span class="ambessa-m-odd-name">2</span>
-                <span class="ambessa-m-odd-val">${aOdd}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 2UP -->
-        <div class="ambessa-market-sec">
-          <div class="ambessa-market-sec-head" data-toggle-sec="two_up">
-            <span>2UP <small style="color:#8E95A5;font-weight:400;margin-left:3px;">ℹ</small></span>
-            <span class="ambessa-sec-chev">⌵</span>
-          </div>
-          <div class="ambessa-market-sec-body">
-            <div class="ambessa-market-grid ambessa-market-grid-3col">
-              <button type="button" class="ambessa-m-odd-btn odd-btn${sel2Up1 ? ' is-selected' : ''}" data-fixture="${fId}" data-market="two_up" data-selection="1" title="${homeName} (2UP)">
-                <span class="ambessa-m-odd-name">1</span>
-                <span class="ambessa-m-odd-val">${twoUpH}</span>
-              </button>
-              <button type="button" class="ambessa-m-odd-btn odd-btn${sel2UpX ? ' is-selected' : ''}" data-fixture="${fId}" data-market="two_up" data-selection="x" title="Draw (2UP)">
-                <span class="ambessa-m-odd-name">X</span>
-                <span class="ambessa-m-odd-val">${twoUpD}</span>
-              </button>
-              <button type="button" class="ambessa-m-odd-btn odd-btn${sel2Up2 ? ' is-selected' : ''}" data-fixture="${fId}" data-market="two_up" data-selection="2" title="${awayName} (2UP)">
-                <span class="ambessa-m-odd-name">2</span>
-                <span class="ambessa-m-odd-val">${twoUpA}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Double Chance -->
-        <div class="ambessa-market-sec">
-          <div class="ambessa-market-sec-head" data-toggle-sec="dc">
-            <span>Double Chance</span>
-            <span class="ambessa-sec-chev">⌵</span>
-          </div>
-          <div class="ambessa-market-sec-body">
-            <div class="ambessa-market-grid ambessa-market-grid-3col">
-              <button type="button" class="ambessa-m-odd-btn odd-btn${sel1X ? ' is-selected' : ''}" data-fixture="${fId}" data-market="dc" data-selection="1x" title="1X">
-                <span class="ambessa-m-odd-name">1X</span>
-                <span class="ambessa-m-odd-val">${dc1x}</span>
-              </button>
-              <button type="button" class="ambessa-m-odd-btn odd-btn${sel12 ? ' is-selected' : ''}" data-fixture="${fId}" data-market="dc" data-selection="12" title="12">
-                <span class="ambessa-m-odd-name">12</span>
-                <span class="ambessa-m-odd-val">${dc12}</span>
-              </button>
-              <button type="button" class="ambessa-m-odd-btn odd-btn${selX2 ? ' is-selected' : ''}" data-fixture="${fId}" data-market="dc" data-selection="x2" title="X2">
-                <span class="ambessa-m-odd-name">X2</span>
-                <span class="ambessa-m-odd-val">${dcx2}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Both Teams to Score -->
-        <div class="ambessa-market-sec">
-          <div class="ambessa-market-sec-head" data-toggle-sec="btts">
-            <span>Both Teams to Score</span>
-            <span class="ambessa-sec-chev">⌵</span>
-          </div>
-          <div class="ambessa-market-sec-body">
-            <div class="ambessa-market-grid ambessa-market-grid-2col">
-              <button type="button" class="ambessa-m-odd-btn odd-btn${selBY ? ' is-selected' : ''}" data-fixture="${fId}" data-market="btts" data-selection="yes" title="Both Teams to Score - Yes">
-                <span class="ambessa-m-odd-name">Yes</span>
-                <span class="ambessa-m-odd-val">${bttsY}</span>
-              </button>
-              <button type="button" class="ambessa-m-odd-btn odd-btn${selBN ? ' is-selected' : ''}" data-fixture="${fId}" data-market="btts" data-selection="no" title="Both Teams to Score - No">
-                <span class="ambessa-m-odd-name">No</span>
-                <span class="ambessa-m-odd-val">${bttsN}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Goals Odd/Even -->
-        <div class="ambessa-market-sec">
-          <div class="ambessa-market-sec-head" data-toggle-sec="goals_oe">
-            <span>Goals Odd/Even</span>
-            <span class="ambessa-sec-chev">⌵</span>
-          </div>
-          <div class="ambessa-market-sec-body">
-            <div class="ambessa-market-grid ambessa-market-grid-2col">
-              <button type="button" class="ambessa-m-odd-btn odd-btn${selGOdd ? ' is-selected' : ''}" data-fixture="${fId}" data-market="goals_oe" data-selection="odd" title="Total Goals Odd">
-                <span class="ambessa-m-odd-name">Odd</span>
-                <span class="ambessa-m-odd-val">${gOdd}</span>
-              </button>
-              <button type="button" class="ambessa-m-odd-btn odd-btn${selGEven ? ' is-selected' : ''}" data-fixture="${fId}" data-market="goals_oe" data-selection="even" title="Total Goals Even">
-                <span class="ambessa-m-odd-name">Even</span>
-                <span class="ambessa-m-odd-val">${gEven}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Home Team Goals Odd/Even -->
-        <div class="ambessa-market-sec">
-          <div class="ambessa-market-sec-head" data-toggle-sec="h_goals_oe">
-            <span>Home Team Goals Odd/Even</span>
-            <span class="ambessa-sec-chev">⌵</span>
-          </div>
-          <div class="ambessa-market-sec-body">
-            <div class="ambessa-market-grid ambessa-market-grid-2col">
-              <button type="button" class="ambessa-m-odd-btn odd-btn${selHG_Odd ? ' is-selected' : ''}" data-fixture="${fId}" data-market="h_goals_oe" data-selection="odd" title="${homeName} Goals Odd">
-                <span class="ambessa-m-odd-name">Odd</span>
-                <span class="ambessa-m-odd-val">${hOddG}</span>
-              </button>
-              <button type="button" class="ambessa-m-odd-btn odd-btn${selHG_Even ? ' is-selected' : ''}" data-fixture="${fId}" data-market="h_goals_oe" data-selection="even" title="${homeName} Goals Even">
-                <span class="ambessa-m-odd-name">Even</span>
-                <span class="ambessa-m-odd-val">${hEvenG}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Away Team Goals Odd/Even -->
-        <div class="ambessa-market-sec">
-          <div class="ambessa-market-sec-head" data-toggle-sec="a_goals_oe">
-            <span>Away Team Goals Odd/Even</span>
-            <span class="ambessa-sec-chev">⌵</span>
-          </div>
-          <div class="ambessa-market-sec-body">
-            <div class="ambessa-market-grid ambessa-market-grid-2col">
-              <button type="button" class="ambessa-m-odd-btn odd-btn${selAG_Odd ? ' is-selected' : ''}" data-fixture="${fId}" data-market="a_goals_oe" data-selection="odd" title="${awayName} Goals Odd">
-                <span class="ambessa-m-odd-name">Odd</span>
-                <span class="ambessa-m-odd-val">${aOddG}</span>
-              </button>
-              <button type="button" class="ambessa-m-odd-btn odd-btn${selAG_Even ? ' is-selected' : ''}" data-fixture="${fId}" data-market="a_goals_oe" data-selection="even" title="${awayName} Goals Even">
-                <span class="ambessa-m-odd-name">Even</span>
-                <span class="ambessa-m-odd-val">${aEvenG}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Half Time/Full Time -->
-        <div class="ambessa-market-sec">
-          <div class="ambessa-market-sec-head" data-toggle-sec="htft">
-            <span>Half Time/Full Time</span>
-            <span class="ambessa-sec-chev">⌵</span>
-          </div>
-          <div class="ambessa-market-sec-body">
-            <div class="ambessa-market-grid ambessa-market-grid-3x3">
-              ${renderHtFtButtons(fId, m)}
-            </div>
+        <div class="ambessa-market-sec-body">
+          <div class="${isSingleRow ? 'ambessa-market-row-strip' : 'ambessa-market-grid-strip'}">
+            ${oddsHtml}
           </div>
         </div>
       </div>
+    `;
+  }).join("");
 
-      <!-- 2. GOALS / TOTALS -->
-      <div class="ambessa-market-main-header" data-toggle-cat="goals">
-        <span>GOALS / TOTALS</span>
-        <span class="ambessa-chevron">▼</span>
-      </div>
-      <div class="ambessa-cat-content" data-cat-body="goals">
-        ${renderGoalsCategoryMarkets(fId, m)}
-      </div>
-
-      <!-- 3. HALVES -->
-      <div class="ambessa-market-main-header" data-toggle-cat="halves">
-        <span>HALVES</span>
-        <span class="ambessa-chevron">▼</span>
-      </div>
-      <div class="ambessa-cat-content" data-cat-body="halves">
-        ${renderHalvesCategoryMarkets(fId, m)}
-      </div>
-
-      <!-- 4. HANDICAP -->
-      <div class="ambessa-market-main-header" data-toggle-cat="handicap">
-        <span>HANDICAP</span>
-        <span class="ambessa-chevron">▼</span>
-      </div>
-      <div class="ambessa-cat-content" data-cat-body="handicap">
-        ${renderHandicapCategoryMarkets(fId, m)}
-      </div>
-
-      <!-- 5. COMBOS & SPECIALS -->
-      <div class="ambessa-market-main-header" data-toggle-cat="combos">
-        <span>COMBOS & SPECIALS</span>
-        <span class="ambessa-chevron">▼</span>
-      </div>
-      <div class="ambessa-cat-content" data-cat-body="combos">
-        ${renderCombosCategoryMarkets(fId, m)}
-      </div>
+  const mobileHeaderHtml = `
+    <div class="ambessa-mobile-league-header ambessa-detail-mobile-header">
+      <button type="button" class="ambessa-mobile-back-btn" id="ambessa-detail-mobile-back-btn" aria-label="Back">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6600" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+      <span class="ambessa-mobile-league-title">${homeName.toUpperCase()} V ${awayName.toUpperCase()}</span>
     </div>
   `;
+
+  container.innerHTML = `
+    ${mobileHeaderHtml}
+    <!-- HERO (Matching Image 2) -->
+    <div class="ambessa-detail-hero">
+      <div class="ambessa-dh-date">${dateStr}</div>
+      <div class="ambessa-dh-teams">
+        <div class="ambessa-dh-team">
+          <img src="${m.home?.logo || ''}" alt="${homeName}" class="ambessa-dh-logo" onerror="this.outerHTML='⚽'" />
+          <span class="ambessa-dh-name">${homeName}</span>
+        </div>
+        <div class="ambessa-dh-vs">VS</div>
+        <div class="ambessa-dh-team">
+          <img src="${m.away?.logo || ''}" alt="${awayName}" class="ambessa-dh-logo" onerror="this.outerHTML='⚽'" />
+          <span class="ambessa-dh-name">${awayName}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS (Matching Image 2) -->
+    <div class="ambessa-detail-tabs-wrapper">
+      <div class="ambessa-detail-tabs">
+        ${tabsHtml}
+      </div>
+    </div>
+
+    <!-- TOOLBAR (Matching Image 2) -->
+    <div class="ambessa-detail-toolbar">
+      <div class="ambessa-dt-left">
+        <button type="button" class="ambessa-dt-btn" id="ambessa-dt-collapse-all" title="Toggle all markets">▾</button>
+        <button type="button" class="ambessa-dt-btn" id="ambessa-dt-fav" title="Favorites">☆</button>
+      </div>
+      <div class="ambessa-dt-search">
+        <span style="font-size: 11px; color: #FF5722;">🔍</span>
+        <input type="text" id="ambessa-dt-search-input" placeholder="Search..." value="${escapeHtml(state.ambessaDetailSearch || '')}" />
+      </div>
+    </div>
+
+    <!-- MARKETS LIST (Matching Image 2) -->
+    <div class="ambessa-detail-markets">
+      ${marketsHtml || '<div style="padding:20px;text-align:center;color:#8E95A5;">No markets available</div>'}
+    </div>
+  `;
+
+  // Attach event listeners for tabs
+  container.querySelectorAll("[data-ambessa-tab]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.ambessaDetailTab = btn.dataset.ambessaTab;
+      renderAmbessaLeagueDetailCol(m);
+    });
+  });
+
+  // Attach event listeners for accordion headers
+  container.querySelectorAll("[data-ambessa-sec-toggle]").forEach((head) => {
+    head.addEventListener("click", () => {
+      const secId = Number(head.dataset.ambessaSecToggle);
+      if (state.ambessaExpandedMarkets.has(secId)) {
+        state.ambessaExpandedMarkets.delete(secId);
+      } else {
+        state.ambessaExpandedMarkets.add(secId);
+      }
+      renderAmbessaLeagueDetailCol(m);
+    });
+  });
+
+  // Attach search listener
+  const searchInput = $("ambessa-dt-search-input");
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      state.ambessaDetailSearch = e.target.value;
+      renderAmbessaLeagueDetailCol(m);
+      const newInp = $("ambessa-dt-search-input");
+      if (newInp) {
+        newInp.focus();
+        newInp.selectionStart = newInp.selectionEnd = newInp.value.length;
+      }
+    });
+  }
+
+  // Collapse / Expand all
+  const collapseAllBtn = $("ambessa-dt-collapse-all");
+  if (collapseAllBtn) {
+    collapseAllBtn.addEventListener("click", () => {
+      if (state.ambessaExpandedMarkets.size > 0) {
+        state.ambessaExpandedMarkets.clear();
+      } else {
+        filtered.forEach((mk) => state.ambessaExpandedMarkets.add(mk.id));
+      }
+      renderAmbessaLeagueDetailCol(m);
+    });
+  }
 }
 
 function renderHomeSportsView() {
@@ -17956,7 +19589,7 @@ function renderSlip() {
   if (panelSlip) panelSlip.hidden = count === 0;
 
   // Sync Ambessa Bet odds buttons active states
-  document.querySelectorAll(".ambessa-odd-btn").forEach((btn) => {
+  document.querySelectorAll(".ambessa-odd-btn, .ambessa-lm-odd-box").forEach((btn) => {
     const fId = btn.dataset.fixture;
     const market = btn.dataset.market;
     const sel = btn.dataset.selection;
@@ -17997,50 +19630,44 @@ function renderSlip() {
   list.innerHTML = state.slip
     .map((b) => {
       const status = getSlipBetStatus(b);
-      const matchLine = b.homeName && b.awayName ? `${b.homeName} - ${b.awayName}` : b.fixtureName;
-      const leagueMeta = [b.sport, b.country, b.leagueName].filter(Boolean).join(" - ");
+      let matchLine = b.homeName && b.awayName ? (b.homeName + " V " + b.awayName) : (b.fixtureName || "");
+      matchLine = matchLine.replace(/ - /g, " V ").toUpperCase();
+      const marketLabel = (b.marketName || "MATCH RESULT").toUpperCase();
+      const selLabel = (b.selectionName || "").toUpperCase();
 
       let warningHtml = "";
-      let itemClass = "slip-item";
-      let oddBadgeHtml = "";
+      let itemClass = "slip-item ambessa-slip-card";
+      let oddBadgeHtml = '<span class="ambessa-slip-odd-pill">' + b.odd.toFixed(2) + '</span>';
 
       if (status.isFinished) {
         itemClass += " is-finished";
-        warningHtml = `<div class="slip-warning-msg">Match Finished! Click '✕' to remove the event from the ticket!</div>`;
-        oddBadgeHtml = `<span class="slip-odd-badge is-finished">${status.currentOdd.toFixed(2)} -</span>`;
+        warningHtml = '<div class="slip-warning-msg" style="color:#ff5252;font-size:10.5px;margin-top:2px;">Match Finished!</div>';
+        oddBadgeHtml = '<span class="ambessa-slip-odd-pill is-finished">' + status.currentOdd.toFixed(2) + '</span>';
       } else if (status.isSuspended) {
         itemClass += " is-suspended is-locked";
-        warningHtml = `<div class="slip-warning-msg">🔒 Match has already started / Odd is locked. Please remove it to proceed.</div>`;
-        oddBadgeHtml = `<span class="slip-odd-badge is-suspended"><span class="slip-lock-icon">🔒</span> LOCKED</span>`;
+        warningHtml = '<div class="slip-warning-msg" style="color:#ffb74d;font-size:10.5px;margin-top:2px;">Locked</div>';
+        oddBadgeHtml = '<span class="ambessa-slip-odd-pill is-suspended">🔒</span>';
       } else if (status.trend === "up") {
         itemClass += " is-odd-up";
-        warningHtml = `<div class="slip-odds-change-msg is-up">Odds Increased: <del>${b.odd.toFixed(2)}</del> ➔ <strong>${status.currentOdd.toFixed(2)}</strong> ▲</div>`;
-        oddBadgeHtml = `<span class="slip-odd-badge is-up">${status.currentOdd.toFixed(2)} <span class="slip-arrow-up">▲</span></span>`;
+        oddBadgeHtml = '<span class="ambessa-slip-odd-pill is-up">' + status.currentOdd.toFixed(2) + ' &#9650;</span>';
       } else if (status.trend === "down") {
         itemClass += " is-odd-down";
-        warningHtml = `<div class="slip-odds-change-msg is-down">Odds Dropped: <del>${b.odd.toFixed(2)}</del> ➔ <strong>${status.currentOdd.toFixed(2)}</strong> ▼</div>`;
-        oddBadgeHtml = `<span class="slip-odd-badge is-down">${status.currentOdd.toFixed(2)} <span class="slip-arrow-down">▼</span></span>`;
-      } else {
-        oddBadgeHtml = `<span class="slip-odd-badge">${b.odd.toFixed(2)}</span>`;
+        oddBadgeHtml = '<span class="ambessa-slip-odd-pill is-down">' + status.currentOdd.toFixed(2) + ' &#9660;</span>';
       }
 
-      return `
-    <div class="${itemClass}" data-fixture-id="${b.fixtureId}" data-open-fixture="${b.fixtureId}" title="Click to view all markets for ${matchLine}">
-      <div class="slip-item-header">
-        <span class="slip-match-name" data-open-fixture="${b.fixtureId}">${matchLine}</span>
-        <button type="button" class="slip-remove" data-remove="${b.key}" aria-label="Remove">&#x2715;</button>
-      </div>
-      ${warningHtml}
-      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:6px;" data-open-fixture="${b.fixtureId}">
-        <div class="slip-item-main" data-open-fixture="${b.fixtureId}">
-          ${leagueMeta ? `<div class="slip-meta">${leagueMeta}</div>` : ""}
-          <div class="slip-pick"><span class="slip-pick-market">${b.marketName} :</span> <span class="slip-pick-val">${b.selectionName}</span></div>
-        </div>
-        <div class="slip-item-side" data-open-fixture="${b.fixtureId}">
-          ${oddBadgeHtml}
-        </div>
-      </div>
-    </div>`;
+      return '<div class="' + itemClass + '" data-fixture-id="' + b.fixtureId + '" data-open-fixture="' + b.fixtureId + '" title="Click to view all markets for ' + matchLine + '">' +
+        '<button type="button" class="ambessa-slip-item-remove" data-remove="' + b.key + '" aria-label="Remove" title="Remove">' +
+          '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>' +
+        '</button>' +
+        '<div class="ambessa-slip-item-info" data-open-fixture="' + b.fixtureId + '">' +
+          '<div class="ambessa-slip-item-title" data-open-fixture="' + b.fixtureId + '">' + matchLine + '</div>' +
+          '<div class="ambessa-slip-item-market" data-open-fixture="' + b.fixtureId + '">' + marketLabel + ' : <span class="ambessa-slip-item-pick-val">' + selLabel + '</span></div>' +
+          warningHtml +
+        '</div>' +
+        '<div class="ambessa-slip-item-odd-wrap" data-open-fixture="' + b.fixtureId + '">' +
+          oddBadgeHtml +
+        '</div>' +
+      '</div>';
     })
     .join("");
 
@@ -19884,11 +21511,27 @@ function selectLeague(leagueId) {
   state.countryFilter = null;
   state.ambessaSelectedLeague = Number(leagueId);
   closeLeagueDropdown();
+  const mobSportView = $("ambessa-mobile-sport-view");
+  if (mobSportView) mobSportView.hidden = true;
+
+  const countryList = (typeof getAmbessaFootballCountries === "function")
+    ? getAmbessaFootballCountries()
+    : (typeof AMBESSA_FOOTBALL_COUNTRIES !== "undefined" ? AMBESSA_FOOTBALL_COUNTRIES : []);
+  const foundC = countryList.find((c) => c.leagues && c.leagues.some((l) => Number(l.id) === Number(leagueId)));
+  if (foundC) {
+    state.ambessaExpandedCountry = foundC.name;
+    state.ambessaSelectedCountry = foundC.name;
+    state.ambessaFootballExpanded = true;
+  }
 
   // Highlight active sidebar league item
   document.querySelectorAll(".ambessa-league-row").forEach((r) => {
     r.classList.toggle("is-on", Number(r.dataset.sidebarLeague) === Number(leagueId));
   });
+
+  if (typeof renderSportsSidebar === "function") {
+    renderSportsSidebar();
+  }
 
   if (typeof renderAmbessaLeagueView === "function") {
     renderAmbessaLeagueView();
@@ -21172,6 +22815,50 @@ function bindAmbessaEvents() {
     });
   }
 
+    const btnOnline = $("btn-place-online");
+  if (btnOnline) {
+    btnOnline.addEventListener("click", () => {
+      if (!isLoggedIn()) {
+        openAuthModal("login");
+      } else {
+        placeBet();
+      }
+    });
+  }
+
+  const btnPreview = $("btn-ticket-preview");
+  if (btnPreview) {
+    btnPreview.addEventListener("click", () => {
+      if (typeof openTicketPreviewModal === "function") {
+        openTicketPreviewModal();
+      } else {
+        window.print();
+      }
+    });
+  }
+
+  const toggleSortTime = $("toggle-sort-time");
+  if (toggleSortTime) {
+    toggleSortTime.addEventListener("change", (e) => {
+      if (e.target.checked) {
+        state.slip.sort((a, b) => {
+          const tA = a.startTime ? new Date(a.startTime).getTime() : 0;
+          const tB = b.startTime ? new Date(b.startTime).getTime() : 0;
+          return tA - tB;
+        });
+        renderSlip();
+      }
+    });
+  }
+
+  const btnCloseBonus = $("btn-close-bonus");
+  if (btnCloseBonus) {
+    btnCloseBonus.addEventListener("click", () => {
+      const banner = $("betslip-bonus-banner");
+      if (banner) banner.hidden = true;
+    });
+  }
+
   document.querySelectorAll(".ambessa-slip-tab").forEach((tab) => {
     tab.addEventListener("click", (e) => {
       document.querySelectorAll(".ambessa-slip-tab").forEach((t) => t.classList.remove("is-active"));
@@ -21180,22 +22867,447 @@ function bindAmbessaEvents() {
   });
 
   // Return to Home view
+  const AMBESSA_MOBILE_SPORT_COUNTRIES = [
+    { name: "Europe", flag: "https://media.api-sports.io/flags/eu.svg", fallbackFlag: "🇪🇺", count: 6, leagues: [
+      { id: 2, name: "UEFA Champions League", count: 2 },
+      { id: 3, name: "UEFA Europa League", count: 2 },
+      { id: 848, name: "UEFA Conference League", count: 2 }
+    ]},
+    { name: "England", flag: "https://media.api-sports.io/flags/gb-eng.svg", fallbackFlag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", count: 15, leagues: [
+      { id: 39, name: "Premier League", count: 10 },
+      { id: 40, name: "Championship", count: 5 }
+    ]},
+    { name: "Spain", flag: "https://media.api-sports.io/flags/es.svg", fallbackFlag: "🇪🇸", count: 6, leagues: [
+      { id: 140, name: "La Liga", count: 4 },
+      { id: 141, name: "Segunda División", count: 2 }
+    ]},
+    { name: "Italy", flag: "https://media.api-sports.io/flags/it.svg", fallbackFlag: "🇮🇹", count: 6, leagues: [
+      { id: 135, name: "Serie A", count: 4 },
+      { id: 136, name: "Serie B", count: 2 }
+    ]},
+    { name: "Germany", flag: "https://media.api-sports.io/flags/de.svg", fallbackFlag: "🇩🇪", count: 6, leagues: [
+      { id: 78, name: "Bundesliga", count: 4 },
+      { id: 79, name: "2. Bundesliga", count: 2 }
+    ]},
+    { name: "France", flag: "https://media.api-sports.io/flags/fr.svg", fallbackFlag: "🇫🇷", count: 2, leagues: [
+      { id: 61, name: "Ligue 1", count: 2 }
+    ]},
+    { name: "Portugal", flag: "https://media.api-sports.io/flags/pt.svg", fallbackFlag: "🇵🇹", count: 3, leagues: [
+      { id: 94, name: "Primeira Liga", count: 3 }
+    ]},
+    { name: "Netherlands", flag: "https://media.api-sports.io/flags/nl.svg", fallbackFlag: "🇳🇱", count: 2, leagues: [
+      { id: 88, name: "Eredivisie", count: 2 }
+    ]},
+    { name: "Belgium", flag: "https://media.api-sports.io/flags/be.svg", fallbackFlag: "🇧🇪", count: 4, leagues: [
+      { id: 144, name: "Pro League", count: 4 }
+    ]},
+    { name: "Africa", flag: null, fallbackFlag: "🌍", count: 2, leagues: [
+      { id: 6, name: "Africa Cup of Nations", count: 2 }
+    ]},
+    { name: "World", flag: "https://media.api-sports.io/flags/world.svg", fallbackFlag: "🌐", count: 1, leagues: [
+      { id: 10, name: "Club Friendlies", count: 1 }
+    ]}
+  ];
+
+  function renderAmbessaMobileCountriesList() {
+    const container = $("mobile-sport-countries-list");
+    if (!container) return;
+
+    const allCountries = (typeof getAmbessaFootballCountries === "function")
+      ? getAmbessaFootballCountries()
+      : (typeof AMBESSA_FOOTBALL_COUNTRIES !== "undefined" ? AMBESSA_FOOTBALL_COUNTRIES : []);
+
+    let html = "";
+    allCountries.forEach((c) => {
+      const isCtryOpen = state.ambessaExpandedCountry === c.name;
+      const leagues = (state.countryLeagues && state.countryLeagues[c.name]) ||
+        (typeof FOOTBALL_STATIC_LEAGUES !== "undefined" && FOOTBALL_STATIC_LEAGUES[c.name]) ||
+        c.leagues || [];
+
+      const flagHtml = c.flag && (c.flag.startsWith("http") || c.flag.startsWith("/"))
+        ? `<img src="${c.flag}" alt="${c.name}" class="ambessa-country-flag-img" loading="lazy" onerror="this.outerHTML='<span class=\\'ambessa-country-flag\\'>${c.fallbackFlag || '⚽'}</span>'" />`
+        : `<span class="ambessa-country-flag">${c.fallbackFlag || '⚽'}</span>`;
+
+      const leaguesHtml = leagues.map((l) => `
+        <button type="button" class="ambessa-drawer-league-btn" data-mobile-league-id="${l.id}">
+          <span class="ambessa-drawer-league-name">${l.name}</span>
+          <span class="ambessa-drawer-league-count">${l.count || 1}</span>
+        </button>
+      `).join("");
+
+      const chevPoly = isCtryOpen ? "18 15 12 9 6 15" : "6 9 12 15 18 9";
+      const drawerStyle = isCtryOpen ? "display: block;" : "display: none;";
+
+      html += `
+        <div class="ambessa-country-item${isCtryOpen ? " is-open" : ""}" data-country="${c.name}">
+          <button type="button" class="ambessa-country-header">
+            <div class="ambessa-country-left">
+              ${flagHtml}
+              <span class="ambessa-country-title">${c.name}</span>
+            </div>
+            <div class="ambessa-country-right">
+              <span class="ambessa-country-count">${c.count || (leagues.length ? leagues.reduce((acc, x) => acc + (x.count || 1), 0) : 1)}</span>
+              <svg class="ambessa-country-chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="${chevPoly}"></polyline>
+              </svg>
+            </div>
+          </button>
+          <div class="ambessa-country-drawer" style="${drawerStyle}">
+            ${leaguesHtml}
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  
+function backToMobileCountriesList() {
+  state.ambessaSelectedLeague = null;
+  state.ambessaSelectedMatch = null;
+  state.leagueFilter = "all";
+  state.ambessaExpandedCountry = null;
+  state.ambessaMobileDetailActive = false;
+  const lv = $("ambessa-league-view");
+  if (lv) lv.classList.remove("is-mobile-detail-active");
+
+  const homeDef = $("ambessa-home-default");
+  const legView = $("ambessa-league-view");
+  const sportView = $("ambessa-mobile-sport-view");
+
+  if (homeDef) homeDef.hidden = true;
+  if (legView) legView.hidden = true;
+  if (sportView) sportView.hidden = false;
+
+  window.scrollTo({ top: 0, behavior: "instant" });
+  if (typeof renderAmbessaMobileCountriesList === "function") {
+    renderAmbessaMobileCountriesList();
+  }
+}
+window.backToMobileCountriesList = backToMobileCountriesList;
+
+function openAmbessaMobileSportView() {
+    state.mobileSportViewActive = true;
+    state.ambessaMobileDetailActive = false;
+    const lvReset = $("ambessa-league-view");
+    if (lvReset) lvReset.classList.remove("is-mobile-detail-active");
+    state.ambessaSelectedLeague = null;
+    state.ambessaSelectedMatch = null;
+    state.leagueFilter = "all";
+
+    // Highlight top tab
+    document.querySelectorAll(".ambessa-nav-tab").forEach(t => t.classList.remove("is-active"));
+    const tabSport = $("nav-tab-sport");
+    if (tabSport) tabSport.classList.add("is-active");
+
+    // Highlight bottom nav item
+    document.querySelectorAll(".mobile-bnav-item").forEach(b => b.classList.remove("is-active"));
+    const bnavSport = $("mobile-bnav-sport");
+    if (bnavSport) bnavSport.classList.add("is-active");
+
+    const homeDef = $("ambessa-home-default");
+    const legView = $("ambessa-league-view");
+    const sportView = $("ambessa-mobile-sport-view");
+
+    if (homeDef) homeDef.hidden = true;
+    if (legView) legView.hidden = true;
+    if (sportView) sportView.hidden = false;
+
+    window.scrollTo({ top: 0, behavior: "instant" });
+    renderAmbessaMobileCountriesList();
+  }
+  
+  // ambessa-mobile-back-btn-delegated: Back button returns cleanly
+  document.addEventListener("click", (e) => {
+    const detailBackBtn = e.target.closest("#ambessa-detail-mobile-back-btn");
+    if (detailBackBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const legView = $("ambessa-league-view");
+      if (legView) legView.classList.remove("is-mobile-detail-active");
+      state.ambessaMobileDetailActive = false;
+      window.scrollTo({ top: 0, behavior: "instant" });
+      return;
+    }
+    const backBtn = e.target.closest("#ambessa-mobile-back-btn, .ambessa-mobile-back-btn");
+    if (backBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      backToMobileCountriesList();
+    }
+  });
+  function openAmbessaLiveView() {
+    state.mobileSportViewActive = false;
+    state.ambessaMode = "live";
+    state.ambessaMobileDetailActive = false;
+    document.body.classList.add("is-ambessa-live");
+
+    // Highlight top tab
+    document.querySelectorAll(".ambessa-nav-tab").forEach(t => t.classList.remove("is-active"));
+    const tabLive = $("nav-tab-live");
+    if (tabLive) tabLive.classList.add("is-active");
+
+    // Highlight bottom nav
+    document.querySelectorAll(".mobile-bnav-item").forEach(b => b.classList.remove("is-active"));
+    const bnavLive = $("mobile-bnav-live");
+    if (bnavLive) bnavLive.classList.add("is-active");
+
+    const homeDef = $("ambessa-home-default");
+    const sportView = $("ambessa-mobile-sport-view");
+    const legView = $("ambessa-league-view");
+
+    if (homeDef) homeDef.hidden = true;
+    if (sportView) sportView.hidden = true;
+    if (legView) {
+      legView.hidden = false;
+      legView.classList.remove("is-mobile-detail-active");
+    }
+
+    window.scrollTo({ top: 0, behavior: "instant" });
+    renderAmbessaLiveView();
+  }
+  window.openAmbessaLiveView = openAmbessaLiveView;
+  window.openAmbessaMobileSportView = openAmbessaMobileSportView;
+  window.returnToAmbessaHome = returnToAmbessaHome;
+
   function returnToAmbessaHome() {
+    state.mobileSportViewActive = false;
+    state.ambessaMode = "sports";
+    document.body.classList.remove("is-ambessa-live");
+    setView("sports");
+    state.subNav = "sports";
+    updateSubNavHighlight();
     state.ambessaSelectedLeague = null;
     state.leagueFilter = "all";
     document.querySelectorAll(".ambessa-league-row").forEach(r => r.classList.remove("is-on"));
+    
+    // Bottom nav reset
+    const bnavSport = $("mobile-bnav-sport");
+    if (bnavSport) bnavSport.classList.remove("is-active");
+
+    // Top nav reset to Home
+    document.querySelectorAll(".ambessa-nav-tab").forEach(t => t.classList.remove("is-active"));
+    const tabHome = $("nav-tab-home");
+    if (tabHome) tabHome.classList.add("is-active");
+
     const homeDef = $("ambessa-home-default");
     const legView = $("ambessa-league-view");
+    const sportView = $("ambessa-mobile-sport-view");
+
+    if (sportView) sportView.hidden = true;
     if (homeDef) homeDef.hidden = false;
     if (legView) legView.hidden = true;
+    if (typeof renderSportsSidebar === "function") renderSportsSidebar();
     renderAmbessaMatchesTable();
   }
   const tabHome = $("nav-tab-home");
   const tabSport = $("nav-tab-sport");
   const brandLink = document.querySelector(".ambessa-brand-link");
-  if (tabHome) tabHome.addEventListener("click", returnToAmbessaHome);
-  if (tabSport) tabSport.addEventListener("click", returnToAmbessaHome);
+  if (tabHome) {
+    tabHome.addEventListener("click", () => {
+      document.querySelectorAll(".ambessa-nav-tab").forEach(t => t.classList.remove("is-active"));
+      tabHome.classList.add("is-active");
+      returnToAmbessaHome();
+    });
+  }
+    if (tabSport) {
+    tabSport.addEventListener("click", () => {
+      if (window.innerWidth <= 900) {
+        backToMobileCountriesList();
+      } else {
+        document.querySelectorAll(".ambessa-nav-tab").forEach(t => t.classList.remove("is-active"));
+        tabSport.classList.add("is-active");
+        state.ambessaViewMode = "top-leagues";
+        returnToAmbessaHome();
+      }
+    });
+  }
+
+  const countriesList = $("mobile-sport-countries-list");
+  if (countriesList) {
+    countriesList.addEventListener("click", (e) => {
+      const header = e.target.closest(".ambessa-country-header");
+      if (header) {
+        e.preventDefault();
+        e.stopPropagation();
+        const item = header.closest(".ambessa-country-item");
+        if (!item) return;
+
+        const ctryName = item.dataset.country;
+        const drawer = item.querySelector(".ambessa-country-drawer");
+        const poly = item.querySelector(".ambessa-country-chev polyline");
+        const currentlyOpen = item.classList.contains("is-open");
+
+        if (currentlyOpen) {
+          // Collapse currently open item
+          item.classList.remove("is-open");
+          if (drawer) drawer.style.display = "none";
+          if (poly) poly.setAttribute("points", "6 9 12 15 18 9");
+          if (state.ambessaExpandedCountry === ctryName) {
+            state.ambessaExpandedCountry = null;
+          }
+        } else {
+          // Close other open countries
+          document.querySelectorAll("#mobile-sport-countries-list .ambessa-country-item.is-open").forEach((other) => {
+            other.classList.remove("is-open");
+            const otherDrawer = other.querySelector(".ambessa-country-drawer");
+            const otherPoly = other.querySelector(".ambessa-country-chev polyline");
+            if (otherDrawer) otherDrawer.style.display = "none";
+            if (otherPoly) otherPoly.setAttribute("points", "6 9 12 15 18 9");
+          });
+
+          // Expand this country
+          item.classList.add("is-open");
+          if (drawer) drawer.style.display = "block";
+          if (poly) poly.setAttribute("points", "18 15 12 9 6 15");
+          state.ambessaExpandedCountry = ctryName;
+        }
+        return;
+      }
+      const leagueBtn = e.target.closest(".ambessa-drawer-league-btn");
+      if (leagueBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const lid = Number(leagueBtn.dataset.mobileLeagueId);
+        if (lid && typeof selectLeague === "function") {
+          selectLeague(lid);
+          const sportView = $("ambessa-mobile-sport-view");
+          if (sportView) sportView.hidden = true;
+        }
+      }
+    });
+  }
+
+  const btnMobileHome = $("btn-mobile-home");
+  if (btnMobileHome) {
+    btnMobileHome.addEventListener("click", () => {
+      returnToAmbessaHome();
+    });
+  }
+
+  const tabLive = $("nav-tab-live");
+  const tabLiveGames = $("nav-tab-livegames");
+  if (tabLive) {
+    tabLive.addEventListener("click", () => {
+      openAmbessaLiveView();
+    });
+  }
+  if (tabLiveGames) {
+    tabLiveGames.addEventListener("click", () => {
+      document.querySelectorAll(".ambessa-nav-tab").forEach(t => t.classList.remove("is-active"));
+      tabLiveGames.classList.add("is-active");
+      state.ambessaMode = "live";
+      renderAmbessaLiveView();
+    });
+  }
   if (brandLink) brandLink.addEventListener("click", returnToAmbessaHome);
+
+  // SPORT DROPDOWN MENU ACTIONS
+  const sportMenu = $("nav-sport-menu");
+  if (sportMenu) {
+    sportMenu.addEventListener("click", (e) => {
+      const item = e.target.closest(".ambessa-sport-item");
+      if (!item) return;
+      const action = item.dataset.sportAction;
+
+      document.querySelectorAll(".ambessa-nav-tab").forEach(t => t.classList.remove("is-active"));
+      if (tabSport) tabSport.classList.add("is-active");
+
+      if (action === "upcoming") {
+        returnToAmbessaHome();
+        state.ambessaViewMode = "upcoming";
+        const btnUpcoming = $("ambessa-btn-upcoming");
+        const btnTopLeagues = $("ambessa-btn-top-leagues");
+        if (btnUpcoming) btnUpcoming.classList.add("is-active");
+        if (btnTopLeagues) btnTopLeagues.classList.remove("is-active");
+        renderAmbessaMatchesTable();
+      } else if (action === "top-sports") {
+        returnToAmbessaHome();
+        state.ambessaViewMode = "top-leagues";
+        const btnUpcoming = $("ambessa-btn-upcoming");
+        const btnTopLeagues = $("ambessa-btn-top-leagues");
+        if (btnTopLeagues) btnTopLeagues.classList.add("is-active");
+        if (btnUpcoming) btnUpcoming.classList.remove("is-active");
+        renderAmbessaMatchesTable();
+      } else if (action === "express") {
+        returnToAmbessaHome();
+        state.slipMode = "multiple";
+        save();
+        renderSlip();
+        const modeBtn = $("btn-betslip-mode");
+        if (modeBtn) modeBtn.textContent = (state.slip && state.slip.length > 1) ? "MULTIPLE" : "SINGLE";
+        const slipPanel = $("betslip-panel");
+        if (slipPanel) {
+          slipPanel.classList.add("is-open");
+          slipPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+        if (typeof toast === "function") {
+          toast("Express (Multiple) bet mode active", "info");
+        }
+      } else if (action === "results") {
+        applySubNav("results");
+      }
+    });
+  }
+
+  // Mobile Sport & Time filter dropdowns
+  const btnMobTime = $("mobile-sport-filter-time");
+  const dropMobTime = $("mobile-time-filter-dropdown");
+  const btnMobSport = $("mobile-sport-filter-sport");
+  const dropMobSport = $("mobile-sport-dropdown");
+
+  if (btnMobTime && dropMobTime) {
+    btnMobTime.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const isHidden = dropMobTime.hidden;
+      dropMobTime.hidden = !isHidden;
+      if (dropMobSport) dropMobSport.hidden = true;
+    });
+
+    dropMobTime.querySelectorAll(".ambessa-filter-dropdown-opt").forEach((opt) => {
+      opt.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const filterId = opt.dataset.timeFilter || "all";
+        setAmbessaTimeFilter(filterId);
+        dropMobTime.hidden = true;
+      });
+    });
+  }
+
+  if (btnMobSport && dropMobSport) {
+    btnMobSport.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const isHidden = dropMobSport.hidden;
+      dropMobSport.hidden = !isHidden;
+      if (dropMobTime) dropMobTime.hidden = true;
+    });
+
+    dropMobSport.querySelectorAll(".ambessa-filter-dropdown-opt").forEach((opt) => {
+      opt.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropMobSport.querySelectorAll(".ambessa-filter-dropdown-opt").forEach(o => o.classList.remove("is-selected"));
+        opt.classList.add("is-selected");
+        const sportVal = $("mobile-sport-filter-sport-val");
+        if (sportVal) sportVal.textContent = opt.textContent.replace(/^[^w]+/, "").trim();
+        dropMobSport.hidden = true;
+      });
+    });
+  }
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#mobile-time-pill-wrap") && dropMobTime) {
+      dropMobTime.hidden = true;
+    }
+    if (!e.target.closest("#mobile-sport-pill-wrap") && dropMobSport) {
+      dropMobSport.hidden = true;
+    }
+  });
+
 
   // Search input
   const headerSearch = $("ambessa-header-search");
@@ -21257,39 +23369,300 @@ function bindAmbessaEvents() {
   const leagueView = $("ambessa-league-view");
   if (leagueView) {
     leagueView.addEventListener("click", (e) => {
-      // 1. Accordion submarket toggle
-      const secHead = e.target.closest(".ambessa-market-sec-head");
+      // --- LIVE SPORTS BAR CLICK ---
+      const sportItem = e.target.closest(".ambessa-live-sport-item");
+      if (sportItem) {
+        e.preventDefault();
+        state.ambessaLiveSport = sportItem.dataset.liveSport;
+        renderAmbessaLiveView();
+        return;
+      }
+
+      // --- LIVE VIEW HANDLERS ---
+      if (state.ambessaMode === "live") {
+        // 1. Live Odd Buttons Clicked
+        const oddBtn = e.target.closest("[data-live-match]");
+        if (oddBtn) {
+          e.stopPropagation();
+          e.preventDefault();
+          const mId = Number(oddBtn.dataset.liveMatch);
+          const market = oddBtn.dataset.market;
+          const selection = oddBtn.dataset.selection;
+          const oddVal = parseFloat(oddBtn.dataset.odd) || 1.50;
+
+          const liveList = typeof getLiveFixturesList === "function" ? getLiveFixturesList() : [];
+          const match = liveList.find(m => Number(m.fixtureId || m.id) === mId) || (typeof findFixture === "function" ? findFixture(mId) : null);
+          if (match) {
+            const fId = Number(match.fixtureId || match.id);
+            const homeName = match.home?.name || match.teams?.home?.name || "Home";
+            const awayName = match.away?.name || match.teams?.away?.name || "Away";
+            const marketName = market === "1x2" ? "Match Result" : (market === "dc" ? "Double Chance" : (market === "btts" ? "Both Teams to Score" : "Correct Score"));
+            const selLabel = selection === "home" ? homeName : (selection === "draw" ? "Draw" : (selection === "away" ? awayName : selection.toUpperCase()));
+
+            const fixtureObj = {
+              fixtureId: fId,
+              id: fId,
+              date: match.date || new Date().toISOString(),
+              sport: "Football",
+              league: { id: match.league?.id || 1, name: match.league?.name || "Football", country: match.league?.country || "World" },
+              home: { name: homeName },
+              away: { name: awayName }
+            };
+
+            const key = slipKey(fId, market, selection);
+            const existingIdx = state.slip.findIndex(s => s.key === key);
+            if (existingIdx >= 0) {
+              state.slip.splice(existingIdx, 1);
+            } else {
+              addToSlip(fixtureObj, market, selection, oddVal, marketName, selLabel);
+            }
+            save();
+            renderSlip();
+            renderAmbessaLiveView();
+          }
+          return;
+        }
+
+        // 2. Live Match Card Clicked
+        const liveCard = e.target.closest(".ambessa-live-match-card");
+        if (liveCard) {
+          const mId = Number(liveCard.dataset.liveFixture);
+          if (mId && state.ambessaSelectedLiveMatch !== mId) {
+            state.ambessaSelectedLiveMatch = mId;
+            renderAmbessaLiveView();
+          }
+          return;
+        }
+
+        // Toggle Live Country Accordion (Arrow / Header Click)
+        const countryHead = e.target.closest(".ambessa-live-country-head");
+        if (countryHead) {
+          const group = countryHead.closest(".ambessa-live-country-group");
+          const body = group?.querySelector(".ambessa-live-country-body");
+          const chev = countryHead.querySelector(".ambessa-live-country-chev");
+          const cName = group?.dataset.liveCountry;
+          if (body) {
+            const isCurrentlyHidden = body.style.display === "none";
+            if (isCurrentlyHidden) {
+              body.style.display = "";
+              if (chev) chev.innerHTML = "&#x2335;";
+              if (cName && state.ambessaLiveOpenCountries) state.ambessaLiveOpenCountries.add(cName);
+            } else {
+              body.style.display = "none";
+              if (chev) chev.innerHTML = "&#x2303;";
+              if (cName && state.ambessaLiveOpenCountries) state.ambessaLiveOpenCountries.delete(cName);
+            }
+          }
+          return;
+        }
+
+        // Toggle Live League Accordion (Arrow / Header Click)
+        const leagueHead = e.target.closest(".ambessa-live-league-head");
+        if (leagueHead) {
+          const group = leagueHead.closest(".ambessa-live-league-group");
+          const body = group?.querySelector(".ambessa-live-league-body");
+          const chev = leagueHead.querySelector(".ambessa-live-league-chev");
+          const lName = group?.dataset.liveLeague;
+          if (body) {
+            const isCurrentlyHidden = body.style.display === "none";
+            if (isCurrentlyHidden) {
+              body.style.display = "";
+              if (chev) chev.innerHTML = "&#x2335;";
+              if (lName && state.ambessaLiveOpenLeagues) state.ambessaLiveOpenLeagues.add(lName);
+            } else {
+              body.style.display = "none";
+              if (chev) chev.innerHTML = "&#x2303;";
+              if (lName && state.ambessaLiveOpenLeagues) state.ambessaLiveOpenLeagues.delete(lName);
+            }
+          }
+          return;
+        }
+
+        // 3. Category Pills Clicked
+        const catPill = e.target.closest(".ambessa-cat-pill");
+        if (catPill) {
+          document.querySelectorAll(".ambessa-cat-pill").forEach(p => p.classList.remove("is-active"));
+          catPill.classList.add("is-active");
+          return;
+        }
+
+        // 4. Filter Pills Clicked
+        const livePill = e.target.closest(".ambessa-live-pill");
+        if (livePill) {
+          const mkt = livePill.dataset.livePillMarket;
+          if (mkt) {
+            state.ambessaLiveMarketPill = mkt;
+            renderAmbessaLiveView();
+          }
+          return;
+        }
+
+        // 5. Accordion Toggle
+        const accHead = e.target.closest(".ambessa-accordion-head");
+        if (accHead) {
+          const body = accHead.nextElementSibling;
+          const toggle = accHead.querySelector(".ambessa-acc-toggle");
+          if (body) {
+            if (body.style.display === "none") {
+              body.style.display = "";
+              if (toggle) toggle.textContent = "⌃";
+            } else {
+              body.style.display = "none";
+              if (toggle) toggle.textContent = "⌵";
+            }
+          }
+          return;
+        }
+      }
+
+      // 1. Breadcrumb Back Button
+      const backBtn = e.target.closest("#ambessa-detail-back, .md-breadcrumb-back");
+      if (backBtn) {
+        e.preventDefault();
+        returnToAmbessaHome();
+        return;
+      }
+
+      // Category accordion header toggle (e.g. MAIN, GOALS / TOTALS, HALVES, etc.)
+      const catHead = e.target.closest(".ambessa-market-main-header, [data-toggle-cat]");
+      if (catHead) {
+        e.preventDefault();
+        const body = catHead.nextElementSibling;
+        const chev = catHead.querySelector(".ambessa-chevron");
+        if (body && body.classList.contains("ambessa-cat-content")) {
+          const isOpen = body.classList.toggle("is-open");
+          if (chev) chev.textContent = isOpen ? "▲" : "▼";
+        }
+        return;
+      }
+
+      // Sub-market accordion header toggle (e.g. Match Result, Correct Score, Draw No Bet, etc.)
+      const secHead = e.target.closest(".ambessa-market-sec-head, [data-toggle-sec]");
       if (secHead) {
+        e.preventDefault();
         const sec = secHead.closest(".ambessa-market-sec");
         if (sec) {
-          sec.classList.toggle("is-collapsed");
+          const isCollapsed = sec.classList.toggle("is-collapsed");
           const chev = secHead.querySelector(".ambessa-sec-chev");
-          if (chev) chev.textContent = sec.classList.contains("is-collapsed") ? "›" : "⌵";
+          if (chev) {
+            chev.textContent = isCollapsed ? "⌵" : "▲";
+          }
         }
         return;
       }
 
-      // 2. Category header toggle (MAIN, GOALS, HALVES, etc.)
-      const mainHead = e.target.closest(".ambessa-market-main-header");
-      if (mainHead) {
-        const catKey = mainHead.dataset.toggleCat;
-        const catBody = leagueView.querySelector(`[data-cat-body="${catKey}"]`);
-        if (catBody) {
-          const isOpen = catBody.classList.toggle("is-open");
-          const ch = mainHead.querySelector(".ambessa-chevron");
-          if (ch) ch.textContent = isOpen ? "▲" : "▼";
+      // 2. Category Tab click
+      const tabBtn = e.target.closest("[data-ambessa-mtab]");
+      if (tabBtn) {
+        e.preventDefault();
+        state.ambessaDetailTab = tabBtn.dataset.ambessaMtab;
+        if (state.ambessaSelectedMatch) {
+          renderAmbessaLeagueDetailCol(state.ambessaSelectedMatch);
         }
         return;
       }
 
-      // 3. Odd button click
-      const oddBtn = e.target.closest(".odd-btn, .ambessa-lm-odd-box, .ambessa-m-odd-btn");
-      if (oddBtn) {
+      // 3. Collapse/Expand All toggle button
+      const collapseBtn = e.target.closest("#ambessa-detail-collapse-all");
+      if (collapseBtn) {
+        e.preventDefault();
+        const fId = state.ambessaSelectedMatch ? (state.ambessaSelectedMatch.fixtureId || state.ambessaSelectedMatch.id) : null;
+        const markets = (fId && state.fixtureMarkets[fId]) || [];
+        if (state.ambessaDetailExpanded && state.ambessaDetailExpanded.size > 0) {
+          state.ambessaDetailExpanded.clear();
+        } else {
+          if (!state.ambessaDetailExpanded) state.ambessaDetailExpanded = new Set();
+          markets.forEach((mk) => state.ambessaDetailExpanded.add(mk.id));
+        }
+        if (state.ambessaSelectedMatch) {
+          renderAmbessaLeagueDetailCol(state.ambessaSelectedMatch);
+        }
+        return;
+      }
+
+      // 4. Favourite markets filter toggle
+      const favToggle = e.target.closest("#ambessa-detail-fav-toggle");
+      if (favToggle) {
+        e.preventDefault();
+        state.ambessaDetailFavOnly = !state.ambessaDetailFavOnly;
+        if (state.ambessaSelectedMatch) {
+          renderAmbessaLeagueDetailCol(state.ambessaSelectedMatch);
+        }
+        return;
+      }
+
+      // 5. Star on market header
+      const star = e.target.closest("[data-fav-market]");
+      if (star) {
+        e.preventDefault();
+        e.stopPropagation();
+        const mName = star.dataset.favMarket;
+        if (!state.favoriteMarkets) state.favoriteMarkets = new Set();
+        if (state.favoriteMarkets.has(mName)) {
+          state.favoriteMarkets.delete(mName);
+          toast(`Removed "${mName}" from favourites`, "info");
+        } else {
+          state.favoriteMarkets.add(mName);
+          toast(`Added "${mName}" to favourites`, "ok");
+        }
+        try {
+          localStorage.setItem("hope_fav_markets", JSON.stringify(Array.from(state.favoriteMarkets)));
+        } catch (_) {}
+        if (state.ambessaSelectedMatch) {
+          renderAmbessaLeagueDetailCol(state.ambessaSelectedMatch);
+        }
+        return;
+      }
+
+      // 6. Market header accordion toggle
+      const toggle = e.target.closest("[data-toggle-market]");
+      if (toggle) {
+        e.preventDefault();
+        const mkId = Number(toggle.dataset.toggleMarket);
+        if (!state.ambessaDetailExpanded) state.ambessaDetailExpanded = new Set();
+        if (state.ambessaDetailExpanded.has(mkId)) {
+          state.ambessaDetailExpanded.delete(mkId);
+        } else {
+          state.ambessaDetailExpanded.add(mkId);
+        }
+        const mSec = toggle.closest(".md-market");
+        if (mSec) {
+          const isOpen = state.ambessaDetailExpanded.has(mkId);
+          mSec.classList.toggle("is-open", isOpen);
+          const colBtn = $("ambessa-detail-collapse-all");
+          if (colBtn) colBtn.textContent = state.ambessaDetailExpanded.size > 0 ? "▾" : "▴";
+        }
+        return;
+      }
+
+      // 7. Detail Odd button click
+      const detailOdd = e.target.closest("[data-detail-odd]");
+      if (detailOdd) {
+        e.preventDefault();
+        e.stopPropagation();
+        const fId = Number(detailOdd.dataset.fixture);
+        const match = findFixture(fId) || state.ambessaSelectedMatch;
+        if (match) {
+          toggleDetailSelection(
+            match,
+            { id: Number(detailOdd.dataset.marketId), name: detailOdd.dataset.marketName },
+            { value: detailOdd.dataset.value, odd: detailOdd.dataset.odd }
+          );
+          if (state.ambessaSelectedMatch) {
+            renderAmbessaLeagueView();
+          }
+        }
+        return;
+      }
+
+      // 8. Odd button click (both left column cards and right column market cards)
+      const lmOdd = e.target.closest(".ambessa-lm-odd-box, .odd-btn, .ambessa-m-odd-btn");
+      if (lmOdd && !lmOdd.matches("[data-detail-odd]")) {
         e.stopPropagation();
         e.preventDefault();
-        const fId = Number(oddBtn.dataset.fixture);
-        const market = oddBtn.dataset.market;
-        const selection = oddBtn.dataset.selection;
+        const fId = Number(lmOdd.dataset.fixture);
+        const market = lmOdd.dataset.market;
+        const selection = lmOdd.dataset.selection;
         const fixture = findFixture(fId) || (state.ambessaSelectedMatch && Number(state.ambessaSelectedMatch.fixtureId || state.ambessaSelectedMatch.id) === fId ? state.ambessaSelectedMatch : null);
         if (fixture) {
           toggleSelection(fixture, market, selection);
@@ -21298,7 +23671,7 @@ function bindAmbessaEvents() {
         return;
       }
 
-      // 4. Match card click (select match)
+      // 9. Match card click (select match)
       const card = e.target.closest(".ambessa-lm-card");
       if (card) {
         const fId = Number(card.dataset.lmFixture);
@@ -21308,30 +23681,116 @@ function bindAmbessaEvents() {
           document.querySelectorAll(".ambessa-lm-card").forEach(c => c.classList.remove("is-selected"));
           card.classList.add("is-selected");
           renderAmbessaLeagueDetailCol(match);
+          if (window.innerWidth <= 1024) {
+            const lv = $("ambessa-league-view");
+            if (lv) lv.classList.add("is-mobile-detail-active");
+            state.ambessaMobileDetailActive = true;
+            window.scrollTo({ top: 0, behavior: "instant" });
+          }
+        }
+        return;
+      }
+    });
+
+    // Search input inside detail column
+    leagueView.addEventListener("input", (e) => {
+      const searchInp = e.target.closest("#ambessa-detail-search-input");
+      if (searchInp) {
+        state.ambessaDetailSearch = searchInp.value.trim();
+        if (state.ambessaSelectedMatch) {
+          renderAmbessaLeagueDetailCol(state.ambessaSelectedMatch);
+          const newInp = $("ambessa-detail-search-input");
+          if (newInp) {
+            newInp.focus();
+            newInp.selectionStart = newInp.selectionEnd = newInp.value.length;
+          }
+        }
+      }
+    });
+  }
+
+  const sidebarSports = $("sidebar-sports");
+  if (sidebarSports) {
+    sidebarSports.addEventListener("click", (e) => {
+      // 1. Sport head toggle (Football accordion)
+      const sportHead = e.target.closest(".ambessa-sport-head, [data-ambessa-sport]");
+      if (sportHead) {
+        e.preventDefault();
+        state.ambessaFootballExpanded = !state.ambessaFootballExpanded;
+        renderSportsSidebar();
+        return;
+      }
+
+      // 2. Country head toggle (e.g. Europe, England, Spain)
+      const ctryHead = e.target.closest(".ambessa-country-head, [data-ambessa-country]");
+      if (ctryHead) {
+        e.preventDefault();
+        const cName = ctryHead.dataset.ambessaCountry;
+        state.ambessaSelectedCountry = cName;
+        if (state.ambessaExpandedCountry === cName) {
+          state.ambessaExpandedCountry = null;
+        } else {
+          state.ambessaExpandedCountry = cName;
+          if ((!state.countryLeagues || !state.countryLeagues[cName]) && typeof fetchCountryLeagues === "function") {
+            fetchCountryLeagues(cName).then(() => {
+              if (state.ambessaExpandedCountry === cName) {
+                renderSportsSidebar();
+              }
+            });
+          }
+        }
+        renderSportsSidebar();
+        return;
+      }
+
+      // 3. Sub-league item (e.g. UEFA Europa League 18)
+      const subRow = e.target.closest(".ambessa-league-subrow, [data-sub-league]");
+      if (subRow) {
+        e.preventDefault();
+        const lid = Number(subRow.dataset.subLeague);
+        selectLeague(lid);
+        return;
+      }
+
+      // 4. Other sports (Basketball, Table Tennis, etc.)
+      const sportRow = e.target.closest(".ambessa-sport-row, [data-sidebar-sport]");
+      if (sportRow) {
+        e.preventDefault();
+        document.querySelectorAll(".ambessa-sport-row").forEach((r) => r.classList.remove("is-active"));
+        sportRow.classList.add("is-active");
+        const sportId = sportRow.dataset.sidebarSport || sportRow.dataset.sportId;
+        if (sportId) {
+          state.sportFilter = sportId;
+          returnToAmbessaHome();
+          renderAmbessaMatchesTable();
         }
         return;
       }
     });
   }
 
-  document.querySelectorAll(".ambessa-sport-row").forEach((row) => {
-    row.addEventListener("click", (e) => {
-      document.querySelectorAll(".ambessa-sport-row").forEach((r) => r.classList.remove("is-active"));
-      e.currentTarget.classList.add("is-active");
-      const sportId = e.currentTarget.dataset.sportId;
-      if (sportId) {
-        state.sportFilter = sportId;
-        renderAmbessaMatchesTable();
-      }
-    });
-  });
-
+  const wrapTime = $("ambessa-time-filter-wrap");
   const btnTime = $("btn-filter-time");
-  if (btnTime) {
-    btnTime.addEventListener("click", () => {
-      state.timeFilter = state.timeFilter === "today" ? "all" : "today";
-      btnTime.style.filter = state.timeFilter === "today" ? "brightness(1.2)" : "none";
-      renderAmbessaMatchesTable();
+  const dropdownTime = $("ambessa-time-filter-dropdown");
+
+  if (btnTime && wrapTime) {
+    btnTime.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const isOpen = wrapTime.classList.toggle("is-open");
+      if (dropdownTime) dropdownTime.hidden = !isOpen;
+      btnTime.setAttribute("aria-expanded", String(isOpen));
+    });
+  }
+
+  if (dropdownTime) {
+    dropdownTime.querySelectorAll(".ambessa-time-filter-opt").forEach((opt) => {
+      opt.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const filterId = opt.dataset.timeFilter || "all";
+        setAmbessaTimeFilter(filterId);
+      });
     });
   }
 
@@ -21523,6 +23982,82 @@ document.addEventListener("click", (e) => {
   on($("mobile-slip-fab"), "click", () => {
     if (document.body.classList.contains("betslip-open")) closeMobileDrawers();
     else openMobileBetslip();
+  });
+
+  // Ambessa Mobile Multi Bar & Betslip Modal Listeners
+  on($("ambessa-mobile-multi-bar"), "click", () => {
+    openAmbessaMobileBetslip();
+  });
+
+  on($("ambessa-m-slip-close-btn"), "click", () => {
+    closeAmbessaMobileBetslip();
+  });
+
+  on($("ambessa-m-trash-btn"), "click", () => {
+    state.slip = [];
+    persistSlip();
+    renderSlip();
+    closeAmbessaMobileBetslip();
+  });
+
+  on($("ambessa-m-fast-btn"), "click", () => {
+    openShareModal();
+  });
+
+  on($("ambessa-m-place-btn"), "click", () => {
+    placeBet();
+  });
+
+  on($("ambessa-m-stake-input"), "input", (e) => {
+    const val = Number(e.target.value) || 0;
+    state.stake = val;
+    const deskStake = $("stake-input");
+    if (deskStake) deskStake.value = val;
+    const mPossWin = $("ambessa-m-possible-win");
+    if (mPossWin) mPossWin.textContent = fmt(potentialWin());
+    const deskPossWin = $("potential-win");
+    if (deskPossWin) deskPossWin.textContent = fmt(potentialWin());
+  });
+
+  on($("ambessa-m-max-btn"), "click", () => {
+    const maxBal = Number(state.balance) > 20 ? Number(state.balance) : 1000;
+    state.stake = maxBal;
+    const mStake = $("ambessa-m-stake-input");
+    if (mStake) mStake.value = maxBal;
+    const deskStake = $("stake-input");
+    if (deskStake) deskStake.value = maxBal;
+    const mPossWin = $("ambessa-m-possible-win");
+    if (mPossWin) mPossWin.textContent = fmt(potentialWin());
+    const deskPossWin = $("potential-win");
+    if (deskPossWin) deskPossWin.textContent = fmt(potentialWin());
+  });
+
+  on($("ambessa-m-slip-list"), "click", (e) => {
+    const btn = e.target.closest("[data-remove]");
+    if (btn) {
+      const key = btn.dataset.remove;
+      if (key) {
+        removeSlipItem(key);
+      }
+    }
+  });
+
+  on($("ambessa-m-tab-multi"), "click", () => {
+    const tMulti = $("ambessa-m-tab-multi");
+    const tSingle = $("ambessa-m-tab-single");
+    if (tMulti) tMulti.classList.add("is-active");
+    if (tSingle) tSingle.classList.remove("is-active");
+    state.slipMode = "multiple";
+    syncMobileSlipCount();
+  });
+
+  on($("ambessa-m-tab-single"), "click", () => {
+    const tMulti = $("ambessa-m-tab-multi");
+    const tSingle = $("ambessa-m-tab-single");
+    if (tSingle) tSingle.classList.add("is-active");
+    if (tMulti) tMulti.classList.remove("is-active");
+    state.slipMode = "single";
+    syncMobileSlipCount();
   });
 
   on($("btn-mobile-home"), "click", () => {
@@ -21851,6 +24386,24 @@ document.addEventListener("click", (e) => {
   }
 
   // Mobile bottom navigation bar
+  on($("mobile-bnav-sport"), "click", () => {
+    state.currentNav = "sport";
+    if (typeof window.openAmbessaMobileSportView === "function") {
+      window.openAmbessaMobileSportView();
+    } else if (typeof openAmbessaMobileSportView === "function") {
+      openAmbessaMobileSportView();
+    }
+  });
+  on($("mobile-bnav-games"), "click", () => {
+    state.currentNav = "games";
+    if (typeof setView === "function") setView("games");
+  });
+  on($("mobile-bnav-chat"), "click", () => {
+    const chatModal = $("account-modal");
+    if (chatModal) {
+      if (typeof openAccountModal === "function") openAccountModal("support");
+    }
+  });
   on($("mobile-bnav-menu"), "click", () => {
     toggleDedicatedMobileMenu();
   });
@@ -21901,7 +24454,7 @@ document.addEventListener("click", (e) => {
   });
   on($("mobile-bnav-live"), "click", () => {
     closeMobileDrawers();
-    applySubNav("inplay");
+    openAmbessaLiveView();
   });
   on($("mobile-bnav-chat"), "click", () => {
     toast("Live Chat support is active 24/7.", "ok");
@@ -23768,6 +26321,10 @@ function init() {
     const bookedParam = urlParams.get("booked");
     if (bookedParam && bookedParam.length === 5) {
       setTimeout(() => loadBookedBetByCode(bookedParam), 300);
+    }
+    const matchParam = urlParams.get("match") || urlParams.get("fixture");
+    if (matchParam) {
+      setTimeout(() => openAmbessaMatch(Number(matchParam)), 400);
     }
     const checkParam = urlParams.get("check") || urlParams.get("ticket") || urlParams.get("verify") || urlParams.get("t");
     if (checkParam) {

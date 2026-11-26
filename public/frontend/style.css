@@ -1,3 +1,7 @@
+
+.ambessa-desktop-lm-content { display: block; }
+.ambessa-mobile-lm-content { display: none; }
+.ambessa-mobile-league-header { display: none; }
 /* ===== THEME DEFINITIONS =====
    In dark mode or other color themes, ONLY the red parts from the image change.
    All cards, boards, betslip, backgrounds and text stay in their clean light style.
@@ -27049,6 +27053,81 @@ body {
   align-items: center;
 }
 
+/* SPORT DROPDOWN MENU */
+.ambessa-sport-dropdown-wrap {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.ambessa-sport-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 170px;
+  background: #1c202e;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0 0 4px 4px;
+  padding: 4px 0;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.75);
+  z-index: 1000;
+}
+
+.ambessa-sport-menu::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+}
+
+.ambessa-sport-dropdown-wrap:hover .ambessa-sport-menu,
+.ambessa-sport-dropdown-wrap:focus-within .ambessa-sport-menu,
+.ambessa-sport-menu.is-open {
+  display: block;
+}
+
+.ambessa-sport-dropdown-wrap:hover .ambessa-nav-tab,
+.ambessa-sport-dropdown-wrap:focus-within .ambessa-nav-tab {
+  color: #FF5722 !important;
+  border-bottom: 3px solid #FF5722 !important;
+}
+
+.ambessa-sport-dropdown-wrap:hover .ambessa-nav-tab .ambessa-nav-svg,
+.ambessa-sport-dropdown-wrap:focus-within .ambessa-nav-tab .ambessa-nav-svg {
+  stroke: #FF5722 !important;
+}
+
+.ambessa-sport-item {
+  display: block;
+  width: 100%;
+  padding: 9px 16px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #C8CDD8;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  box-sizing: border-box;
+  transition: background 0.15s ease, color 0.15s ease, padding-left 0.15s ease;
+}
+
+.ambessa-sport-item:hover,
+.ambessa-sport-item:focus {
+  background: #252a3d;
+  color: #FFFFFF;
+  padding-left: 19px;
+}
+
 .ambessa-games-menu {
   display: none;
   position: absolute;
@@ -27147,12 +27226,12 @@ body {
 
 /* 4. LEFT SIDEBAR */
 .ambessa-sidebar {
-  width: 255px !important;
-  min-width: 255px !important;
-  max-width: 255px !important;
+  width: 215px !important;
+  min-width: 215px !important;
+  max-width: 215px !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 10px !important;
+  gap: 6px !important;
   background: transparent !important;
   border: 0 !important;
   padding: 0 !important;
@@ -27168,11 +27247,11 @@ body {
 
 .ambessa-sidebar-header {
   background: #282A3A !important;
-  padding: 11px 16px !important;
+  padding: 6px 10px !important;
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
-  font-size: 13.5px !important;
+  gap: 6px !important;
+  font-size: 11.5px !important;
   font-weight: 800 !important;
   color: #FFFFFF !important;
   letter-spacing: 0.5px !important;
@@ -27210,10 +27289,11 @@ body {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  height: 44px !important;
-  padding: 0 14px !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
-  font-size: 13px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 8px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+  font-size: 11px !important;
   font-weight: 700 !important;
   color: #E2E6EF !important;
   cursor: pointer !important;
@@ -27221,7 +27301,7 @@ body {
   width: 100% !important;
   text-align: left !important;
   border: 0 !important;
-  transition: all 0.15s ease !important;
+  transition: all 0.12s ease !important;
 }
 
 .ambessa-league-row:hover {
@@ -27246,6 +27326,38 @@ body {
   line-height: 1 !important;
 }
 
+.ambessa-league-row .league-flag-img {
+  width: 22px !important;
+  height: 15px !important;
+  min-width: 22px !important;
+  object-fit: cover !important;
+  border-radius: 2px !important;
+  margin-right: 10px !important;
+  display: inline-block !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+  vertical-align: middle !important;
+}
+
+.ambessa-league-row .league-flag-emoji {
+  font-size: 16px !important;
+  margin-right: 10px !important;
+  min-width: 22px !important;
+  display: inline-block !important;
+  text-align: center !important;
+}
+
+.ambessa-card-league-flag-img {
+  width: 18px !important;
+  height: 13px !important;
+  min-width: 18px !important;
+  object-fit: cover !important;
+  border-radius: 2px !important;
+  margin-right: 6px !important;
+  display: inline-block !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+  vertical-align: middle !important;
+}
+
 .ambessa-league-row .league-name {
   flex: 1;
   margin: 0 6px;
@@ -27260,6 +27372,14 @@ body {
   font-size: 16px !important;
   font-weight: 800 !important;
   color: #FF5722 !important;
+}
+
+/* AMBESSA FILTER BY TIME PILL & DROPDOWN (Matches Image 1) */
+.ambessa-time-filter-wrap {
+  position: relative !important;
+  width: 100% !important;
+  margin: 3px 0 !important;
+  z-index: 100 !important;
 }
 
 .ambessa-time-filter-pill {
@@ -27277,15 +27397,68 @@ body {
   box-shadow: 0 3px 8px rgba(255, 87, 34, 0.4) !important;
   transition: all 0.2s ease !important;
   letter-spacing: 0.3px !important;
-  margin: 2px 0 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  user-select: none !important;
 }
 
 .ambessa-time-filter-pill:hover {
   background: #F4511E !important;
-  transform: translateY(-1px);
+}
+
+/* When dropdown is open, square off bottom corners of button seamlessly */
+.ambessa-time-filter-wrap.is-open .ambessa-time-filter-pill {
+  border-radius: 22px 22px 0 0 !important;
+  box-shadow: none !important;
+}
+
+.ambessa-time-filter-dropdown {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  width: 100% !important;
+  background: #FF5722 !important;
+  border-radius: 0 0 8px 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45) !important;
+  z-index: 1000 !important;
+  display: none !important;
+  flex-direction: column !important;
+}
+
+.ambessa-time-filter-wrap.is-open .ambessa-time-filter-dropdown {
+  display: flex !important;
+}
+
+.ambessa-time-filter-dropdown[hidden] {
+  display: none !important;
+}
+
+.ambessa-time-filter-opt {
+  padding: 8px 16px !important;
+  color: #FFFFFF !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  background: #FF5722 !important;
+  transition: background 0.15s ease !important;
+  user-select: none !important;
+}
+
+.ambessa-time-filter-opt:hover {
+  background: #F4511E !important;
+}
+
+/* Selected option has the exact bright blue background from Image 1 */
+.ambessa-time-filter-opt.is-selected {
+  background: #1976D2 !important;
+  color: #FFFFFF !important;
+}
+
+.ambessa-time-filter-opt.is-selected:hover {
+  background: #1565C0 !important;
 }
 
 .ambessa-sport-row {
@@ -27344,6 +27517,238 @@ body {
   color: #FFFFFF;
 }
 
+/* FOOTBALL COUNTRY & LEAGUE ACCORDION IN SIDEBAR */
+.ambessa-sport-head {
+  display: flex !important;
+  align-items: center !important;
+  height: 44px !important;
+  padding: 0 14px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+  cursor: pointer !important;
+  background: transparent !important;
+  width: 100% !important;
+  text-align: left !important;
+  border: 0 !important;
+  transition: all 0.15s ease !important;
+  user-select: none !important;
+}
+
+.ambessa-sport-head:hover,
+.ambessa-sport-head.is-active {
+  background: #222533 !important;
+}
+
+.ambessa-sport-head .sport-ico {
+  font-size: 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  line-height: 1 !important;
+  margin-right: 6px !important;
+}
+
+.ambessa-sport-head .sport-name {
+  flex: 1 !important;
+  margin-left: 6px !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+}
+
+.ambessa-sport-head .sport-count {
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  color: #D1D5DB !important;
+  margin-right: 8px !important;
+}
+
+.ambessa-sport-head .chev-down {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #FFFFFF !important;
+}
+
+.ambessa-football-countries {
+  display: flex !important;
+  flex-direction: column !important;
+  background: #141620 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  max-height: 520px !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin !important;
+}
+
+.ambessa-football-countries::-webkit-scrollbar {
+  width: 5px !important;
+}
+
+.ambessa-football-countries::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-radius: 4px !important;
+}
+
+.ambessa-country-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+}
+
+.ambessa-country-item:last-child {
+  border-bottom: 0 !important;
+}
+
+.ambessa-country-head {
+  display: flex !important;
+  align-items: center !important;
+  height: 26px !important;
+  min-height: 26px !important;
+  padding: 0 8px 0 10px !important;
+  cursor: pointer !important;
+  background: transparent !important;
+  transition: all 0.12s ease !important;
+  user-select: none !important;
+}
+
+.ambessa-country-head:hover {
+  background: #252838 !important;
+}
+
+.ambessa-country-item.is-open .ambessa-country-head {
+  background: #1E2130 !important;
+}
+
+.ambessa-country-item.is-selected .ambessa-country-head,
+.ambessa-country-head.is-selected {
+  background: #8e5028 !important;
+}
+
+.ambessa-country-item.is-selected .ambessa-country-head .country-name,
+.ambessa-country-item.is-selected .ambessa-country-head .country-count,
+.ambessa-country-item.is-selected .ambessa-country-head .country-chev {
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
+}
+
+.ambessa-country-head .country-flag-img {
+  width: 22px !important;
+  height: 15px !important;
+  min-width: 22px !important;
+  object-fit: cover !important;
+  border-radius: 2px !important;
+  margin-right: 10px !important;
+  display: inline-block !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+  vertical-align: middle !important;
+}
+
+.ambessa-country-head .country-flag-emoji {
+  font-size: 16px !important;
+  margin-right: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  min-width: 22px !important;
+  text-align: center !important;
+}
+
+.ambessa-country-head .country-flag {
+  font-size: 17px !important;
+  margin-right: 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  line-height: 1 !important;
+}
+
+.ambessa-country-head .country-name {
+  flex: 1 !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  color: #C5CAD5 !important;
+}
+
+.ambessa-country-item.is-open .ambessa-country-head .country-name {
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
+}
+
+.ambessa-country-head .country-count {
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  color: #8E95A5 !important;
+  margin-right: 8px !important;
+}
+
+.ambessa-country-head .country-chev {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #8E95A5 !important;
+}
+
+.ambessa-country-leagues {
+  display: flex !important;
+  flex-direction: column !important;
+  background: #0F1118 !important;
+}
+
+.ambessa-league-subrow {
+  display: flex !important;
+  align-items: center !important;
+  height: 25px !important;
+  min-height: 25px !important;
+  padding: 0 8px 0 18px !important;
+  cursor: pointer !important;
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02) !important;
+  transition: all 0.12s ease !important;
+  user-select: none !important;
+}
+
+.ambessa-league-subrow:hover {
+  background: #1E2130 !important;
+}
+
+.ambessa-league-subrow.is-selected {
+  background: #FF5722 !important;
+  color: #FFFFFF !important;
+}
+
+.ambessa-league-subrow .subleague-name {
+  flex: 1 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #C5CAD5 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.ambessa-league-subrow.is-selected .subleague-name {
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
+}
+
+.ambessa-league-subrow .subleague-count {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #8E95A5 !important;
+  margin-right: 8px !important;
+}
+
+.ambessa-league-subrow.is-selected .subleague-count {
+  color: #FFFFFF !important;
+}
+
+.ambessa-league-subrow .subleague-arrow {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #8E95A5 !important;
+}
+
+.ambessa-league-subrow.is-selected .subleague-arrow {
+  color: #FFFFFF !important;
+}
+
 /* 5. CENTER CONTENT */
 .ambessa-content {
   flex: 1 !important;
@@ -27396,17 +27801,17 @@ body {
 
 .ambessa-toggle-tab {
   flex: 1 !important;
-  padding: 11px 20px !important;
-  border-radius: 9999px !important;
-  font-size: 12.5px !important;
-  font-weight: 900 !important;
-  text-align: center !important;
-  border: 0 !important;
+  padding: 7px 16px !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.4px !important;
+  border: none !important;
+  border-radius: 20px !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
-  background: #252836 !important;
+  transition: all 0.15s ease !important;
+  text-transform: uppercase !important;
+  background: #1C2030 !important;
   color: #8E95A5 !important;
-  letter-spacing: 0.5px !important;
 }
 
 .ambessa-toggle-tab:hover {
@@ -27423,81 +27828,34 @@ body {
 .ambessa-matches-container {
   display: flex !important;
   flex-direction: column !important;
-  gap: 6px !important;
+  gap: 4px !important;
 }
 
 .ambessa-table-header {
-  display: flex !important;
-  align-items: center !important;
-  padding: 6px 12px !important;
-  background: #181A24 !important;
-  border-radius: 6px !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  color: #8E95A5 !important;
-  border: 1px solid rgba(255, 255, 255, 0.04) !important;
-}
-
-.ambessa-th-match {
-  flex: 1 !important;
-}
-
-.ambessa-th-group {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  text-align: center !important;
-}
-
-.ambessa-th-result {
-  width: 170px !important;
-}
-
-.ambessa-th-double {
-  width: 170px !important;
-}
-
-.ambessa-th-btts {
-  width: 115px !important;
-}
-
-.ambessa-th-group-title {
-  font-size: 10px;
-  font-weight: 700;
-  color: #A0A5B5;
-  margin-bottom: 2px;
-}
-
-.ambessa-th-cols {
-  display: flex;
-  width: 100%;
-  justify-content: space-around;
-  font-size: 10px;
-  font-weight: 800;
-  color: #8E95A5;
+  display: none !important;
 }
 
 .ambessa-match-card {
-  background: #181A24 !important;
+  background: #141722 !important;
   border-radius: 6px !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
   overflow: hidden !important;
-  transition: border-color 0.15s !important;
+  transition: all 0.15s ease !important;
 }
 
 .ambessa-match-card:hover {
-  border-color: rgba(255, 87, 34, 0.3) !important;
+  border-color: rgba(255, 87, 34, 0.35) !important;
 }
 
 .ambessa-card-top {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  padding: 5px 12px !important;
-  background: #1F2230 !important;
+  padding: 4px 10px 2px 10px !important;
+  background: transparent !important;
   font-size: 11px !important;
   font-weight: 700 !important;
-  color: #9499A8 !important;
+  color: #FF7A00 !important;
 }
 
 .ambessa-card-league {
@@ -27507,23 +27865,259 @@ body {
 }
 
 .ambessa-card-ball {
-  font-size: 11px;
+  display: none !important;
 }
 
 .ambessa-card-kickoff {
-  font-size: 11px;
-  color: #8E95A5;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #FF7A00 !important;
 }
 
-.ambessa-card-main-row {
+.ambessa-card-middle-row {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
+  padding: 2px 10px 4px 10px !important;
+  gap: 8px !important;
+}
+
+.ambessa-card-teams {
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  color: #FFFFFF !important;
+  cursor: pointer !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  letter-spacing: 0.1px !important;
+}
+
+.ambessa-card-teams:hover {
+  color: #FF5722 !important;
+}
+
+.ambessa-side-bets-pill {
+  background: transparent !important;
+  color: #FF7A00 !important;
+  border: none !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: all 0.15s ease !important;
+}
+
+.ambessa-side-bets-pill:hover {
+  background: transparent !important;
+  color: #FFA040 !important;
+}
+
+.ambessa-card-odds-row {
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 10px 6px 10px !important;
+  gap: 6px !important;
+}
+
+.ambessa-odds-cluster {
+  display: flex !important;
+  flex-direction: row !important;
+  background: #000000 !important;
+  border-radius: 3px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  overflow: hidden !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  box-sizing: border-box !important;
+}
+
+.ambessa-cluster-result {
+  flex: 1.15 !important;
+}
+
+.ambessa-cluster-double {
+  flex: 1.15 !important;
+}
+
+.ambessa-cluster-btts {
+  flex: 0.85 !important;
+}
+
+.ambessa-odd-btn {
+  flex: 1 !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  background: #000000 !important;
+  border: 0 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 0 !important;
+  color: #FFFFFF !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  cursor: pointer !important;
+  padding: 0 8px !important;
+  transition: background 0.12s ease !important;
+  user-select: none !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+}
+
+.ambessa-odd-btn:last-child {
+  border-right: 0 !important;
+}
+
+.ambessa-odd-btn .ambessa-odd-label {
+  display: inline-block !important;
+  color: #FFFFFF !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  text-align: left !important;
+  pointer-events: none !important;
+  flex-shrink: 0 !important;
+}
+
+.ambessa-odd-btn .ambessa-odd-val {
+  display: inline-block !important;
+  color: #FF7A00 !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  text-align: right !important;
+  pointer-events: none !important;
+  flex-shrink: 0 !important;
+}
+
+.ambessa-odd-btn:hover {
+  background: #181C28 !important;
+}
+
+.ambessa-odd-btn.is-selected {
+  background: #FF7A00 !important;
+}
+
+.ambessa-odd-btn.is-selected .ambessa-odd-label {
+  color: #FFFFFF !important;
+}
+
+.ambessa-odd-btn.is-selected .ambessa-odd-val {
+  color: #000000 !important;
+  font-weight: 700 !important;
+}
+
+/* 5C. AMBESSA DEDICATED LIVE VIEW (Matching media_1795623258449_64055760.jpg) */
+.ambessa-live-pills-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 10px !important;
+  overflow-x: auto !important;
+  padding-bottom: 2px !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.ambessa-live-pills-row::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.ambessa-live-pill {
+  padding: 6px 14px !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  background: #141722 !important;
+  color: #C5CAD5 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: all 0.15s ease !important;
+}
+
+.ambessa-live-pill:hover {
+  background: #202434 !important;
+  color: #FFFFFF !important;
+}
+
+.ambessa-live-pill.is-active {
+  background: #FF5722 !important;
+  color: #FFFFFF !important;
+  border-color: #FF5722 !important;
+}
+
+.ambessa-live-country-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: #1A1D2B !important;
+  padding: 8px 14px !important;
+  border-radius: 4px 4px 0 0 !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+  cursor: pointer !important;
+}
+
+.ambessa-live-country-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.ambessa-live-league-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: #241D1A !important;
+  padding: 8px 14px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+  color: #FF7A00 !important;
+  cursor: pointer !important;
+}
+
+.ambessa-live-match-card {
+  background: #141620 !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
   padding: 8px 12px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.ambessa-live-match-card:hover {
+  background: #1B1E2C !important;
+}
+
+.ambessa-live-match-card.is-active {
+  background: #1C202F !important;
+  border-left: 3px solid #FF5722 !important;
+}
+
+.ambessa-live-card-breadcrumb {
+  font-size: 11px !important;
+  color: #8E95A5 !important;
+  margin-bottom: 5px !important;
+}
+
+.ambessa-live-card-main {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
   gap: 12px !important;
 }
 
-.ambessa-card-teams-wrap {
+.ambessa-live-card-teams {
   flex: 1 !important;
   min-width: 0 !important;
   display: flex !important;
@@ -27531,230 +28125,841 @@ body {
   gap: 3px !important;
 }
 
-.ambessa-card-teams {
+.ambessa-live-team-row {
+  display: flex !important;
+  justify-content: space-between !important;
   font-size: 13.5px !important;
-  font-weight: 800 !important;
-  color: #FFFFFF !important;
-  cursor: pointer !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.ambessa-side-bets-pill {
-  align-self: flex-start !important;
-  background: #101218 !important;
-  color: #FF7043 !important;
-  border: 1px solid rgba(255, 87, 34, 0.25) !important;
-  font-size: 9.5px !important;
   font-weight: 700 !important;
-  padding: 2px 7px !important;
-  border-radius: 4px !important;
-  cursor: pointer !important;
-  transition: all 0.15s !important;
+  color: #E2E6EF !important;
 }
 
-.ambessa-side-bets-pill:hover {
-  background: #FF5722 !important;
+.ambessa-live-match-card.is-active .ambessa-live-team-row:first-child {
+  color: #FF7A00 !important;
+}
+
+.ambessa-live-team-row strong {
+  font-size: 14px !important;
   color: #FFFFFF !important;
+  margin-left: 8px !important;
 }
 
-.ambessa-card-odds-grid {
+.ambessa-live-card-meta {
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
+  gap: 10px !important;
+  margin-top: 3px !important;
+  font-size: 11px !important;
 }
 
-.ambessa-odds-cluster {
+.ambessa-live-sidebets {
+  color: #FF7A00 !important;
+  font-weight: 700 !important;
+}
+
+.ambessa-live-time {
+  color: #8E95A5 !important;
+}
+
+.ambessa-live-odds-box {
   display: flex !important;
-  align-items: center !important;
-  gap: 4px !important;
-}
-
-.ambessa-cluster-result {
-  width: 170px !important;
-}
-
-.ambessa-cluster-double {
-  width: 170px !important;
-}
-
-.ambessa-cluster-btts {
-  width: 115px !important;
-}
-
-.ambessa-odd-btn {
-  flex: 1 !important;
-  height: 30px !important;
-  background: #242735 !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  background: #000000 !important;
   border-radius: 4px !important;
-  color: #F5A623 !important;
-  font-size: 12px !important;
-  font-weight: 800 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  overflow: hidden !important;
+}
+
+.ambessa-live-odd-cell {
+  width: 58px !important;
+  height: 48px !important;
   display: flex !important;
+  flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: #000000 !important;
   cursor: pointer !important;
-  padding: 0 4px !important;
+  padding: 4px !important;
   transition: all 0.15s ease !important;
 }
 
-.ambessa-odd-btn:hover {
-  background: #2D3142 !important;
-  border-color: #FF5722 !important;
+.ambessa-live-odd-cell:last-child {
+  border-right: 0 !important;
+}
+
+.ambessa-live-odd-cell:hover {
+  background: #1C202F !important;
+}
+
+.ambessa-live-odd-cell.is-selected {
+  background: #FF5722 !important;
+}
+
+.ambessa-live-odd-cell .odd-lbl {
+  font-size: 11px !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+}
+
+.ambessa-live-odd-cell .odd-num {
+  font-size: 12px !important;
+  color: #FF7A00 !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+}
+
+.ambessa-live-odd-cell.is-selected .odd-num {
   color: #FFFFFF !important;
 }
 
-.ambessa-odd-btn.is-selected {
-  background: #FF5722 !important;
-  border-color: #FF5722 !important;
+.trend-up {
+  color: #22C55E !important;
+  font-size: 9px !important;
+}
+
+.trend-down {
+  color: #EF4444 !important;
+  font-size: 9px !important;
+}
+
+/* Pitch Scoreboard Center */
+.ambessa-pitch-live-overlay {
+  position: absolute !important;
+  top: 0; left: 0; right: 0; bottom: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 2 !important;
+  pointer-events: none !important;
+}
+
+.ambessa-pitch-live-teams {
+  font-size: 15px !important;
+  font-weight: 800 !important;
   color: #FFFFFF !important;
-  box-shadow: 0 0 10px rgba(255, 87, 34, 0.6) !important;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8) !important;
+  margin-bottom: 2px !important;
+}
+
+.ambessa-pitch-live-minute {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #FFFFFF !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+.ambessa-pitch-live-halves {
+  font-size: 11px !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
+  margin-top: 2px !important;
+}
+
+/* Market Category Pills on Right Column */
+.ambessa-market-cat-strip {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 10px 0 !important;
+  overflow-x: auto !important;
+}
+
+.ambessa-cat-pill {
+  padding: 5px 14px !important;
+  border-radius: 4px !important;
+  background: #141722 !important;
+  color: #C5CAD5 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: all 0.15s ease !important;
+}
+
+.ambessa-cat-pill:hover {
+  background: #202434 !important;
+  color: #FFFFFF !important;
+}
+
+.ambessa-cat-pill.is-active {
+  background: #FF5722 !important;
+  color: #FFFFFF !important;
+  border-color: #FF5722 !important;
+}
+
+/* Correct Score Grid matching Image 4 */
+.ambessa-correct-score-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 6px !important;
+  padding: 10px !important;
+}
+
+.ambessa-cs-cell {
+  height: 36px !important;
+  background: #181C28 !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0 10px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.ambessa-cs-cell:hover {
+  background: #222738 !important;
+}
+
+.ambessa-cs-cell.is-selected {
+  background: #FF5722 !important;
+}
+
+.ambessa-cs-cell .cs-label {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #FFFFFF !important;
+}
+
+.ambessa-cs-cell .cs-odd {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #FF7A00 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+}
+
+.ambessa-cs-cell.is-selected .cs-odd {
+  color: #FFFFFF !important;
 }
 
 /* 5B. AMBESSA LEAGUE TWO-COLUMN SPLIT VIEW (Matching media_1795454154866_f4f607f6.jpg) */
 .ambessa-league-view {
   display: flex !important;
   align-items: flex-start !important;
-  gap: 12px !important;
+  gap: 8px !important;
   width: 100% !important;
 }
 
 .ambessa-league-matches-col {
-  flex: 1.15 !important;
-  min-width: 0 !important;
+  flex: 1 !important;
+  min-width: 310px !important;
+  max-width: 440px !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 8px !important;
+  gap: 3px !important;
 }
 
 .ambessa-league-detail-col {
-  flex: 1 !important;
-  min-width: 350px !important;
-  max-width: 480px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 10px !important;
-}
-
-/* Match Card in League List */
-.ambessa-lm-card {
-  background: #181A24 !important;
-  border-radius: 8px !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  overflow: hidden !important;
-  cursor: pointer !important;
-  transition: all 0.15s ease !important;
-}
-
-.ambessa-lm-card:hover {
-  background: #1E2130 !important;
-  border-color: rgba(255, 87, 34, 0.3) !important;
-}
-
-.ambessa-lm-card.is-selected {
-  border: 1.5px solid #FF5722 !important;
-  background: #1B1E2C !important;
-  box-shadow: 0 0 10px rgba(255, 87, 34, 0.25) !important;
-}
-
-.ambessa-lm-head {
-  background: #141620 !important;
-  padding: 6px 12px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  font-size: 11px !important;
-  color: #8E95A5 !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
-}
-
-.ambessa-lm-league {
-  color: #FF5722 !important;
-  font-weight: 700 !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-}
-
-.ambessa-lm-date {
-  color: #FF9800 !important;
-  font-weight: 700 !important;
-}
-
-.ambessa-lm-body {
-  padding: 10px 12px !important;
+  flex: 1.35 !important;
+  min-width: 360px !important;
+  max-width: none !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 8px !important;
+  background: transparent !important;
+  border-radius: 8px !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Ambessa League 2-Column Detail Column - Dark Theme with Image 3 Odds Placement */
+.ambessa-detail-hope-wrap {
+  width: 100% !important;
+  background: #181A24 !important;
+  color: #FFFFFF !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.ambessa-detail-hope-wrap .md-breadcrumb {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: #141620 !important;
+  color: #8E95A5 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  padding: 10px 14px !important;
+}
+
+.ambessa-detail-hope-wrap .md-breadcrumb-back {
+  width: 28px !important;
+  height: 28px !important;
+  border: 0 !important;
+  border-radius: 4px !important;
+  background: transparent !important;
+  color: #FF5722 !important;
+  font-size: 22px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+}
+
+.ambessa-detail-hope-wrap .md-breadcrumb-dots {
+  color: #8E95A5 !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+}
+
+.ambessa-detail-hope-wrap .md-breadcrumb-path {
+  flex: 1 !important;
+  min-width: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  color: #C5CAD5 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+
+.ambessa-detail-hope-wrap .md-hero {
+  margin: 0 !important;
+  background: #181A24 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  padding: 16px 20px 20px !important;
+}
+
+.ambessa-detail-hope-wrap .md-date {
+  color: #8E95A5 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  margin-bottom: 12px !important;
+}
+
+.ambessa-detail-hope-wrap .md-teams {
+  display: grid !important;
+  grid-template-columns: 1fr auto 1fr !important;
+  align-items: center !important;
+  gap: 16px !important;
+}
+
+.ambessa-detail-hope-wrap .md-team {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px !important;
+  text-align: center !important;
+}
+
+.ambessa-detail-hope-wrap .md-team img {
+  width: 48px !important;
+  height: 48px !important;
+  object-fit: contain !important;
+}
+
+.ambessa-detail-hope-wrap .md-team-fallback-badge {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  background: #252838 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 24px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.ambessa-detail-hope-wrap .md-team span {
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+}
+
+.ambessa-detail-hope-wrap .md-vs {
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  color: #FF5722 !important;
+}
+
+.ambessa-detail-hope-wrap .md-tabs-wrap {
+  background: #141620 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  padding: 8px 10px !important;
+  overflow: hidden !important;
+}
+
+.ambessa-detail-hope-wrap .md-tabs {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 6px !important;
+  align-items: center !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: #2D3142 #141620 !important;
+  padding-bottom: 3px !important;
+  margin: 0 !important;
+}
+
+.ambessa-detail-hope-wrap .md-tabs::-webkit-scrollbar {
+  height: 4px !important;
+}
+
+.ambessa-detail-hope-wrap .md-tabs::-webkit-scrollbar-track {
+  background: #141620 !important;
+  border-radius: 2px !important;
+}
+
+.ambessa-detail-hope-wrap .md-tabs::-webkit-scrollbar-thumb {
+  background: #2D3142 !important;
+  border-radius: 2px !important;
+}
+
+.ambessa-detail-hope-wrap .md-tab {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 14px !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  background: #1E2130 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #8E95A5 !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.15s ease !important;
+}
+
+.ambessa-detail-hope-wrap .md-tab:hover {
+  background: #252838 !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  color: #FFFFFF !important;
+}
+
+.ambessa-detail-hope-wrap .md-tab.is-on {
+  background: #FF5722 !important;
+  border-color: #FF5722 !important;
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 6px rgba(255, 87, 34, 0.35) !important;
+}
+
+.ambessa-detail-hope-wrap .md-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 12px !important;
+  background: #141620 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.ambessa-detail-hope-wrap .md-toolbar-btn {
+  width: 32px !important;
+  height: 32px !important;
+  border: 0 !important;
+  border-radius: 4px !important;
+  background: #1E2130 !important;
+  color: #FF5722 !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  transition: background 0.15s ease !important;
+}
+
+.ambessa-detail-hope-wrap .md-toolbar-btn:hover {
+  background: #252838 !important;
+}
+
+.ambessa-detail-hope-wrap .md-toolbar-btn.is-active {
+  color: #FF9800 !important;
+}
+
+.ambessa-detail-hope-wrap .md-search {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex: 1 !important;
+  margin-left: auto !important;
+  max-width: 280px !important;
+  background: #11131C !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 4px !important;
+  padding: 4px 10px !important;
+}
+
+.ambessa-detail-hope-wrap .md-search-icon {
+  color: #FF5722 !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+}
+
+.ambessa-detail-hope-wrap .md-search input {
+  flex: 1 !important;
+  background: none !important;
+  border: 0 !important;
+  outline: none !important;
+  font-size: 12px !important;
+  color: #FFFFFF !important;
+}
+
+.ambessa-detail-hope-wrap .md-search input::placeholder {
+  color: #666A78 !important;
+}
+
+.ambessa-detail-hope-wrap .md-markets {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  padding: 8px !important;
+  background: #11131C !important;
+}
+
+.ambessa-detail-hope-wrap .md-market {
+  background: #181A24 !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+}
+
+.ambessa-detail-hope-wrap .md-market-head {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  padding: 10px 14px !important;
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+  background: #1E2130 !important;
+  border: 0 !important;
+  text-align: left !important;
+  color: #FFFFFF !important;
+  cursor: pointer !important;
+  letter-spacing: 0.3px !important;
+  user-select: none !important;
+  transition: background 0.15s ease !important;
+}
+
+.ambessa-detail-hope-wrap .md-market-head:hover {
+  background: #252838 !important;
+}
+
+.ambessa-detail-hope-wrap .md-market-chevron {
+  font-size: 10px !important;
+  color: #8E95A5 !important;
+  transition: transform 0.15s !important;
+  width: 12px !important;
+  line-height: 1 !important;
+}
+
+.ambessa-detail-hope-wrap .md-market:not(.is-open) .md-market-chevron {
+  transform: rotate(180deg) !important;
+}
+
+.ambessa-detail-hope-wrap .md-market-star {
+  font-size: 15px !important;
+  color: #666A78 !important;
+  cursor: pointer !important;
+  padding: 0 4px !important;
+  transition: color 0.15s, transform 0.12s !important;
+}
+
+.ambessa-detail-hope-wrap .md-market-star:hover {
+  color: #FF9800 !important;
+  transform: scale(1.18) !important;
+}
+
+.ambessa-detail-hope-wrap .md-market-star.is-fav {
+  color: #FF9800 !important;
+}
+
+.ambessa-detail-hope-wrap .md-market-title {
+  flex: 1 !important;
+  color: #FFFFFF !important;
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+}
+
+.ambessa-detail-hope-wrap .md-market-body {
+  display: none !important;
+  padding: 10px 12px !important;
+  background: #181A24 !important;
+}
+
+.ambessa-detail-hope-wrap .md-market.is-open .md-market-body {
+  display: block !important;
+}
+
+.ambessa-detail-hope-wrap .md-odds-grid {
+  display: grid !important;
+  gap: 8px !important;
+}
+
+.ambessa-detail-hope-wrap .md-odds-grid--1 {
+  grid-template-columns: 1fr !important;
+}
+
+.ambessa-detail-hope-wrap .md-odds-grid--2 {
+  grid-template-columns: repeat(2, 1fr) !important;
+}
+
+.ambessa-detail-hope-wrap .md-odds-grid--3 {
+  grid-template-columns: repeat(3, 1fr) !important;
+}
+
+.ambessa-detail-hope-wrap .md-odds-grid--4 {
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+
+/* ── EXACT IMAGE 3 ODD BUTTONS ────────────────────────────── */
+.ambessa-detail-hope-wrap .md-odd {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  width: 100% !important;
+  padding: 8px 14px !important;
+  border-radius: 6px !important;
+  background: #11131C !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  text-align: left !important;
+  min-height: 40px !important;
+  box-sizing: border-box !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  user-select: none !important;
+}
+
+.ambessa-detail-hope-wrap .md-odd:hover {
+  background: #1E2130 !important;
+  border-color: rgba(255, 87, 34, 0.4) !important;
+}
+
+.ambessa-detail-hope-wrap .md-odd.is-selected {
+  background: #FF5722 !important;
+  border-color: #FF5722 !important;
+  color: #FFFFFF !important;
+}
+
+.ambessa-detail-hope-wrap .md-odd-label {
+  font-size: 13px !important;
+  color: #8E95A5 !important;
+  font-weight: 700 !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  text-align: left !important;
+}
+
+.ambessa-detail-hope-wrap .md-odd-value {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #FF9800 !important;
+  flex-shrink: 0 !important;
+  text-align: right !important;
+}
+
+.ambessa-detail-hope-wrap .md-odd.is-selected .md-odd-label,
+.ambessa-detail-hope-wrap .md-odd.is-selected .md-odd-value {
+  color: #FFFFFF !important;
+}
+
+.ambessa-detail-hope-wrap .md-empty {
+  text-align: center !important;
+  padding: 32px 16px !important;
+  color: #8E95A5 !important;
+  background: #181A24 !important;
+  font-size: 13px !important;
+}
+
+/* Compact Match Card in League List (Matches Image 1) */
+.ambessa-lm-card {
+  background: #141622 !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  overflow: hidden !important;
+  cursor: pointer !important;
+  transition: all 0.12s ease !important;
+  margin-bottom: 3px !important;
+}
+
+.ambessa-lm-card:hover {
+  background: #181b28 !important;
+  border-color: rgba(255, 87, 34, 0.35) !important;
+}
+
+.ambessa-lm-card.is-selected {
+  border: 1px solid #FF5722 !important;
+  background: #161826 !important;
+  box-shadow: 0 0 8px rgba(255, 87, 34, 0.25) !important;
+}
+
+.ambessa-lm-head {
+  background: transparent !important;
+  padding: 3px 8px 1px 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  font-size: 10.5px !important;
+  border-bottom: none !important;
+  min-height: 18px !important;
+}
+
+.ambessa-lm-league {
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  max-width: 65% !important;
+}
+
+.ambessa-lm-league-name {
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+}
+
+.ambessa-lm-meta-right {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex-shrink: 0 !important;
+}
+
+.ambessa-lm-date {
+  color: #7D8499 !important;
+  font-weight: 600 !important;
+  font-size: 10.5px !important;
+  white-space: nowrap !important;
+}
+
+.ambessa-lm-body {
+  padding: 1px 8px 4px 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
 }
 
 .ambessa-lm-teams-row {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
+  gap: 8px !important;
+  min-height: 18px !important;
 }
 
 .ambessa-lm-teams {
-  font-size: 13.5px !important;
-  font-weight: 800 !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
   color: #FFFFFF !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  letter-spacing: 0.1px !important;
+  line-height: 1.2 !important;
+  flex: 1 !important;
 }
 
 .ambessa-lm-sidebets {
-  background: #252838 !important;
-  color: #FF9800 !important;
-  font-size: 11px !important;
-  font-weight: 800 !important;
-  padding: 2px 7px !important;
-  border-radius: 4px !important;
+  background: transparent !important;
+  color: #FF7A00 !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  line-height: 1.2 !important;
 }
 
+/* Image 2 Odds Row: Seamless connected dark container with 3 segments */
 .ambessa-lm-odds-row {
   display: flex !important;
+  flex-direction: row !important;
   align-items: center !important;
-  gap: 8px !important;
+  background: #000000 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 3px !important;
+  overflow: hidden !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .ambessa-lm-odd-box {
   flex: 1 !important;
   display: flex !important;
+  flex-direction: row !important;
   align-items: center !important;
   justify-content: space-between !important;
-  background: #11131C !important;
-  padding: 7px 12px !important;
-  border-radius: 4px !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  background: #000000 !important;
+  padding: 0 10px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  border: none !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 0 !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: all 0.12s ease !important;
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+  line-height: normal !important;
+  margin: 0 !important;
+  text-align: left !important;
+}
+
+.ambessa-lm-odd-box:last-child {
+  border-right: none !important;
 }
 
 .ambessa-lm-odd-box:hover {
-  background: #2D3142 !important;
-  border-color: #FF5722 !important;
+  background: #181B28 !important;
 }
 
 .ambessa-lm-odd-box.is-selected {
-  background: #FF5722 !important;
+  background: #FF7A00 !important;
+  border-color: #FF7A00 !important;
+}
+
+.ambessa-lm-odd-box .ambessa-lm-odd-label {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #FFFFFF !important;
+  display: inline-block !important;
+  line-height: 1 !important;
+}
+
+.ambessa-lm-odd-box .ambessa-lm-odd-val {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #FF7A00 !important;
+  display: inline-block !important;
+  line-height: 1 !important;
+}
+
+.ambessa-lm-odd-box.is-selected .ambessa-lm-odd-label {
   color: #FFFFFF !important;
 }
 
-.ambessa-lm-odd-label {
-  font-size: 11.5px !important;
-  font-weight: 800 !important;
-  color: #8E95A5 !important;
-}
-
-.ambessa-lm-odd-val {
-  font-size: 12.5px !important;
-  font-weight: 900 !important;
-  color: #FF9800 !important;
-}
-
-.ambessa-lm-odd-box.is-selected .ambessa-lm-odd-label,
 .ambessa-lm-odd-box.is-selected .ambessa-lm-odd-val {
-  color: #FFFFFF !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
 }
 
 /* PITCH VISUALIZER */
@@ -27916,7 +29121,7 @@ body {
 }
 
 .ambessa-market-sec-body {
-  padding: 10px 12px !important;
+  padding: 8px 12px !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 10px !important;
@@ -27932,70 +29137,115 @@ body {
 
 .ambessa-market-grid {
   display: flex !important;
+  flex-direction: row !important;
   align-items: stretch !important;
-  gap: 8px !important;
+  gap: 0 !important;
   width: 100% !important;
+  background: #0d0f18 !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
 }
 
 .ambessa-market-grid-2col {
-  display: grid !important;
-  grid-template-columns: repeat(2, 1fr) !important;
-  gap: 8px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 0 !important;
+  width: 100% !important;
+  background: #0d0f18 !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
 }
 
 .ambessa-market-grid-3col {
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
-  gap: 8px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 0 !important;
+  width: 100% !important;
+  background: #0d0f18 !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
 }
 
 .ambessa-market-grid-3x3 {
   display: grid !important;
   grid-template-columns: repeat(3, 1fr) !important;
-  gap: 8px !important;
+  gap: 0 !important;
+  width: 100% !important;
+  background: #0d0f18 !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
 }
 
 .ambessa-m-odd-btn {
   flex: 1 !important;
   display: flex !important;
-  flex-direction: column !important;
+  flex-direction: row !important;
   align-items: center !important;
-  justify-content: center !important;
-  min-height: 48px !important;
-  background: #11131C !important;
-  padding: 6px 8px !important;
-  border-radius: 6px !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  justify-content: space-between !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  background: #0d0f18 !important;
+  padding: 0 16px !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: background 0.15s ease !important;
   user-select: none !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+.ambessa-market-grid-2col .ambessa-m-odd-btn:last-child,
+.ambessa-market-grid-3col .ambessa-m-odd-btn:last-child,
+.ambessa-market-grid .ambessa-m-odd-btn:last-child {
+  border-right: 0 !important;
+}
+
+.ambessa-market-grid-3x3 .ambessa-m-odd-btn {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.ambessa-market-grid-3x3 .ambessa-m-odd-btn:nth-child(3n) {
+  border-right: 0 !important;
+}
+
+.ambessa-market-grid-3x3 .ambessa-m-odd-btn:nth-last-child(-n+3) {
+  border-bottom: 0 !important;
 }
 
 .ambessa-m-odd-btn:hover {
-  background: #1E2130 !important;
-  border-color: rgba(255, 87, 34, 0.4) !important;
+  background: #181C28 !important;
 }
 
 .ambessa-m-odd-btn.is-selected {
   background: #FF5722 !important;
-  border-color: #FF5722 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 .ambessa-m-odd-name {
-  font-size: 12.5px !important;
+  font-size: 13px !important;
   font-weight: 700 !important;
-  color: #8E95A5 !important;
-  margin-bottom: 2px !important;
-  line-height: 1.1 !important;
-  text-align: center !important;
+  color: #FFFFFF !important;
+  margin-bottom: 0 !important;
+  line-height: 1 !important;
+  text-align: left !important;
 }
 
 .ambessa-m-odd-val {
-  font-size: 14.5px !important;
-  font-weight: 900 !important;
-  color: #FF9800 !important;
-  line-height: 1.1 !important;
-  text-align: center !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #FF7A00 !important;
+  line-height: 1 !important;
+  text-align: right !important;
 }
 
 .ambessa-m-odd-btn.is-selected .ambessa-m-odd-name,
@@ -28014,25 +29264,28 @@ body {
   display: flex !important;
 }
 
-/* 6. BETSLIP PANEL */
+/* 6. BETSLIP PANEL (Exact Match to Image 1) */
 .ambessa-betslip {
-  width: 280px !important;
-  min-width: 280px !important;
-  max-width: 280px !important;
+  width: 290px !important;
+  min-width: 290px !important;
+  max-width: 290px !important;
   display: flex !important;
   flex-direction: column !important;
-  background: transparent !important;
-  border: 0 !important;
+  background: #111420 !important;
+  border-radius: 6px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   padding: 0 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+  overflow: hidden !important;
 }
 
 .ambessa-slip-tabs-bar {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  background: #11131A !important;
-  border-radius: 6px 6px 0 0 !important;
-  padding-right: 6px !important;
+  background: #111420 !important;
+  padding: 0 6px 0 0 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
 .ambessa-slip-tabs {
@@ -28042,15 +29295,20 @@ body {
 }
 
 .ambessa-slip-tab {
-  background: #A72828 !important;
+  background: #7E2A12 !important;
   color: #FFFFFF !important;
   font-size: 11px !important;
   font-weight: 800 !important;
   padding: 8px 12px !important;
-  border-radius: 6px 6px 0 0 !important;
+  border-radius: 4px 4px 0 0 !important;
   border: 0 !important;
   cursor: pointer !important;
-  transition: all 0.2s !important;
+  letter-spacing: 0.5px !important;
+  transition: background 0.15s !important;
+}
+
+.ambessa-slip-tab:hover {
+  background: #963518 !important;
 }
 
 .ambessa-slip-tab.is-active {
@@ -28066,31 +29324,414 @@ body {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  transition: transform 0.15s !important;
+  transition: transform 0.15s, color 0.15s !important;
 }
 
 .ambessa-slip-delete-btn:hover {
-  transform: scale(1.1);
-  color: #FF5722 !important;
+  transform: scale(1.15) !important;
+  color: #FF5252 !important;
 }
 
+/* Toggle Bar (Copy ticket / Sort by Time) */
+.ambessa-slip-toggle-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 6px 10px !important;
+  background: #141724 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.ambessa-slip-toggle {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  user-select: none !important;
+}
+
+.ambessa-slip-toggle input {
+  display: none !important;
+}
+
+.ambessa-slip-switch {
+  width: 26px !important;
+  height: 15px !important;
+  background: #3B4254 !important;
+  border-radius: 10px !important;
+  position: relative !important;
+  transition: background 0.2s !important;
+  display: inline-block !important;
+  flex-shrink: 0 !important;
+}
+
+.ambessa-slip-switch::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 2px !important;
+  left: 2px !important;
+  width: 11px !important;
+  height: 11px !important;
+  background: #FFFFFF !important;
+  border-radius: 50% !important;
+  transition: transform 0.2s !important;
+}
+
+.ambessa-slip-toggle input:checked + .ambessa-slip-switch {
+  background: #FF5722 !important;
+}
+
+.ambessa-slip-toggle input:checked + .ambessa-slip-switch::after {
+  transform: translateX(11px) !important;
+}
+
+.ambessa-slip-toggle-lbl {
+  color: #8E95A5 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+/* Empty notice */
 .ambessa-slip-empty {
-  background: #181A26 !important;
-  border-radius: 0 0 8px 8px !important;
-  min-height: 160px !important;
+  background: #141724 !important;
+  min-height: 140px !important;
   padding: 24px 16px !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  border-top: 0 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
-  color: #F5A623 !important;
-  font-size: 14.5px !important;
+  color: #FF5722 !important;
+  font-size: 13.5px !important;
   font-weight: 800 !important;
   letter-spacing: 0.5px !important;
 }
 
+.ambessa-slip-empty[hidden],
+#slip-empty-notice[hidden] {
+  display: none !important;
+}
+
+.ambessa-betslip #panel-slip[hidden] {
+  display: none !important;
+}
+
+.ambessa-betslip .betslip-panel-slip {
+  background: transparent !important;
+  border-bottom: 0 !important;
+}
+
+/* Slip List and Dark Match Cards */
+.ambessa-betslip .betslip-list {
+  padding: 6px 6px 0 !important;
+  max-height: 380px !important;
+  overflow-y: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  background: transparent !important;
+}
+
+.ambessa-betslip .slip-item,
+.ambessa-slip-card {
+  background: #181B28 !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  border-radius: 4px !important;
+  margin: 0 !important;
+  padding: 8px 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  transition: border-color 0.15s, background 0.15s !important;
+  cursor: pointer !important;
+}
+
+.ambessa-betslip .slip-item:hover,
+.ambessa-slip-card:hover {
+  border-color: rgba(255, 87, 34, 0.4) !important;
+  background: #1B1F30 !important;
+}
+
+.ambessa-slip-item-remove {
+  background: none !important;
+  border: 0 !important;
+  color: #E53935 !important;
+  cursor: pointer !important;
+  padding: 2px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  transition: transform 0.15s, color 0.15s !important;
+}
+
+.ambessa-slip-item-remove:hover {
+  transform: scale(1.15) !important;
+  color: #FF5252 !important;
+}
+
+.ambessa-slip-item-info {
+  flex: 1 !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+}
+
+.ambessa-slip-item-title {
+  color: #FFFFFF !important;
+  font-size: 11.5px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.25 !important;
+}
+
+.ambessa-slip-item-market {
+  color: #8E95A5 !important;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+}
+
+.ambessa-slip-item-pick-val {
+  color: #c5cbe0 !important;
+  font-weight: 700 !important;
+}
+
+.ambessa-slip-odd-pill {
+  background: #FF5722 !important;
+  color: #FFFFFF !important;
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+  padding: 3px 8px !important;
+  border-radius: 4px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 44px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Betslip Foot */
+.ambessa-betslip .betslip-foot {
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 8px 10px 10px !important;
+  background: #111420 !important;
+}
+
+.ambessa-slip-odds-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 4px 0 8px !important;
+}
+
+.ambessa-slip-odds-label {
+  color: #FFFFFF !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+}
+
+.ambessa-slip-odds-val {
+  color: #FFFFFF !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+}
+
+/* Stepper row */
+.ambessa-stake-stepper-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 8px !important;
+}
+
+.ambessa-stake-circle-btn {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  background: #FF5722 !important;
+  color: #FFFFFF !important;
+  border-radius: 50% !important;
+  border: 0 !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  line-height: 1 !important;
+  transition: transform 0.1s, opacity 0.15s !important;
+}
+
+.ambessa-stake-circle-btn:hover {
+  opacity: 0.9 !important;
+  transform: scale(1.05) !important;
+}
+
+.ambessa-stake-stepper-row input {
+  flex: 1 !important;
+  margin: 0 8px !important;
+  height: 34px !important;
+  background: #000000 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 4px !important;
+  color: #FFFFFF !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  text-align: center !important;
+  outline: none !important;
+}
+
+/* Bonus Bar */
+.ambessa-slip-bonus-bar {
+  background: #181B28 !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 4px !important;
+  padding: 6px 10px !important;
+  margin-bottom: 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+}
+
+.ambessa-slip-bonus-top {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  font-size: 11px !important;
+  color: #9CA3AF !important;
+}
+
+.ambessa-slip-bonus-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+}
+
+.ambessa-slip-info-ico {
+  color: #2196F3 !important;
+  font-weight: 800 !important;
+  font-size: 12px !important;
+}
+
+.ambessa-slip-bonus-close {
+  color: #E53935 !important;
+  cursor: pointer !important;
+  font-size: 11px !important;
+  padding: 0 2px !important;
+}
+
+.ambessa-slip-bonus-chevron {
+  text-align: center !important;
+  color: #FF5722 !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  line-height: 1 !important;
+}
+
+/* Payout row */
+.ambessa-slip-payout-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 4px 0 8px !important;
+}
+
+.ambessa-slip-payout-label {
+  color: #FFFFFF !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+}
+
+.ambessa-slip-payout-val {
+  color: #FF7A00 !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+}
+
+.ambessa-slip-payout-val span {
+  color: #FF7A00 !important;
+}
+
+/* Ticket preview */
+.ambessa-ticket-preview-link {
+  text-align: center !important;
+  color: #FFFFFF !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  letter-spacing: 0.5px !important;
+  cursor: pointer !important;
+  margin: 2px 0 10px !important;
+}
+
+.ambessa-ticket-preview-link:hover {
+  color: #FF5722 !important;
+}
+
+/* Action buttons */
+.ambessa-slip-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.ambessa-btn-place-bet {
+  background: #FF5722 !important;
+  color: #FFFFFF !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  height: 40px !important;
+  border-radius: 6px !important;
+  border: 0 !important;
+  cursor: pointer !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  transition: opacity 0.15s, transform 0.1s !important;
+}
+
+.ambessa-btn-place-bet:hover {
+  opacity: 0.92 !important;
+}
+
+.ambessa-btn-place-bet:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+.ambessa-btn-place-online {
+  background: #FF7A00 !important;
+  color: #FFFFFF !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  height: 40px !important;
+  border-radius: 6px !important;
+  border: 0 !important;
+  cursor: pointer !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  transition: opacity 0.15s, transform 0.1s !important;
+}
+
+.ambessa-btn-place-online:hover {
+  opacity: 0.92 !important;
+}
+
+.ambessa-btn-place-online:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+.ambessa-betslip .betslip-mode-bar,
+.ambessa-betslip .quick-stakes-row,
+.ambessa-betslip .potential-winning-box,
+.ambessa-betslip .betslip-meta-row,
+.ambessa-betslip .betslip-actions-block,
 .ambessa-betslip .betslip-tools {
   display: none !important;
 }
@@ -28169,4 +29810,1761 @@ body {
   width: 68px !important;
   height: 68px !important;
   display: block !important;
+}
+
+/* Hide Top Leagues card and Filter by Time in live mode */
+body.is-ambessa-live .ambessa-sidebar-card,
+body.is-ambessa-live #btn-filter-time,
+body.is-ambessa-live .ambessa-time-filter-wrap {
+  display: none !important;
+}
+
+/* Live View Country & League Accordion Styles matching Image 1 */
+.ambessa-live-country-group {
+  margin-bottom: 3px !important;
+}
+
+.ambessa-live-country-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: #1B1E2D !important;
+  padding: 8px 14px !important;
+  border-radius: 4px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #FFFFFF !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  transition: background 0.15s ease !important;
+}
+
+.ambessa-live-country-head:hover {
+  background: #252A3D !important;
+}
+
+.ambessa-live-league-group {
+  margin-bottom: 2px !important;
+}
+
+.ambessa-live-league-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: #231C20 !important;
+  padding: 7px 14px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  color: #E2E6EF !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  transition: background 0.15s ease !important;
+}
+
+.ambessa-live-league-head:hover {
+  background: #2D2329 !important;
+}
+
+.ambessa-live-country-chev,
+.ambessa-live-league-chev {
+  color: #FF5722 !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  user-select: none !important;
+  display: inline-block !important;
+  transition: transform 0.15s ease !important;
+}
+
+
+/* Compact Overview Match Cards */
+.ambessa-match-card {
+  margin-bottom: 4px !important;
+}
+.ambessa-card-top {
+  padding: 4px 10px 2px 10px !important;
+  font-size: 10.5px !important;
+}
+.ambessa-card-middle-row {
+  padding: 2px 10px 4px 10px !important;
+}
+.ambessa-card-teams {
+  font-size: 12.5px !important;
+}
+.ambessa-card-odds-row {
+  padding: 0 10px 6px 10px !important;
+}
+
+
+/* ===== AMBESSA MATCH DETAIL - EXACT IMAGE 2 STRUCTURE WITH DARK THEME ===== */
+.ambessa-detail-hero {
+  background: #181A24 !important;
+  border-radius: 6px !important;
+  padding: 14px 16px !important;
+  margin-bottom: 8px !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  text-align: center !important;
+}
+
+.ambessa-dh-date {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #8E95A5 !important;
+  margin-bottom: 12px !important;
+}
+
+.ambessa-dh-teams {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-around !important;
+  gap: 16px !important;
+}
+
+.ambessa-dh-team {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex: 1 !important;
+}
+
+.ambessa-dh-logo {
+  width: 44px !important;
+  height: 44px !important;
+  object-fit: contain !important;
+}
+
+.ambessa-dh-name {
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+  text-align: center !important;
+}
+
+.ambessa-dh-vs {
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  color: #FF5722 !important;
+  padding: 0 10px !important;
+}
+
+/* Category Tabs (Horizontal Scrollbar) */
+.ambessa-detail-tabs-wrapper {
+  overflow-x: auto !important;
+  white-space: nowrap !important;
+  padding-bottom: 4px !important;
+  margin-bottom: 8px !important;
+}
+
+.ambessa-detail-tabs-wrapper::-webkit-scrollbar {
+  height: 4px !important;
+}
+
+.ambessa-detail-tabs-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 2px !important;
+}
+
+.ambessa-detail-tabs {
+  display: inline-flex !important;
+  gap: 6px !important;
+}
+
+.ambessa-dtab {
+  background: #181A24 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #FFFFFF !important;
+  border-radius: 4px !important;
+  padding: 6px 14px !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: all 0.15s ease !important;
+}
+
+.ambessa-dtab:hover {
+  background: #252838 !important;
+}
+
+.ambessa-dtab.is-active {
+  background: #FF5722 !important;
+  border-color: #FF5722 !important;
+  color: #FFFFFF !important;
+}
+
+/* Toolbar */
+.ambessa-detail-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  margin-bottom: 8px !important;
+  padding: 2px 4px !important;
+}
+
+.ambessa-dt-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.ambessa-dt-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #FF5722 !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  padding: 2px 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.ambessa-dt-search {
+  display: flex !important;
+  align-items: center !important;
+  background: #141722 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 4px !important;
+  padding: 4px 10px !important;
+  gap: 6px !important;
+}
+
+.ambessa-dt-search input {
+  background: transparent !important;
+  border: none !important;
+  color: #FFFFFF !important;
+  font-size: 11.5px !important;
+  outline: none !important;
+  width: 120px !important;
+}
+
+/* Markets Accordions List */
+.ambessa-detail-markets {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+.ambessa-market-sec {
+  background: #181A24 !important;
+  border-radius: 4px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.ambessa-market-sec-head {
+  padding: 10px 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  cursor: pointer !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  color: #FFFFFF !important;
+  background: #1C2030 !important;
+  user-select: none !important;
+  transition: background 0.15s ease !important;
+}
+
+.ambessa-market-sec-head:hover {
+  background: #252838 !important;
+}
+
+.ambessa-market-sec-title-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.ambessa-sec-chev {
+  font-size: 12px !important;
+  color: #8E95A5 !important;
+}
+
+.ambessa-sec-star {
+  font-size: 13px !important;
+  color: #8E95A5 !important;
+}
+
+.ambessa-market-sec-body {
+  padding: 8px 12px !important;
+  background: #181A24 !important;
+}
+
+.ambessa-market-sec.is-collapsed .ambessa-market-sec-body {
+  display: none !important;
+}
+
+/* Single-row table strip */
+.ambessa-market-row-strip {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+  width: 100% !important;
+  background: #0d0f18 !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Grid for multiple values */
+.ambessa-market-grid-strip {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 0 !important;
+  width: 100% !important;
+  background: #0d0f18 !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.ambessa-m-odd-btn {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  background: #0d0f18 !important;
+  padding: 0 16px !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  cursor: pointer !important;
+  transition: background 0.15s ease !important;
+  user-select: none !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+.ambessa-market-row-strip .ambessa-m-odd-btn:last-child {
+  border-right: 0 !important;
+}
+
+.ambessa-market-grid-strip .ambessa-m-odd-btn {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.ambessa-market-grid-strip .ambessa-m-odd-btn:nth-child(3n) {
+  border-right: 0 !important;
+}
+
+.ambessa-market-grid-strip .ambessa-m-odd-btn:nth-last-child(-n+3) {
+  border-bottom: 0 !important;
+}
+
+.ambessa-m-odd-btn:hover {
+  background: #181C28 !important;
+}
+
+.ambessa-m-odd-btn.is-selected {
+  background: #FF5722 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.ambessa-m-odd-name {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #FFFFFF !important;
+  letter-spacing: 0.1px !important;
+}
+
+.ambessa-m-odd-val {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #FF7A00 !important;
+}
+
+.ambessa-m-odd-btn.is-selected .ambessa-m-odd-name,
+.ambessa-m-odd-btn.is-selected .ambessa-m-odd-val {
+  color: #FFFFFF !important;
+}
+
+/* HIDE FLOATING CHAT WIDGET */
+.ambessa-chat-widget,
+#ambessa-chat-widget,
+.ambessa-chat-prompt-card,
+.ambessa-chat-trigger {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ==========================================================================
+   AMBESSA MOBILE HOME VIEW - EXACT IMAGE MATCH (media_1795673899094_b6abf0e8.jpg)
+   ========================================================================== */
+
+/* Hide mobile-specific elements on desktop */
+.ambessa-mobile-kickoff,
+.ambessa-mobile-sidebets {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  /* Toggle desktop/mobile spans */
+  .ambessa-desktop-kickoff,
+  .ambessa-desktop-sidebets {
+    display: none !important;
+  }
+  .ambessa-mobile-kickoff,
+  .ambessa-mobile-sidebets {
+    display: inline !important;
+  }
+
+  /* 1. TOP ORANGE HEADER & SITE HEADER */
+  .ambessa-site-header {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .ambessa-top-bar,
+  .utility-bar,
+  .main-nav,
+  .sub-nav,
+  .mobile-main-nav,
+  .mobile-sports-strip,
+  .mobile-time-strip,
+  .ambessa-sidebar,
+  .ambessa-betslip-col,
+  .ambessa-cluster-double,
+  .ambessa-cluster-btts,
+  .ambessa-chat-widget {
+    display: none !important;
+  }
+
+  .mobile-top {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    background: #FF6600 !important;
+    height: 52px !important;
+    padding: 0 12px !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 150 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
+  }
+
+  .mobile-top-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  .mobile-top-brand {
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .ambessa-mobile-lion-logo,
+  .mobile-top-brand img {
+    height: 38px !important;
+    width: 38px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    display: block !important;
+  }
+
+  .mobile-top-btn {
+    background: transparent !important;
+    border: none !important;
+    padding: 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    cursor: pointer !important;
+  }
+
+  .mobile-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .mobile-btn-login {
+    height: 32px !important;
+    padding: 0 16px !important;
+    border: 1.5px solid #000000 !important;
+    background: transparent !important;
+    color: #000000 !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    border-radius: 20px !important;
+    cursor: pointer !important;
+    letter-spacing: 0.3px !important;
+  }
+
+  .mobile-btn-signup {
+    height: 32px !important;
+    padding: 0 16px !important;
+    border: none !important;
+    background: #FF3D00 !important;
+    color: #FFFFFF !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    border-radius: 20px !important;
+    cursor: pointer !important;
+    letter-spacing: 0.3px !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
+  }
+
+  /* 2. TOP HORIZONTAL CATEGORY ICONS BAR */
+  .ambessa-nav-bar {
+    display: flex !important;
+    background: #0E1017 !important;
+    height: 52px !important;
+    padding: 0 4px !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    position: sticky !important;
+    top: 52px !important;
+    z-index: 140 !important;
+  }
+
+  .ambessa-nav-bar::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .ambessa-nav-menu {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    min-width: 100% !important;
+    gap: 4px !important;
+    padding: 0 8px !important;
+  }
+
+  .ambessa-nav-tab {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    background: transparent !important;
+    border: none !important;
+    color: #FFFFFF !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 4px 10px !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+  }
+
+  .ambessa-nav-tab span {
+    text-transform: capitalize !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+  }
+
+  .ambessa-nav-tab svg {
+    width: 20px !important;
+    height: 20px !important;
+    color: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+  }
+
+  .ambessa-nav-tab.is-active {
+    color: #FFFFFF !important;
+  }
+
+  .ambessa-nav-dropdown-wrap .ambessa-sports-dropdown-panel,
+  .ambessa-nav-promo-pill,
+  .ambessa-nav-right,
+  .ambessa-nav-tab[data-nav="coupon"],
+  .ambessa-nav-tab[data-nav="virtual"] {
+    display: none !important;
+  }
+
+  /* 3. MAIN CONTENT AND CARDS */
+  body {
+    padding-bottom: 70px !important;
+    background: #0A0B10 !important;
+  }
+
+  .ambessa-web-body {
+    display: block !important;
+    width: 100% !important;
+    padding: 0 0 70px 0 !important;
+    margin: 0 !important;
+  }
+
+  .ambessa-main-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* 4. BANNER WITH HAZARD BORDER */
+  .ambessa-banner-card-border {
+    margin: 8px 8px 6px 8px !important;
+    border-radius: 6px !important;
+    max-height: 140px !important;
+    border: 4px solid transparent !important;
+    border-image: repeating-linear-gradient(
+      -45deg,
+      #FF6600 0px,
+      #FF6600 12px,
+      #141722 12px,
+      #141722 24px
+    ) 4 !important;
+  }
+
+  .ambessa-banner-img {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 130px !important;
+    object-fit: cover !important;
+    display: block !important;
+    border-radius: 4px !important;
+  }
+
+  /* 5. VIEW TOGGLE BAR (Upcoming vs Top Matches) */
+  .ambessa-view-toggle-bar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 6px 12px 10px 12px !important;
+    gap: 12px !important;
+    background: transparent !important;
+  }
+
+  .ambessa-toggle-tab {
+    flex: 1 !important;
+    text-align: center !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    padding: 10px 18px !important;
+    border-radius: 24px !important;
+    background: transparent !important;
+    color: #8E95A5 !important;
+    text-transform: capitalize !important;
+    border: none !important;
+    cursor: pointer !important;
+  }
+
+  .ambessa-toggle-tab.is-active {
+    background: #FF6600 !important;
+    color: #000000 !important;
+    font-weight: 800 !important;
+  }
+
+  /* 6. MATCH CARDS ON MOBILE */
+  .ambessa-matches-container {
+    padding: 0 8px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+
+  .ambessa-match-card {
+    background: #11131B !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    padding: 8px 10px 10px 10px !important;
+  }
+
+  .ambessa-card-top {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 2px 4px 6px 4px !important;
+  }
+
+  .ambessa-card-league-name {
+    font-size: 11.5px !important;
+    color: #FF7A00 !important;
+    font-weight: 700 !important;
+  }
+
+  .ambessa-mobile-kickoff {
+    font-size: 11.5px !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.2px !important;
+  }
+
+  .ambessa-card-middle-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 2px 4px 8px 4px !important;
+  }
+
+  .ambessa-card-teams {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    color: #FFFFFF !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.2px !important;
+  }
+
+  .ambessa-side-bets-pill {
+    background: transparent !important;
+    color: #FF7A00 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border: none !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    cursor: pointer !important;
+  }
+
+  /* 7. ODDS ROW: ONLY 1 X 2 VISIBLE ON MOBILE */
+  .ambessa-card-odds-row {
+    padding: 0 4px !important;
+    display: flex !important;
+    width: 100% !important;
+  }
+
+  .ambessa-cluster-result {
+    flex: 1 !important;
+    width: 100% !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    background: #000000 !important;
+    border-radius: 4px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    display: flex !important;
+    overflow: hidden !important;
+  }
+
+  .ambessa-odd-btn {
+    flex: 1 !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 12px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    background: transparent !important;
+    border: none !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    cursor: pointer !important;
+  }
+
+  .ambessa-odd-btn:last-child {
+    border-right: none !important;
+  }
+
+  .ambessa-odd-btn .ambessa-odd-label {
+    font-size: 12px !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+  }
+
+  .ambessa-odd-btn .ambessa-odd-val {
+    font-size: 13px !important;
+    color: #FF7A00 !important;
+    font-weight: 600 !important;
+  }
+
+  .ambessa-odd-btn.is-selected {
+    background: #FF7A00 !important;
+  }
+  .ambessa-odd-btn.is-selected .ambessa-odd-label {
+    color: #FFFFFF !important;
+  }
+  .ambessa-odd-btn.is-selected .ambessa-odd-val {
+    color: #000000 !important;
+    font-weight: 700 !important;
+  }
+
+  /* 8. FIXED BOTTOM ORANGE NAVIGATION BAR */
+  .mobile-bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+    background: #FF6600 !important;
+    height: 56px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-around !important;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.3) !important;
+    border-top: none !important;
+    padding: 0 4px !important;
+  }
+
+  .mobile-bnav-item {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    background: transparent !important;
+    border: none !important;
+    color: #000000 !important;
+    cursor: pointer !important;
+    padding: 4px 0 !important;
+  }
+
+  .mobile-bnav-icon svg {
+    color: #000000 !important;
+    stroke: #000000 !important;
+  }
+
+  .mobile-bnav-label {
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    color: #000000 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.2px !important;
+  }
+
+  .mobile-bnav-center-menu {
+    position: relative !important;
+  }
+
+  .mobile-bnav-center-circle {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    background: #E64A19 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-top: -18px !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3) !important;
+    border: 2px solid #FF6600 !important;
+  }
+
+  /* ========================================================
+     MOBILE SPORT VIEW (Matching Reference Image)
+     ======================================================== */
+  .ambessa-mobile-sport-view {
+    background: #12141F !important;
+    min-height: calc(100vh - 110px) !important;
+    padding-bottom: 75px !important;
+  }
+  .ambessa-mobile-sport-view[hidden],
+  .ambessa-league-view[hidden],
+  #ambessa-mobile-sport-view[hidden],
+  #ambessa-league-view[hidden],
+  #ambessa-home-default[hidden] {
+    display: none !important;
+  }
+
+  /* Two Top Filter Pills */
+  .ambessa-sport-filter-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 12px 14px !important;
+    background: #12141F !important;
+  }
+
+  .ambessa-sport-filter-pill {
+    flex: 1 !important;
+    height: 44px !important;
+    background: #1C2032 !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    border-radius: 24px !important;
+    color: #FFFFFF !important;
+    font-size: 14.5px !important;
+    font-weight: 700 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 16px !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  .ambessa-sport-filter-pill:active {
+    background: #252A42 !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+  }
+
+  .ambessa-sport-filter-pill svg {
+    color: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+    stroke-width: 2.5 !important;
+  }
+
+  /* Countries Accordion List */
+  .ambessa-sport-countries-list,
+  #mobile-sport-countries-list {
+    display: flex !important;
+    flex-direction: column !important;
+    background: #12141F !important;
+    border-top: none !important;
+  }
+
+  #ambessa-mobile-sport-view .ambessa-country-item,
+  .ambessa-country-item {
+    background: #161928 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    margin: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  #ambessa-mobile-sport-view .ambessa-country-item.is-selected,
+  #ambessa-mobile-sport-view .ambessa-country-item.is-selected .ambessa-country-header,
+  #ambessa-mobile-sport-view .ambessa-country-item.is-selected .ambessa-country-head {
+    background: #161928 !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  .ambessa-country-header {
+    width: 100% !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    background: #161928 !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 16px !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    transition: background 0.12s ease !important;
+  }
+
+  .ambessa-country-header:active {
+    background: #1F2338 !important;
+  }
+
+  .ambessa-country-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+  }
+
+  .ambessa-country-flag {
+    font-size: 18px !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .ambessa-country-flag-img {
+    width: 24px !important;
+    height: 16px !important;
+    object-fit: cover !important;
+    border-radius: 2px !important;
+    display: block !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .ambessa-country-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #FFFFFF !important;
+    letter-spacing: 0.15px !important;
+  }
+
+  .ambessa-country-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  .ambessa-country-count {
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    color: #9CA3AF !important;
+  }
+
+  .ambessa-country-chev {
+    width: 15px !important;
+    height: 15px !important;
+    color: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+    stroke-width: 2.5 !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+  }
+
+  .ambessa-country-drawer {
+    background: #10121C !important;
+    display: none;
+    padding: 2px 0 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+  }
+
+  .ambessa-country-item.is-open .ambessa-country-drawer {
+    display: block;
+  }
+
+  .ambessa-drawer-league-btn {
+    width: 100% !important;
+    height: 44px !important;
+    background: transparent !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 18px 0 54px !important;
+    cursor: pointer !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  .ambessa-drawer-league-btn:active {
+    background: rgba(255, 255, 255, 0.06) !important;
+  }
+
+  .ambessa-drawer-league-name {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #E2E8F0 !important;
+  }
+
+  .ambessa-drawer-league-count {
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    color: #9CA3AF !important;
+  }
+
+  /* Active Bottom Nav Item (Black rounded pill with white icon & text) */
+  .mobile-bnav-item.is-active {
+    background: #000000 !important;
+    border-radius: 14px !important;
+    padding: 4px 14px !important;
+    min-width: 64px !important;
+  }
+
+  .mobile-bnav-item.is-active .mobile-bnav-icon svg {
+    color: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+  }
+
+  .mobile-bnav-item.is-active .mobile-bnav-label {
+    color: #FFFFFF !important;
+  }
+
+  /* Active Top Nav Tab (Sport tab active glow) */
+  .ambessa-nav-tab.is-active {
+    background: linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.06) 100%) !important;
+    border-radius: 8px !important;
+    color: #FFFFFF !important;
+  }
+
+
+  /* Dropdown Wraps & Menus on Mobile */
+  .ambessa-filter-pill-wrap {
+    flex: 1 !important;
+    position: relative !important;
+  }
+
+  .ambessa-filter-dropdown {
+    position: absolute !important;
+    top: calc(100% + 6px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #141724 !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+    z-index: 500 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .ambessa-filter-dropdown[hidden] {
+    display: none !important;
+  }
+
+  .ambessa-filter-dropdown-opt {
+    height: 44px !important;
+    padding: 0 16px !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    color: #D1D5DB !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    cursor: pointer !important;
+  }
+
+  .ambessa-filter-dropdown-opt:last-child {
+    border-bottom: none !important;
+  }
+
+  .ambessa-filter-dropdown-opt:active,
+  .ambessa-filter-dropdown-opt.is-selected {
+    background: #FF6600 !important;
+    color: #000000 !important;
+    font-weight: 800 !important;
+  }
+
+
+  /* ========================================================
+     MOBILE LEAGUE VIEW (Matching media_1795680396384_20164eed.jpg)
+     ======================================================== */
+  .ambessa-league-view {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Mobile League View: By default show matches list, hide detail */
+  .ambessa-league-view:not(.is-mobile-detail-active) .ambessa-league-matches-col {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 100% !important;
+    padding: 0 8px 70px 8px !important;
+    margin: 0 !important;
+    gap: 8px !important;
+  }
+  .ambessa-league-view:not(.is-mobile-detail-active) .ambessa-league-detail-col {
+    display: none !important;
+  }
+
+  /* When match choices/detail is opened on mobile: hide matches list, show detail choices column! */
+  .ambessa-league-view.is-mobile-detail-active .ambessa-league-matches-col {
+    display: none !important;
+  }
+  .ambessa-league-view.is-mobile-detail-active .ambessa-league-detail-col {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 100% !important;
+    padding: 0 8px 75px 8px !important;
+    margin: 0 !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+  }
+
+  .ambessa-mobile-match-top-row,
+  .ambessa-mobile-teams-stacked,
+  .ambessa-mobile-team-name,
+  .ambessa-mobile-match-badge {
+    cursor: pointer !important;
+  }
+
+  .ambessa-desktop-lm-content {
+    display: none !important;
+  }
+
+  .ambessa-mobile-lm-content {
+    display: block !important;
+  }
+
+  /* Orange Header Bar with Back Button */
+  .ambessa-mobile-league-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 12px 6px 10px 6px !important;
+    border-bottom: 2px solid #FF6600 !important;
+    margin: 2px 0 8px 0 !important;
+    background: transparent !important;
+  }
+
+  .ambessa-mobile-back-btn {
+    background: transparent !important;
+    border: none !important;
+    padding: 2px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+  }
+
+  .ambessa-mobile-back-btn svg {
+    stroke: #FF6600 !important;
+    color: #FF6600 !important;
+  }
+
+  .ambessa-mobile-league-title {
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    color: #FF6600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  /* Mobile League Match Cards */
+  .ambessa-lm-card {
+    background: #11131C !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    padding: 10px 10px 8px 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .ambessa-mobile-match-top-row {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+  }
+
+  .ambessa-mobile-teams-stacked {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    flex: 1 !important;
+  }
+
+  .ambessa-mobile-team-name {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    color: #FFFFFF !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.2px !important;
+    line-height: 1.35 !important;
+  }
+
+  .ambessa-mobile-match-meta {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .ambessa-mobile-match-date {
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    color: #FFFFFF !important;
+    letter-spacing: 0.2px !important;
+  }
+
+  .ambessa-mobile-match-badge {
+    background: transparent !important;
+    color: #FF7A00 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    display: inline-block !important;
+  }
+
+  .ambessa-lm-odds-row {
+    display: flex !important;
+    width: 100% !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    background: #000000 !important;
+    border-radius: 4px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    overflow: hidden !important;
+  }
+
+  .ambessa-lm-odd-box {
+    flex: 1 !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 12px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    background: transparent !important;
+    border: none !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    cursor: pointer !important;
+  }
+
+  .ambessa-lm-odd-box:last-child {
+    border-right: none !important;
+  }
+
+  .ambessa-lm-odd-box .ambessa-lm-odd-label {
+    font-size: 12px !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+  }
+
+  .ambessa-lm-odd-box .ambessa-lm-odd-val {
+    font-size: 13px !important;
+    color: #FF7A00 !important;
+    font-weight: 600 !important;
+  }
+
+  .ambessa-lm-odd-box.is-selected {
+    background: #FF7A00 !important;
+  }
+  .ambessa-lm-odd-box.is-selected .ambessa-lm-odd-label {
+    color: #FFFFFF !important;
+  }
+  .ambessa-lm-odd-box.is-selected .ambessa-lm-odd-val {
+    color: #000000 !important;
+    font-weight: 700 !important;
+  }
+
+}
+
+@media (min-width: 1025px) {
+  .ambessa-detail-mobile-header {
+    display: none !important;
+  }
+}
+
+/* Live Sports Bar matching user reference */
+.ambessa-live-sports-bar {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: #141724 !important;
+  padding: 8px 10px 0 10px !important;
+  margin-bottom: 8px !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+.ambessa-live-sports-bar::-webkit-scrollbar {
+  display: none !important;
+}
+.ambessa-live-sport-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 4px 14px 8px 14px !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  border-bottom: 2.5px solid transparent !important;
+  color: #8E95A5 !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+.ambessa-live-sport-item.is-active {
+  border-bottom: 2.5px solid #FF6600 !important;
+}
+.ambessa-live-sport-item.is-active .ambessa-live-sport-label {
+  color: #FF6600 !important;
+}
+.ambessa-live-sport-item.is-active .ambessa-live-sport-count {
+  color: #FFFFFF !important;
+}
+.ambessa-live-sport-icon-wrap {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-bottom: 3px !important;
+}
+.ambessa-live-sport-icon {
+  font-size: 20px !important;
+  line-height: 1 !important;
+}
+.ambessa-live-sport-count {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #8E95A5 !important;
+  margin-left: 5px !important;
+}
+.ambessa-live-sport-label {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: #8E95A5 !important;
+  letter-spacing: 0.3px !important;
+  text-transform: uppercase !important;
+}
+
+/* ============================================================
+   AMBESSA MOBILE MULTI BOTTOM BAR (Matching Image 2)
+   ============================================================ */
+.ambessa-mobile-multi-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: #1B1728 !important;
+  z-index: 1050;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+@media (max-width: 900px) {
+  .ambessa-mobile-multi-bar:not([hidden]) {
+    display: flex !important;
+  }
+  
+  body.has-multi-bar .mobile-bottom-nav {
+    display: none !important;
+  }
+
+  .mobile-slip-fab {
+    display: none !important;
+  }
+}
+
+.ambessa-multi-bar-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0 16px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.ambessa-multi-bar-center {
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ambessa-multi-title {
+  color: #FFFFFF !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2px !important;
+}
+
+.ambessa-multi-count {
+  color: #FFFFFF !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+}
+
+.ambessa-multi-odds {
+  color: #FF7A00 !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+}
+
+.ambessa-multi-bar-right {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ambessa-multi-chevron {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+  display: block;
+}
+
+/* ============================================================
+   AMBESSA MOBILE BETSLIP MODAL (Matching Image 3)
+   ============================================================ */
+.ambessa-mobile-betslip-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background: #0E0D14 !important;
+  z-index: 2100;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.ambessa-mobile-betslip-modal[hidden] {
+  display: none !important;
+}
+
+/* Modal Header Bar */
+.ambessa-m-slip-header {
+  height: 48px;
+  background: #181524 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.ambessa-m-slip-tabs {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: 28px;
+}
+
+.ambessa-m-slip-tab {
+  background: transparent !important;
+  border: none !important;
+  color: #8E8A9F !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  height: 100%;
+  cursor: pointer;
+  padding: 0 4px !important;
+  position: relative;
+  display: flex;
+  align-items: center;
+  outline: none;
+}
+
+.ambessa-m-slip-tab.is-active {
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  border-bottom: 3px solid #FF5722 !important;
+}
+
+.ambessa-m-slip-close-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+/* Modal Scrollable Body */
+.ambessa-m-slip-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #0E0D14 !important;
+  padding: 0;
+}
+
+.ambessa-m-slip-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Match Bet Item Card (Image 3) */
+.ambessa-m-bet-card {
+  background: #181524 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-sizing: border-box;
+}
+
+.ambessa-m-bet-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ambessa-m-bet-teams {
+  color: #FFFFFF !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.1px !important;
+  flex: 1;
+}
+
+.ambessa-m-bet-del {
+  background: transparent !important;
+  border: none !important;
+  color: #8E8A9F !important;
+  stroke: #8E8A9F !important;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  flex-shrink: 0;
+}
+
+.ambessa-m-bet-del:hover {
+  color: #FF5252 !important;
+  stroke: #FF5252 !important;
+}
+
+.ambessa-m-bet-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ambessa-m-bet-market {
+  color: #8E8A9F !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+.ambessa-m-bet-odd {
+  color: #FF7A00 !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+}
+
+/* Modal Bottom Fixed Controls */
+.ambessa-m-slip-footer {
+  background: #0E0D14 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.ambessa-m-stake-row {
+  display: flex;
+  align-items: center;
+  background: #000000 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  padding: 2px 6px 2px 12px;
+  height: 38px;
+  box-sizing: border-box;
+}
+
+.ambessa-m-stake-input {
+  background: transparent !important;
+  border: none !important;
+  color: #FFFFFF !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  flex: 1;
+  outline: none;
+  width: 100%;
+}
+
+.ambessa-m-max-btn {
+  background: #7CB342 !important;
+  color: #000000 !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  border: none !important;
+  border-radius: 3px !important;
+  padding: 4px 8px !important;
+  cursor: pointer;
+  letter-spacing: 0.5px !important;
+}
+
+.ambessa-m-totals-box {
+  display: flex;
+  align-items: center;
+  background: #000000 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  height: 36px;
+  box-sizing: border-box;
+}
+
+.ambessa-m-totals-col {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+}
+
+.ambessa-m-totals-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.ambessa-m-tot-lbl {
+  color: #8E8A9F !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+.ambessa-m-tot-val {
+  color: #FF7A00 !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+}
+
+.ambessa-m-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ambessa-m-trash-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #8E8A9F !important;
+  stroke: #8E8A9F !important;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  outline: none;
+}
+
+.ambessa-m-trash-btn:hover {
+  color: #FF5252 !important;
+  stroke: #FF5252 !important;
+}
+
+.ambessa-m-fast-btn,
+.ambessa-m-place-btn {
+  flex: 1;
+  height: 42px;
+  background: #FF6600 !important;
+  color: #000000 !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  border: none !important;
+  border-radius: 24px !important;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+  letter-spacing: 0.3px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.ambessa-m-fast-btn:hover,
+.ambessa-m-place-btn:hover {
+  opacity: 0.9 !important;
 }
