@@ -4,11 +4,11 @@ const fs = require('fs');
 const path = require('path');
 const { fork } = require('child_process');
 
-const FRONTEND_PORT = process.env.PORT || 3000;
+const FRONTEND_PORT = process.env.PORT || 3008;
 const ROOT_DIR = __dirname;
 const FRONTEND_DIR = path.join(ROOT_DIR, 'frontend');
 const API_DIR = path.join(ROOT_DIR, 'hope-bet-api');
-const INTERNAL_API_PORT = 8787;
+const INTERNAL_API_PORT = process.env.API_PORT || 8788;
 
 // 1. Start Backend API process
 let apiProcess = null;
