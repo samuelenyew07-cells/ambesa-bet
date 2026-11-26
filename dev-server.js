@@ -87,11 +87,9 @@ const server = http.createServer((req, res) => {
   const urlPath = req.url.split('?')[0];
   let safePath = path.normalize(decodeURIComponent(urlPath)).replace(/^(\.\.[\/\\])+/, '');
 
-  // Redirect root / to /frontend/ for consistent app behavior
+  // Serve root / directly as index.html (also supports /frontend/ seamlessly)
   if (safePath === '/' || safePath === '\\') {
-    res.writeHead(302, { Location: '/frontend/' });
-    res.end();
-    return;
+    safePath = '/index.html';
   }
 
   // Short verification URLs for QR codes and barcodes (e.g. /v/H0017 or /check/H0017)
