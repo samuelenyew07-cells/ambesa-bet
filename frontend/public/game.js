@@ -1,3 +1,69 @@
+// ============================================================
+// FAST BET / CASHIER CODE MODAL (Matches Image 2)
+// ============================================================
+function openFastBetCodeModal() {
+  if (!state.slip || !state.slip.length) {
+    toast("Add selections to your betslip first", "err");
+    return;
+  }
+
+  // Generate 4-digit numeric booking code
+  const numCode = String(Math.floor(1000 + Math.random() * 9000));
+  const fullCode = "S" + numCode;
+  state.currentBookingCode = numCode;
+
+  // Persist in localStorage under both '4821' and 'S4821'
+  try {
+    const bookedStore = JSON.parse(localStorage.getItem("hope_booked_bets") || "{}");
+    const bookingItem = {
+      code: numCode,
+      fullCode: fullCode,
+      slip: JSON.parse(JSON.stringify(state.slip)),
+      stake: state.stake || 20,
+      totalOdds: totalOdds(),
+      potentialWin: potentialWin(),
+      createdAt: new Date().toISOString(),
+    };
+    bookedStore[numCode] = bookingItem;
+    bookedStore[fullCode] = bookingItem;
+    localStorage.setItem("hope_booked_bets", JSON.stringify(bookedStore));
+  } catch (_) {}
+
+  // Sync with central backend API for cross-device booking lookup (shop admin, cashier, etc.)
+  if (useApi() && api().bookBet) {
+    try {
+      api().bookBet({
+        code: numCode,
+        fullCode: fullCode,
+        stake: state.stake || 20,
+        mode: state.slipMode || (state.slip.length > 1 ? "multiple" : "single"),
+        selections: state.slip,
+      }).catch((e) => console.warn("Backend booking sync:", e));
+    } catch (_) {}
+  }
+
+  // Update modal code display
+  const codeValEl = $("fast-bet-code-val");
+  if (codeValEl) {
+    codeValEl.textContent = fullCode;
+    codeValEl.dataset.rawCode = numCode;
+    codeValEl.dataset.fullCode = fullCode;
+  }
+
+  // Show modal
+  const modal = $("fast-bet-modal-backdrop");
+  if (modal) modal.hidden = false;
+  document.body.classList.add("fast-bet-open");
+}
+window.openFastBetCodeModal = openFastBetCodeModal;
+
+function closeFastBetCodeModal() {
+  const modal = $("fast-bet-modal-backdrop");
+  if (modal) modal.hidden = true;
+  document.body.classList.remove("fast-bet-open");
+}
+window.closeFastBetCodeModal = closeFastBetCodeModal;
+
 "use strict";
 
 const STORAGE = "sport-betting-v1";
@@ -22358,8 +22424,8 @@ function openShareModal() {
     return;
   }
 
-  // Generate 5-digit numeric booking code
-  const code = String(Math.floor(10000 + Math.random() * 90000));
+  // Generate 4-digit numeric booking code
+  const code = String(Math.floor(1000 + Math.random() * 9000));
   state.currentBookingCode = code;
 
   // Persist the booked bet in localStorage so it can be reloaded via this 5-digit code
@@ -22733,9 +22799,9 @@ window.renderCheckBetLoadedSlip = renderCheckBetLoadedSlip;
 async function loadBookedBetByCode(rawCode) {
   const cleanStr = String(rawCode || "").trim();
   const rawDigits = cleanStr.replace(/[^0-9]/g, "");
-  let code = rawDigits.length === 5 ? rawDigits : cleanStr;
+  let code = (rawDigits.length >= 4 && rawDigits.length <= 6) ? rawDigits : cleanStr;
 
-  if (!code || (code.length !== 5 && !cleanStr.toUpperCase().startsWith("BOOK-"))) {
+  if (!code || (code.length < 4 && !cleanStr.toUpperCase().startsWith("BOOK-") && !cleanStr.toUpperCase().startsWith("S"))) {
     if (cleanStr.length >= 3) {
       const maybeTicket = findTicketByIdOrCashier(cleanStr);
       if (maybeTicket || (useApi() && cleanStr.length >= 4)) {
@@ -22743,7 +22809,7 @@ async function loadBookedBetByCode(rawCode) {
         return;
       }
     }
-    toast("Enter a valid 5-digit booking code (5 numbers)", "err");
+    toast("Enter a valid 4-digit booking code", "err");
     return;
   }
 
@@ -22753,7 +22819,7 @@ async function loadBookedBetByCode(rawCode) {
       bookedStore = JSON.parse(localStorage.getItem("hope_booked_bets") || "{}");
     } catch (_) {}
 
-    let item = bookedStore[code];
+    let item = bookedStore[code] || bookedStore["S" + code] || bookedStore[cleanStr];
 
     // Try central backend API for cross-device booking lookup
     if ((!item || !item.slip || !item.slip.length) && useApi() && api().fetchBookedBet) {
@@ -22871,11 +22937,19 @@ function bindAmbessaEvents() {
     });
   }
 
-    const btnOnline = $("btn-place-online");
+  const btnPlace = $("btn-place");
+  if (btnPlace) {
+    btnPlace.addEventListener("click", () => {
+      openFastBetCodeModal();
+    });
+  }
+
+  const btnOnline = $("btn-place-online");
   if (btnOnline) {
     btnOnline.addEventListener("click", () => {
       if (!isLoggedIn()) {
         openAuthModal("login");
+        toast("Please log in to place bets online", "err");
       } else {
         placeBet();
       }
@@ -24059,11 +24133,39 @@ document.addEventListener("click", (e) => {
   });
 
   on($("ambessa-m-fast-btn"), "click", () => {
-    openShareModal();
+    openFastBetCodeModal();
   });
 
   on($("ambessa-m-place-btn"), "click", () => {
-    placeBet();
+    openFastBetCodeModal();
+  });
+
+  on($("ambessa-m-online-btn"), "click", () => {
+    if (!isLoggedIn()) {
+      openAuthModal("login");
+      toast("Please log in to place bets online", "err");
+    } else {
+      placeBet();
+    }
+  });
+
+  on($("fast-bet-modal-close"), "click", closeFastBetCodeModal);
+  on($("fast-bet-modal-backdrop"), "click", (e) => {
+    if (e.target.id === "fast-bet-modal-backdrop") closeFastBetCodeModal();
+  });
+
+  on($("fast-bet-copy-btn"), "click", () => {
+    const codeValEl = $("fast-bet-code-val");
+    const textToCopy = codeValEl ? (codeValEl.textContent || codeValEl.dataset.fullCode || codeValEl.dataset.rawCode) : "";
+    if (textToCopy && navigator.clipboard) {
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        toast(`Code ${textToCopy} copied!`, "ok");
+      }).catch(() => {
+        toast(`Code: ${textToCopy}`, "ok");
+      });
+    } else if (textToCopy) {
+      toast(`Code: ${textToCopy}`, "ok");
+    }
   });
 
   on($("ambessa-m-stake-input"), "input", (e) => {
@@ -25844,7 +25946,7 @@ document.addEventListener("click", (e) => {
     settleEndedTickets();
   }, 15000);
 
-  on($("btn-place"), "click", placeBet);
+  on($("btn-place"), "click", openFastBetCodeModal);
 
   on($("btn-clear-slip"), "click", () => {
     state.slip = [];

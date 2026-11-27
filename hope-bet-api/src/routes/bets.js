@@ -230,12 +230,14 @@ router.post("/book", (req, res) => {
   const potentialWin = Math.min(Number((stake * totalOdds).toFixed(2)), maxWinLimit);
 
   let code = String(req.body.code || "").replace(/\D/g, "");
-  if (code.length !== 5) {
-    code = String(Math.floor(10000 + Math.random() * 90000));
+  if (code.length !== 4) {
+    code = String(Math.floor(1000 + Math.random() * 9000));
   }
+  const fullCode = "S" + code;
 
   const booking = {
     code,
+    fullCode,
     selections: normalized,
     stake,
     mode,
@@ -249,23 +251,27 @@ router.post("/book", (req, res) => {
       store.booked_bets = {};
     }
     store.booked_bets[code] = booking;
+    store.booked_bets[fullCode] = booking;
   });
 
   res.status(201).json({
     ok: true,
     code,
+    fullCode,
     booking,
   });
 });
 
 router.get("/book/:code", (req, res) => {
-  const raw = String(req.params.code || "").replace(/\D/g, "").trim();
-  if (!raw) {
+  const rawInput = String(req.params.code || "").trim();
+  const rawDigits = rawInput.replace(/\D/g, "").trim();
+  if (!rawInput && !rawDigits) {
     return res.status(400).json({ ok: false, error: "Booking code is required" });
   }
 
   const store = getStore();
-  const booking = store.booked_bets ? store.booked_bets[raw] || null : null;
+  const booked = store.booked_bets || {};
+  const booking = booked[rawInput] || booked[rawDigits] || booked["S" + rawDigits] || null;
 
   if (!booking) {
     return res.status(404).json({ ok: false, error: `Booked bet "${raw}" not found` });
