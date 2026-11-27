@@ -14372,6 +14372,15 @@ function addToSlip(fixture, marketKey, selection, odd, marketLabel, pickLabel) {
   });
 }
 
+function removeSlipItem(key) {
+  if (!key) return;
+  state.slip = (state.slip || []).filter((b) => b.key !== key);
+  save();
+  renderSlip();
+  if (state.detailFixtureId) renderMatchDetail();
+}
+window.removeSlipItem = removeSlipItem;
+
 function getScrollContext() {
   const contentEl = document.querySelector(".content");
   const marketsEl = $("match-markets");
@@ -14406,13 +14415,19 @@ function restoreScrollContext(ctx) {
   }
 }
 
+function syncAllOddButtons() {
+  document.querySelectorAll(".odd-btn, .ambessa-odd-btn, .ambessa-lm-odd-box, .mobile-league-odd-btn, .pop-odd-btn, [data-detail-odd]").forEach((btn) => {
+    const fId = btn.dataset.fixture || btn.dataset.liveMatch;
+    const market = btn.dataset.market;
+    const sel = btn.dataset.selection;
+    if (fId && market && sel) {
+      btn.classList.toggle("is-selected", isSelected(Number(fId), market, sel));
+    }
+  });
+}
+
 function refreshMatchViews() {
-  const leaguesView = document.querySelector('[data-view="leagues"]');
-  if (leaguesView && !leaguesView.hidden) {
-    renderLeaguePage();
-    return;
-  }
-  refreshHomeAndBoard();
+  syncAllOddButtons();
 }
 
 function toggleSelection(fixture, market, selection) {
@@ -16733,9 +16748,16 @@ function renderAmbessaMatchesTable() {
     return;
   }
 
+  const totalMatchesCount = fixtures.length;
+  const currentLimit = (viewMode === "upcoming")
+    ? (state.ambessaUpcomingLimit || 40)
+    : (state.ambessaTopMatchesLimit || 50);
+
+  const visibleFixtures = fixtures.slice(0, currentLimit);
+
   let html = "";
 
-  for (const f of fixtures) {
+  for (const f of visibleFixtures) {
     const fId = f.fixtureId || f.id;
     ensureFixtureOdds(f);
 
@@ -16847,7 +16869,31 @@ function renderAmbessaMatchesTable() {
     `;
   }
 
+  if (totalMatchesCount > currentLimit) {
+    const remaining = totalMatchesCount - currentLimit;
+    html += `
+      <div class="ambessa-load-more-wrap" style="text-align:center;padding:24px 16px 36px;">
+        <button type="button" id="ambessa-load-more-btn" class="ambessa-load-more-btn" style="background:#FF5722;color:#ffffff;border:none;border-radius:8px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(255,87,34,0.35);transition:all 0.2s;">
+          <span>Show More Matches (${remaining} remaining)</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+      </div>
+    `;
+  }
+
   container.innerHTML = html;
+
+  const loadMoreBtn = $("ambessa-load-more-btn");
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener("click", () => {
+      if (viewMode === "upcoming") {
+        state.ambessaUpcomingLimit = (state.ambessaUpcomingLimit || 40) + 40;
+      } else {
+        state.ambessaTopMatchesLimit = (state.ambessaTopMatchesLimit || 50) + 40;
+      }
+      renderAmbessaMatchesTable();
+    });
+  }
 }
 
 // AMBESSA_FOOTBALL_COUNTRIES is defined above with getAmbessaFootballCountries()
@@ -19589,14 +19635,7 @@ function renderSlip() {
   if (panelSlip) panelSlip.hidden = count === 0;
 
   // Sync Ambessa Bet odds buttons active states
-  document.querySelectorAll(".ambessa-odd-btn, .ambessa-lm-odd-box").forEach((btn) => {
-    const fId = btn.dataset.fixture;
-    const market = btn.dataset.market;
-    const sel = btn.dataset.selection;
-    if (fId && market && sel) {
-      btn.classList.toggle("is-selected", isSelected(fId, market, sel));
-    }
-  });
+  syncAllOddButtons();
 
   const list = $("slip-list");
   const foot = $("slip-foot");
@@ -22803,12 +22842,16 @@ function bindAmbessaEvents() {
   if (btnUpcoming && btnTopLeagues) {
     btnUpcoming.addEventListener("click", () => {
       state.ambessaViewMode = "upcoming";
+      state.ambessaSelectedLeague = null;
+      state.ambessaUpcomingLimit = 40;
       btnUpcoming.classList.add("is-active");
       btnTopLeagues.classList.remove("is-active");
       renderAmbessaMatchesTable();
     });
     btnTopLeagues.addEventListener("click", () => {
       state.ambessaViewMode = "top-leagues";
+      state.ambessaSelectedLeague = null;
+      state.ambessaTopMatchesLimit = 50;
       btnTopLeagues.classList.add("is-active");
       btnUpcoming.classList.remove("is-active");
       renderAmbessaMatchesTable();
@@ -23217,6 +23260,8 @@ function openAmbessaMobileSportView() {
       if (action === "upcoming") {
         returnToAmbessaHome();
         state.ambessaViewMode = "upcoming";
+        state.ambessaSelectedLeague = null;
+        state.ambessaUpcomingLimit = 40;
         const btnUpcoming = $("ambessa-btn-upcoming");
         const btnTopLeagues = $("ambessa-btn-top-leagues");
         if (btnUpcoming) btnUpcoming.classList.add("is-active");
@@ -23225,6 +23270,8 @@ function openAmbessaMobileSportView() {
       } else if (action === "top-sports") {
         returnToAmbessaHome();
         state.ambessaViewMode = "top-leagues";
+        state.ambessaSelectedLeague = null;
+        state.ambessaTopMatchesLimit = 50;
         const btnUpcoming = $("ambessa-btn-upcoming");
         const btnTopLeagues = $("ambessa-btn-top-leagues");
         if (btnTopLeagues) btnTopLeagues.classList.add("is-active");
@@ -23349,7 +23396,6 @@ function openAmbessaMobileSportView() {
         const fixture = findFixture(fId);
         if (fixture) {
           toggleSelection(fixture, market, selection);
-          renderAmbessaMatchesTable();
         }
         return;
       }
@@ -23666,7 +23712,6 @@ function openAmbessaMobileSportView() {
         const fixture = findFixture(fId) || (state.ambessaSelectedMatch && Number(state.ambessaSelectedMatch.fixtureId || state.ambessaSelectedMatch.id) === fId ? state.ambessaSelectedMatch : null);
         if (fixture) {
           toggleSelection(fixture, market, selection);
-          renderAmbessaLeagueView();
         }
         return;
       }
@@ -23995,7 +24040,7 @@ document.addEventListener("click", (e) => {
 
   on($("ambessa-m-trash-btn"), "click", () => {
     state.slip = [];
-    persistSlip();
+    save();
     renderSlip();
     closeAmbessaMobileBetslip();
   });
@@ -24035,6 +24080,8 @@ document.addEventListener("click", (e) => {
   on($("ambessa-m-slip-list"), "click", (e) => {
     const btn = e.target.closest("[data-remove]");
     if (btn) {
+      e.stopPropagation();
+      e.preventDefault();
       const key = btn.dataset.remove;
       if (key) {
         removeSlipItem(key);
