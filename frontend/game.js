@@ -22165,8 +22165,9 @@ function buildTicketReceiptHtml(ticket, options = {}) {
     <!-- Top Header Brand Box -->
     <div class="receipt-box receipt-brand-box">
       <div class="receipt-brand-left">
-        <div class="receipt-brand-row">
-          <span class="receipt-brand-text">Hope Bet</span>
+        <img src="assets/ambessa-logo.png" alt="Ambessa Bet" class="receipt-brand-logo" />
+        <div class="receipt-brand-text-col">
+          <span class="receipt-brand-text">AMBESSA BET</span>
           <span class="receipt-brand-scan">SCAN &amp; CHECK BET</span>
           <span class="receipt-status-pill ${statusClass}">${statusLabel}</span>
         </div>
