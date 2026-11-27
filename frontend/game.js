@@ -7101,25 +7101,27 @@ function formatCountdown(iso) {
 
 function isLiveFixture(fixture) {
   if (!fixture) return false;
-  const status = String(fixture.status || "").toUpperCase();
-  if (["FT", "AET", "PEN", "PST", "CANC", "ABD", "FINISHED", "ENDED"].includes(status)) return false;
+  const status = String(fixture.status?.short || fixture.status || "").toUpperCase().trim();
+  if (["FT", "AET", "PEN", "PST", "CANC", "ABD", "AWD", "WO", "FINISHED", "ENDED"].includes(status)) return false;
   if (fixture.isLive) return true;
   if (["LIVE", "1H", "2H", "HT", "ET", "P", "IN_PLAY", "BT"].includes(status)) return true;
-  const kick = new Date(fixture.date).getTime();
+  const dateVal = fixture.date || fixture.fixture?.date;
+  const kick = dateVal ? new Date(dateVal).getTime() : 0;
   const now = Date.now();
-  return kick <= now && kick >= now - 2 * 3600000;
+  return kick > 0 && kick <= now && kick >= (now - 115 * 60 * 1000);
 }
 
 function isMatchStarted(fixture) {
   if (!fixture) return false;
   if (fixture.isLive) return true;
   if (typeof isLiveFixture === "function" && isLiveFixture(fixture)) return true;
-  const status = String(fixture.status || "").toUpperCase().trim();
+  const status = String(fixture.status?.short || fixture.status || "").toUpperCase().trim();
   if (status && !["NS", "TBD", "NOT_STARTED", "SCHEDULED", "UPCOMING"].includes(status)) {
     return true;
   }
-  const kick = fixture.date ? new Date(fixture.date).getTime() : 0;
-  if (kick && kick <= Date.now()) {
+  const dateVal = fixture.date || fixture.fixture?.date;
+  const kick = dateVal ? new Date(dateVal).getTime() : 0;
+  if (kick && !isNaN(kick) && kick <= Date.now()) {
     return true;
   }
   return false;
@@ -16572,8 +16574,8 @@ function isMatchUpcoming(f) {
   }
   const dateVal = f.date || f.fixture?.date;
   const kick = dateVal ? new Date(dateVal).getTime() : 0;
-  if (kick && !isNaN(kick) && kick <= (Date.now() - 10 * 60 * 1000)) {
-    return false; // match kickoff has arrived/passed - move to LIVE
+  if (kick && !isNaN(kick) && kick <= Date.now()) {
+    return false; // match kickoff has arrived/passed - move to LIVE or finished
   }
   return true;
 }
@@ -17461,29 +17463,47 @@ var UEFA_NATIONS_FIXTURES = [
 
 function getFallbackLeagueFixtures(lid) {
   const topNames = {
-    144: { name: "Belgium - Pro League", matches: [["Club Brugge", "Anderlecht"], ["Genk", "Gent"], ["Antwerp", "Standard Liege"]] },
-    128: { name: "Argentina - Liga Profesional", matches: [["River Plate", "Boca Juniors"], ["Racing Club", "Independiente"], ["San Lorenzo", "Huracan"]] }
+    1: { name: "Europe - UEFA Nations League", country: "Europe", matches: [["France", "Italy"], ["Spain", "Germany"], ["Portugal", "Netherlands"]] },
+    2: { name: "Europe - UEFA Champions League", country: "Europe", matches: [["Real Madrid", "Manchester City"], ["Arsenal", "Bayern Munich"], ["Barcelona", "Paris Saint-Germain"], ["Liverpool", "Inter Milan"], ["Bayer Leverkusen", "Atletico Madrid"]] },
+    3: { name: "Europe - UEFA Europa League", country: "Europe", matches: [["AS Roma", "Tottenham Hotspur"], ["Manchester United", "Athletic Club"], ["FC Porto", "Ajax"]] },
+    848: { name: "Europe - UEFA Conference League", country: "Europe", matches: [["Chelsea", "Fiorentina"], ["Real Betis", "Panathinaikos"]] },
+    39: { name: "England - Premier League", country: "England", matches: [["Arsenal", "Chelsea"], ["Liverpool", "Manchester City"], ["Manchester United", "Tottenham Hotspur"]] },
+    140: { name: "Spain - La Liga", country: "Spain", matches: [["Real Madrid", "Barcelona"], ["Atletico Madrid", "Sevilla"]] },
+    78: { name: "Germany - Bundesliga", country: "Germany", matches: [["Bayern Munich", "Borussia Dortmund"], ["Bayer Leverkusen", "RB Leipzig"]] },
+    135: { name: "Italy - Serie A", country: "Italy", matches: [["Inter Milan", "Juventus"], ["AC Milan", "Napoli"]] },
+    61: { name: "France - Ligue 1", country: "France", matches: [["Paris Saint-Germain", "Marseille"], ["Monaco", "Lyon"]] },
+    144: { name: "Belgium - Pro League", country: "Belgium", matches: [["Club Brugge", "Anderlecht"], ["Genk", "Gent"]] },
+    128: { name: "Argentina - Liga Profesional", country: "Argentina", matches: [["River Plate", "Boca Juniors"], ["Racing Club", "Independiente"]] }
   };
-  const info = topNames[lid] || { name: "Football League", matches: [["Home FC", "Away FC"], ["Team Alpha", "Team Beta"]] };
+  const info = topNames[lid] || { name: "Football League", country: "World", matches: [["Home FC", "Away FC"], ["Team Alpha", "Team Beta"]] };
+  const now = Date.now();
   return info.matches.map((pair, idx) => {
-    const fId = lid * 1000 + idx + 1;
+    // Schedule for upcoming days at 20:45
+    const futureDate = new Date(now + (idx + 1) * 24 * 3600 * 1000);
+    futureDate.setHours(20, 45, 0, 0);
+    const day = String(futureDate.getDate()).padStart(2, "0");
+    const mon = String(futureDate.getMonth() + 1).padStart(2, "0");
+    const hr = String(futureDate.getHours()).padStart(2, "0");
+    const mn = String(futureDate.getMinutes()).padStart(2, "0");
+    const fId = lid * 10000 + idx + 1;
     return {
       fixtureId: fId,
       id: fId,
-      date: new Date(Date.now() + (idx + 1) * 86400000).toISOString(),
-      displayDate: "24/11 20:00",
-      league: { id: lid, name: info.name, logo: "🏆", country: "World" },
+      date: futureDate.toISOString(),
+      displayDate: `${day}/${mon} ${hr}:${mn}`,
+      status: "NS",
+      league: { id: lid, name: info.name, logo: "🏆", country: info.country || "Europe" },
       home: { id: fId * 10 + 1, name: pair[0] },
       away: { id: fId * 10 + 2, name: pair[1] },
-      sideBetsCount: 1420 + idx * 37,
+      sideBetsCount: 1540 + idx * 37,
       odds: {
-        home: (2.05 + idx * 0.15).toFixed(2),
-        draw: "3.30",
-        away: (3.10 - idx * 0.10).toFixed(2),
-        doubleChance: { homeDraw: "1.30", homeAway: "1.28", drawAway: "1.65" },
+        home: (2.10 + (idx % 3) * 0.35).toFixed(2),
+        draw: (3.30 + (idx % 2) * 0.20).toFixed(2),
+        away: (2.80 + (idx % 4) * 0.25).toFixed(2),
+        doubleChance: { homeDraw: "1.34", homeAway: "1.28", drawAway: "1.58" },
         toQualify: { home: "1.75", away: "1.95" },
-        twoUp: { home: (2.05 + idx * 0.15).toFixed(2), draw: "3.30", away: (3.10 - idx * 0.10).toFixed(2) },
-        btts: { yes: "1.75", no: "2.00" },
+        twoUp: { home: "2.10", draw: "3.30", away: "2.80" },
+        btts: { yes: "1.65", no: "2.15" },
         goalsOddEven: { odd: "1.90", even: "1.85" },
         homeGoalsOddEven: { odd: "1.95", even: "1.80" },
         awayGoalsOddEven: { odd: "1.92", even: "1.82" },
@@ -18096,45 +18116,42 @@ function renderAmbessaLeagueView() {
   const lid = Number(state.ambessaSelectedLeague);
   let matches = [];
 
-  if (lid === 3 && typeof UEFA_EUROPA_FIXTURES !== "undefined") {
-    matches = UEFA_EUROPA_FIXTURES;
-  } else if (lid === 2 && typeof UEFA_CHAMPIONS_FIXTURES !== "undefined") {
-    matches = UEFA_CHAMPIONS_FIXTURES;
-  } else if (lid === 1 && typeof UEFA_NATIONS_FIXTURES !== "undefined") {
-    matches = UEFA_NATIONS_FIXTURES;
-  } else {
-    // 1. Matches from 951 real API fixtures by league ID
-    matches = (state.fixtures || []).filter((f) => Number(f.league?.id) === lid);
-    // 2. If empty by ID, try matching league name substring
-    if (!matches.length) {
-      const ambTop = [
-        { id: 1, name: "Europe - UEFA Nations League" },
-        { id: 2, name: "Europe - UEFA Champions League" },
-        { id: 3, name: "Europe - UEFA Europa League" },
-        { id: 848, name: "Europe - UEFA Conference League" },
-        { id: 39, name: "England - Premier League" },
-        { id: 140, name: "Spain - La Liga" },
-        { id: 78, name: "Germany - Bundesliga" },
-        { id: 61, name: "France - Ligue 1" },
-        { id: 135, name: "Italy - Serie A" },
-        { id: 88, name: "Netherlands - Eredivisie" },
-        { id: 94, name: "Portugal - Primeira Liga" },
-        { id: 203, name: "Turkey - Süper Lig" },
-        { id: 71, name: "Brazil - Serie A" },
-        { id: 307, name: "Saudi Arabia - Pro League" },
-        { id: 144, name: "Belgium - Pro League" },
-        { id: 128, name: "Argentina - Liga Profesional" }
-      ].find((t) => t.id === lid);
-      if (ambTop) {
-        const seg = ambTop.name.split("-").pop().trim().toLowerCase();
-        matches = (state.fixtures || []).filter((f) => (f.league?.name || "").toLowerCase().includes(seg));
-      }
-    }
-    // 3. Fallback fixtures if off-schedule
-    if (!matches.length) {
-      matches = getFallbackLeagueFixtures(lid);
+  // 1. Matches from real API fixtures by league ID (strictly upcoming matches!)
+  matches = (state.fixtures || []).filter((f) => Number(f.league?.id) === lid && isMatchUpcoming(f));
+
+  // 2. If empty by ID, try matching league name substring (strictly upcoming matches!)
+  if (!matches.length) {
+    const ambTop = [
+      { id: 1, name: "Europe - UEFA Nations League" },
+      { id: 2, name: "Europe - UEFA Champions League" },
+      { id: 3, name: "Europe - UEFA Europa League" },
+      { id: 848, name: "Europe - UEFA Conference League" },
+      { id: 39, name: "England - Premier League" },
+      { id: 140, name: "Spain - La Liga" },
+      { id: 78, name: "Germany - Bundesliga" },
+      { id: 61, name: "France - Ligue 1" },
+      { id: 135, name: "Italy - Serie A" },
+      { id: 88, name: "Netherlands - Eredivisie" },
+      { id: 94, name: "Portugal - Primeira Liga" },
+      { id: 203, name: "Turkey - Süper Lig" },
+      { id: 71, name: "Brazil - Serie A" },
+      { id: 307, name: "Saudi Arabia - Pro League" },
+      { id: 144, name: "Belgium - Pro League" },
+      { id: 128, name: "Argentina - Liga Profesional" }
+    ].find((t) => t.id === lid);
+    if (ambTop) {
+      const seg = ambTop.name.split("-").pop().trim().toLowerCase();
+      matches = (state.fixtures || []).filter((f) => (f.league?.name || "").toLowerCase().includes(seg) && isMatchUpcoming(f));
     }
   }
+
+  // 3. Fallback fixtures if off-schedule (dynamic FUTURE dates only!)
+  if (!matches.length) {
+    matches = getFallbackLeagueFixtures(lid);
+  }
+
+  // 4. Strict filter: NEVER show finished or started matches!
+  matches = (matches || []).filter(isMatchUpcoming);
 
   if (state.ambessaSearchQuery) {
     const q = state.ambessaSearchQuery.toLowerCase();
@@ -18145,13 +18162,9 @@ function renderAmbessaLeagueView() {
     );
   }
 
-  // Ensure an active selected match exists in the current list
+  // Ensure an active selected match exists in the current upcoming list
   const currentSelectedId = state.ambessaSelectedMatch ? (state.ambessaSelectedMatch.fixtureId || state.ambessaSelectedMatch.id) : null;
   let matchInList = currentSelectedId ? matches.find((m) => Number(m.fixtureId || m.id) === Number(currentSelectedId)) : null;
-  if (!matchInList && state.ambessaSelectedMatch) {
-    matches.unshift(state.ambessaSelectedMatch);
-    matchInList = state.ambessaSelectedMatch;
-  }
   state.ambessaSelectedMatch = matchInList || matches[0] || null;
 
   
