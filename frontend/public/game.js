@@ -23322,18 +23322,18 @@ function openAmbessaMobileSportView() {
   }
 
   const tabLive = $("nav-tab-live");
-  const tabLiveGames = $("nav-tab-livegames");
   if (tabLive) {
     tabLive.addEventListener("click", () => {
       openAmbessaLiveView();
     });
   }
-  if (tabLiveGames) {
-    tabLiveGames.addEventListener("click", () => {
+
+  const tabCoupon = $("nav-tab-coupon");
+  if (tabCoupon) {
+    tabCoupon.addEventListener("click", () => {
       document.querySelectorAll(".ambessa-nav-tab").forEach(t => t.classList.remove("is-active"));
-      tabLiveGames.classList.add("is-active");
-      state.ambessaMode = "live";
-      renderAmbessaLiveView();
+      tabCoupon.classList.add("is-active");
+      applySubNav("check-bet");
     });
   }
   if (brandLink) brandLink.addEventListener("click", returnToAmbessaHome);

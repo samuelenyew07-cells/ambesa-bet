@@ -26939,6 +26939,9 @@ body {
 }
 
 .ambessa-nav-dropdown-wrap:hover .ambessa-games-menu,
+.nav-games-dropdown-wrap:hover .ambessa-games-menu,
+.nav-games-dropdown-wrap.is-open .ambessa-games-menu,
+.ambessa-nav-dropdown-wrap.is-open .ambessa-games-menu,
 .ambessa-games-menu.is-open {
   display: block;
 }
