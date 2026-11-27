@@ -22402,8 +22402,12 @@ async function printTicketReceipt(ticket, options = {}) {
     }
   }
   renderPrintTicket(ticket, options);
+  document.body.classList.add("printing-ticket");
   setTimeout(() => {
     window.print();
+    setTimeout(() => {
+      document.body.classList.remove("printing-ticket");
+    }, 1500);
   }, 120);
 }
 

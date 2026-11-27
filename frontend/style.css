@@ -11045,390 +11045,7 @@ body.sidebar-collapsed .sidebar-sport-icon svg {
 }
 
 /* Print Media Styles */
-@media print {
-  @page {
-    size: auto;
-    margin: 0;
-  }
-  html,
-  body {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 100% !important;
-    height: auto !important;
-    min-height: 0 !important;
-    overflow: visible !important;
-    background: #ffffff !important;
-    color: #000000 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-  /* Completely hide all main screen UI elements */
-  body > *:not(.print-receipt-container) {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    overflow: hidden !important;
-  }
-  .print-receipt-container,
-  .print-receipt-container * {
-    visibility: visible !important;
-  }
-  .print-receipt-container {
-    display: block !important;
-    position: relative !important;
-    left: auto !important;
-    top: auto !important;
-    width: 76mm !important;
-    max-width: 76mm !important;
-    min-width: 76mm !important;
-    height: auto !important;
-    min-height: 0 !important;
-    overflow: visible !important;
-    opacity: 1 !important;
-    background: #ffffff !important;
-    z-index: auto !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
-    float: none !important;
-    page-break-after: avoid !important;
-    break-after: avoid !important;
-  }
-  .print-receipt-container .receipt-paper,
-  .receipt-paper {
-    display: block !important;
-    position: relative !important;
-    margin: 0 auto !important;
-    width: 100% !important;
-    max-width: 76mm !important;
-    min-width: 76mm !important;
-    box-sizing: border-box !important;
-    box-shadow: none !important;
-    border: none !important;
-    padding: 2mm 2.5mm !important;
-    color: #000000 !important;
-    background: #ffffff !important;
-    overflow: visible !important;
-    height: auto !important;
-    min-height: 0 !important;
-    page-break-after: avoid !important;
-    break-after: avoid !important;
-    font-size: 11px !important;
-    line-height: 1.3 !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  /* Allow 2x የማያገለግል watermark overlay on print for non-original / reprint tickets */
-  .receipt-watermark-overlay {
-    display: block !important;
-    visibility: visible !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    pointer-events: none !important;
-    overflow: hidden !important;
-    z-index: 99 !important;
-  }
-  .receipt-watermark-item {
-    display: block !important;
-    visibility: visible !important;
-    position: absolute !important;
-    color: rgba(0, 0, 0, 0.40) !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  /* Reset backgrounds for generic elements but NOT for won/lost indicators */
-  .receipt-paper *:not(.receipt-event-item):not(.receipt-outcome-box):not(.receipt-status-pill):not(.receipt-status-badge) {
-    background: none !important;
-    background-color: transparent !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  .receipt-paper * {
-    color: #000000 !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  /* Preserve won/lost row colors on print */
-  .receipt-event-item.is-lost {
-    background-color: #ffdcdb !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  .receipt-event-item.is-won {
-    background-color: #d7f0db !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  .receipt-outcome-box.is-lost {
-    border-color: #c62828 !important;
-    color: #c62828 !important;
-    background-color: #ffdcdb !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  .receipt-outcome-box.is-won {
-    border-color: #1b5e20 !important;
-    color: #1b5e20 !important;
-    background-color: #d7f0db !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  .receipt-status-pill.is-lost,
-  .receipt-status-badge.is-lost {
-    color: #c62828 !important;
-    border-color: #c62828 !important;
-  }
-  .receipt-status-pill.is-won,
-  .receipt-status-badge.is-won {
-    color: #1b5e20 !important;
-    border-color: #1b5e20 !important;
-  }
-  /* All receipt sub-boxes stretch 100% horizontally & avoid page breaks */
-  .receipt-box,
-  .receipt-brand-box,
-  .receipt-meta-box,
-  .receipt-age-box,
-  .receipt-events-list,
-  .receipt-events-summary,
-  .receipt-financials-box,
-  .receipt-outcome-box,
-  .receipt-barcode-wrap,
-  .receipt-footer-terms,
-  .receipt-footer-age,
-  .receipt-hotline-bar {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    border-color: #000000 !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-    overflow: visible !important;
-  }
-  .receipt-box {
-    border: 1.2px solid #000000 !important;
-    padding: 3px 5px !important;
-    margin-bottom: 3px !important;
-  }
-  /* Header Brand Box in print */
-  .receipt-brand-box {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 6px !important;
-    page-break-after: avoid !important;
-    break-after: avoid !important;
-  }
-  .receipt-brand-left {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 6px !important;
-    flex: 1 !important;
-  }
-  .receipt-brand-logo {
-    width: 38px !important;
-    height: 38px !important;
-    object-fit: contain !important;
-    display: block !important;
-    flex-shrink: 0 !important;
-  }
-  .receipt-brand-text-col {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 1px !important;
-  }
-  .receipt-brand-text {
-    font-size: 15px !important;
-    font-weight: 900 !important;
-    color: #000000 !important;
-    letter-spacing: -0.02em !important;
-    white-space: nowrap !important;
-    line-height: 1.1 !important;
-  }
-  .receipt-brand-scan {
-    font-size: 9.5px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.02em !important;
-    color: #000000 !important;
-    line-height: 1.1 !important;
-  }
-  .receipt-status-pill {
-    font-size: 9.5px !important;
-    font-weight: 800 !important;
-    color: #000000 !important;
-    letter-spacing: 0.04em !important;
-    text-transform: uppercase !important;
-    line-height: 1.1 !important;
-    margin-top: 1px !important;
-  }
-  .receipt-qr-wrap {
-    width: 48px !important;
-    height: 48px !important;
-    flex-shrink: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-  .receipt-qr-wrap svg {
-    width: 48px !important;
-    height: 48px !important;
-    max-width: 48px !important;
-    max-height: 48px !important;
-    display: block !important;
-  }
-  /* Metadata Box in print */
-  .receipt-meta-box {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 1px !important;
-    page-break-after: avoid !important;
-    break-after: avoid !important;
-  }
-  .receipt-meta-row {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: baseline !important;
-    gap: 6px !important;
-    font-size: 10px !important;
-    line-height: 1.25 !important;
-  }
-  .receipt-meta-key {
-    font-weight: 800 !important;
-    color: #000000 !important;
-    flex-shrink: 0 !important;
-  }
-  .receipt-meta-val {
-    font-weight: 700 !important;
-    color: #000000 !important;
-    text-align: right !important;
-    letter-spacing: -0.01em !important;
-    word-break: break-all !important;
-  }
-  /* Age Warning Box in print */
-  .receipt-age-box {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    padding: 3px 5px !important;
-    page-break-after: avoid !important;
-    break-after: avoid !important;
-  }
-  .receipt-age-circle {
-    width: 30px !important;
-    height: 30px !important;
-    border-radius: 50% !important;
-    border: 1.5px solid #000000 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 12px !important;
-    font-weight: 900 !important;
-    flex-shrink: 0 !important;
-  }
-  .receipt-age-text {
-    flex: 1 !important;
-    text-align: center !important;
-    font-size: 9.5px !important;
-    font-weight: 700 !important;
-    line-height: 1.2 !important;
-  }
-  .receipt-age-line {
-    height: 1px !important;
-    background: #000000 !important;
-    margin: 1px 0 !important;
-  }
-  /* Events list in print */
-  .receipt-events-list {
-    page-break-inside: auto !important;
-    break-inside: auto !important;
-  }
-  .receipt-event-item {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    border-color: #000000 !important;
-    border-bottom: 1px solid #000000 !important;
-    padding: 3px 4px !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-  }
-  .rec-match-row {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: baseline !important;
-    gap: 4px !important;
-  }
-  .rec-match-title {
-    font-size: 11px !important;
-    font-weight: 800 !important;
-    line-height: 1.2 !important;
-  }
-  .rec-league-row {
-    display: flex !important;
-    justify-content: space-between !important;
-    font-size: 9.5px !important;
-    color: #444444 !important;
-  }
-  .rec-pick-row {
-    display: flex !important;
-    justify-content: space-between !important;
-    font-size: 10.5px !important;
-    font-weight: 800 !important;
-    margin-top: 1px !important;
-  }
-  .rec-match-scores {
-    color: #000000 !important;
-  }
-  /* Barcode & Cashier Code in print */
-  .receipt-barcode-wrap {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    padding: 4px 0 2px !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-  }
-  .receipt-barcode-svg {
-    width: 95% !important;
-    max-width: 100% !important;
-    height: 40px !important;
-    display: block !important;
-    margin: 0 auto !important;
-  }
-  .receipt-barcode-svg rect {
-    fill: #000000 !important;
-  }
-  .receipt-cashier-code {
-    font-size: 10.5px !important;
-    font-weight: 900 !important;
-    color: #000000 !important;
-    margin-top: 2px !important;
-    text-align: center !important;
-  }
-  .rec-fin-total-amount {
-    font-size: 16px !important;
-    font-weight: 900 !important;
-  }
-  /* COPY / REPRINT banner */
-  .receipt-reprint-banner {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    background-color: #fff3cd !important;
-    border-color: #b8860b !important;
-    color: #7a5800 !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-}
+
 
 
 
@@ -31883,4 +31500,451 @@ body.is-ambessa-live .ambessa-time-filter-wrap {
 }
 .fast-bet-notice p:last-child {
   margin: 0;
+}
+
+
+/* ===================================================
+   THERMAL RECEIPT PRINT STYLES (FINAL - PLACED AT VERY END)
+   =================================================== */
+body.printing-ticket > *:not(.print-receipt-container) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+@media print {
+  @page {
+    size: auto;
+    margin: 0;
+  }
+  html,
+  body {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Completely hide all screen elements on the entire page */
+  body > *:not(.print-receipt-container),
+  header, nav, aside, footer, main,
+  .site-header, .admin-header, .ambessa-site-header,
+  .sub-nav, #sub-nav, .web-body, .ambessa-web-body, .acct-sidebar,
+  .acct-content, .admin-footer, #admin-footer, .admin-mobile-bottom-bar,
+  .mobile-main-nav, .mobile-sports-strip, .mobile-time-strip,
+  .mobile-bottom-nav, .fs-mobile-bnav, .admin-bet-bar,
+  .modal, .admin-modal, .admin-modal-backdrop,
+  .ticket-check-modal, .ticket-check-modal-backdrop,
+  .cashout-modal, .cashout-modal-backdrop,
+  .share-modal, .share-modal-backdrop {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .print-receipt-container,
+  .print-receipt-container * {
+    visibility: visible !important;
+  }
+
+  /* Place receipt at the absolute top of Page 1 without any preceding space */
+  .print-receipt-container {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    width: 76mm !important;
+    max-width: 76mm !important;
+    min-width: 76mm !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    background: #ffffff !important;
+    z-index: 999999 !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    float: none !important;
+    page-break-before: avoid !important;
+    break-before: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  .print-receipt-container .receipt-paper,
+  .receipt-paper {
+    display: block !important;
+    position: relative !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 76mm !important;
+    min-width: 76mm !important;
+    box-sizing: border-box !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 2mm 2.5mm !important;
+    color: #000000 !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+    page-break-before: avoid !important;
+    break-before: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Allow 2x watermark overlay on print for non-original / reprint tickets */
+  .receipt-watermark-overlay {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+    z-index: 99 !important;
+  }
+  .receipt-watermark-item {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    color: rgba(0, 0, 0, 0.40) !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .receipt-watermark-top {
+    top: 270px !important;
+  }
+  .receipt-watermark-bottom {
+    bottom: 135px !important;
+    transform: translate(-50%, 50%) rotate(40deg) !important;
+  }
+
+  /* Reset backgrounds for generic elements but NOT for won/lost indicators */
+  .receipt-paper *:not(.receipt-event-item):not(.receipt-outcome-box):not(.receipt-status-pill):not(.receipt-status-badge) {
+    background: none !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .receipt-paper * {
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Preserve won/lost row colors on print */
+  .receipt-event-item.is-lost {
+    background-color: #ffdcdb !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .receipt-event-item.is-won {
+    background-color: #d7f0db !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .receipt-outcome-box.is-lost {
+    border-color: #c62828 !important;
+    color: #c62828 !important;
+    background-color: #ffdcdb !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .receipt-outcome-box.is-won {
+    border-color: #1b5e20 !important;
+    color: #1b5e20 !important;
+    background-color: #d7f0db !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .receipt-status-pill.is-lost,
+  .receipt-status-badge.is-lost {
+    color: #c62828 !important;
+    border-color: #c62828 !important;
+  }
+  .receipt-status-pill.is-won,
+  .receipt-status-badge.is-won {
+    color: #1b5e20 !important;
+    border-color: #1b5e20 !important;
+  }
+
+  /* All receipt sub-boxes stretch 100% horizontally & avoid page breaks */
+  .receipt-box,
+  .receipt-brand-box,
+  .receipt-meta-box,
+  .receipt-age-box,
+  .receipt-events-list,
+  .receipt-events-summary,
+  .receipt-financials-box,
+  .receipt-outcome-box,
+  .receipt-barcode-wrap,
+  .receipt-footer-terms,
+  .receipt-footer-age,
+  .receipt-hotline-bar {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    border-color: #000000 !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    overflow: visible !important;
+  }
+  .receipt-box {
+    border: 1.2px solid #000000 !important;
+    padding: 3px 5px !important;
+    margin-bottom: 3px !important;
+  }
+
+  /* Header Brand Box in print */
+  .receipt-brand-box {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 6px !important;
+    page-break-before: avoid !important;
+    break-before: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+  .receipt-brand-left {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex: 1 !important;
+  }
+  .receipt-brand-logo {
+    width: 38px !important;
+    height: 38px !important;
+    object-fit: contain !important;
+    display: block !important;
+    flex-shrink: 0 !important;
+  }
+  .receipt-brand-text-col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1px !important;
+  }
+  .receipt-brand-text {
+    font-size: 15px !important;
+    font-weight: 900 !important;
+    color: #000000 !important;
+    letter-spacing: -0.02em !important;
+    white-space: nowrap !important;
+    line-height: 1.1 !important;
+  }
+  .receipt-brand-scan {
+    font-size: 9.5px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.02em !important;
+    color: #000000 !important;
+    line-height: 1.1 !important;
+  }
+  .receipt-status-pill {
+    font-size: 9.5px !important;
+    font-weight: 800 !important;
+    color: #000000 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    line-height: 1.1 !important;
+    margin-top: 1px !important;
+  }
+  .receipt-qr-wrap {
+    width: 48px !important;
+    height: 48px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .receipt-qr-wrap svg {
+    width: 48px !important;
+    height: 48px !important;
+    max-width: 48px !important;
+    max-height: 48px !important;
+    display: block !important;
+  }
+
+  /* Metadata Box in print */
+  .receipt-meta-box {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1px !important;
+    page-break-before: avoid !important;
+    break-before: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+  .receipt-meta-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: baseline !important;
+    gap: 6px !important;
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+  }
+  .receipt-meta-key {
+    font-weight: 800 !important;
+    color: #000000 !important;
+    flex-shrink: 0 !important;
+  }
+  .receipt-meta-val {
+    font-weight: 700 !important;
+    color: #000000 !important;
+    text-align: right !important;
+    letter-spacing: -0.01em !important;
+    word-break: break-all !important;
+  }
+
+  /* Age Warning Box in print */
+  .receipt-age-box {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 3px 5px !important;
+    page-break-before: avoid !important;
+    break-before: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+  .receipt-age-circle {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 50% !important;
+    border: 1.5px solid #000000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    flex-shrink: 0 !important;
+  }
+  .receipt-age-text {
+    flex: 1 !important;
+    text-align: center !important;
+    font-size: 9.5px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+  }
+  .receipt-age-line {
+    height: 1px !important;
+    background: #000000 !important;
+    margin: 1px 0 !important;
+  }
+
+  /* Events list in print */
+  .receipt-events-list {
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+  }
+  .receipt-event-item {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-color: #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    padding: 3px 4px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  .rec-match-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: baseline !important;
+    gap: 4px !important;
+  }
+  .rec-match-title {
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    line-height: 1.2 !important;
+  }
+  .rec-league-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    font-size: 9.5px !important;
+    color: #444444 !important;
+  }
+  .rec-pick-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    margin-top: 1px !important;
+  }
+  .rec-match-scores {
+    color: #000000 !important;
+  }
+
+  /* Barcode & Cashier Code in print */
+  .receipt-barcode-wrap {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 4px 0 2px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  .receipt-barcode-svg {
+    width: 95% !important;
+    max-width: 100% !important;
+    height: 40px !important;
+    display: block !important;
+    margin: 0 auto !important;
+  }
+  .receipt-barcode-svg rect {
+    fill: #000000 !important;
+  }
+  .receipt-cashier-code {
+    font-size: 10.5px !important;
+    font-weight: 900 !important;
+    color: #000000 !important;
+    margin-top: 2px !important;
+    text-align: center !important;
+  }
+  .rec-fin-total-amount {
+    font-size: 16px !important;
+    font-weight: 900 !important;
+  }
+
+  /* COPY / REPRINT banner */
+  .receipt-reprint-banner {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    background-color: #fff3cd !important;
+    border-color: #b8860b !important;
+    color: #7a5800 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }
