@@ -7,7 +7,12 @@ const dataDir = path.join(__dirname, "..", "data");
 const storePath = path.join(dataDir, "store.json");
 const initialStorePath = path.join(dataDir, "initial_store.json");
 
+// Persistent storage location completely outside the git repository (immune to git reset / pull)
+const persistentDir = process.env.PERSISTENT_DATA_DIR || (process.platform === "win32" ? path.join(process.env.APPDATA || "C:\\", "ambesa-data") : "/var/backups/ambesa-data");
+const persistentStorePath = path.join(persistentDir, "store.json");
+
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+try { if (!fs.existsSync(persistentDir)) fs.mkdirSync(persistentDir, { recursive: true }); } catch (_) {}
 
 function defaultBonusRules() {
   return [
@@ -216,6 +221,33 @@ let _cachedStore = null;
 let _lastMtime = 0;
 
 function loadStore() {
+  // 1. Auto-recovery: If persistent backup exists and has more users/shops than storePath, recover it!
+  if (fs.existsSync(persistentStorePath)) {
+    try {
+      const pRaw = fs.readFileSync(persistentStorePath, "utf8");
+      const pData = JSON.parse(pRaw);
+      const pUsers = (pData.users || []).length;
+      const pShops = (pData.shops || []).length;
+
+      let localUsers = 0;
+      let localShops = 0;
+      if (fs.existsSync(storePath)) {
+        try {
+          const lData = JSON.parse(fs.readFileSync(storePath, "utf8"));
+          localUsers = (lData.users || []).length;
+          localShops = (lData.shops || []).length;
+        } catch (_) {}
+      }
+
+      if (pShops > localShops || pUsers > localUsers || !fs.existsSync(storePath)) {
+        fs.copyFileSync(persistentStorePath, storePath);
+        console.log(`[db] Restored store from persistent backup (${pUsers} users, ${pShops} shops)`);
+      }
+    } catch (pe) {
+      console.warn("[db] Persistent store check warning:", pe.message);
+    }
+  }
+
   if (!fs.existsSync(storePath)) {
     if (fs.existsSync(initialStorePath)) {
       try {
@@ -303,6 +335,14 @@ function saveStore(store) {
       } catch (_) {}
     }
     fs.renameSync(tmpPath, storePath);
+
+    // Save persistent backup outside repository
+    try {
+      if (!fs.existsSync(persistentDir)) fs.mkdirSync(persistentDir, { recursive: true });
+      fs.writeFileSync(persistentStorePath, data, "utf8");
+    } catch (pe) {
+      console.warn("[db] Persistent write warning:", pe.message);
+    }
   } catch (err) {
     console.error("[db] saveStore error:", err.message);
     try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch (_) {}

@@ -9,3 +9,10 @@ Thumbs.db
 scratch/
 
 .vercel
+
+# Persistent runtime data & store
+hope-bet-api/data/store.json*
+hope-bet-api/data/*.bak
+hope-bet-api/data/*.tmp
+hope-bet-api/data/odds_cache.json
+!hope-bet-api/data/initial_store.json
