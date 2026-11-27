@@ -24137,13 +24137,22 @@ document.addEventListener("click", (e) => {
   });
 
   on($("ambessa-m-place-btn"), "click", () => {
-    openFastBetCodeModal();
+    if (!state.slip || !state.slip.length) {
+      toast("Add selections to your betslip first", "err");
+      return;
+    }
+    if (!isLoggedIn()) {
+      openAuthModal("login");
+      toast("Please login to place bet", "err");
+    } else {
+      placeBet();
+    }
   });
 
   on($("ambessa-m-online-btn"), "click", () => {
     if (!isLoggedIn()) {
       openAuthModal("login");
-      toast("Please log in to place bets online", "err");
+      toast("Please login to place bet", "err");
     } else {
       placeBet();
     }
